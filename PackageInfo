@@ -1,0 +1,40 @@
+name        Radio
+version     $VERSION
+summary     "Find and play internet radio stations"
+description "Start the application. Run a search for a radio station name. If you found one you like, add it to the main list. There you can play it, visit its homepage or change the station information.
+Searches use Radio Network, a service that offers a network API to its database (http://www.radio-browser.info). 
+Stations including all their attributes are saved as Shoutcast playlist files in ~/settings/Stations so they are available for other apps. 
+
+Please report back any bugs, for now by email to fishpond@esmio.de.
+
+Last Updates:
+- 0.0.3-10 Enhanced search on listen.live, handle http redirects 
+- 0.0.3-9 Limit data provided for sniffing format - allows ogg stations to play, better handling of m3u references, retrieve more information from Radio Networks database, increased network timeout for higher stability
+- 0.0.3-8 Stability enhancements, non-responsive stations are not added any more, accept command line parameters
+- 0.0.3-7 Move stream initialization to asynchronous function, some GUI updates
+- 0.0.3-6 Fix stability issues in internal stream handling and workarounds for empty metadata, streams not starting on frame border, etc. 
+- 0.0.3-5 Pull and display metadata from icecast streams 
+
+Known bugs:
+- Some stations will return a 'No handler' error message"
+vendor      "Fishpond"
+packager    "Fishpond"
+architecture    $ARCH
+copyrights { 
+            "2017, Fishpond" 
+}
+urls { 
+            "mailto:fishpond@esmio.de"
+            "http://www.esmio.de/haiku"
+            "http://www.esmio.de/haiku_x86"
+}
+licenses {
+    "MIT"
+}
+provides {
+    Radio = $VERSION
+}
+requires { 
+    haiku>=r1~alpha4_pm-1
+    lib:libxml2
+}
