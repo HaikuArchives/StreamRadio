@@ -5,7 +5,7 @@ description "Start the application. Run a search for a radio station name. If yo
 Searches use Radio Network, a service that offers a network API to its database (http://www.radio-browser.info). 
 Stations including all their attributes are saved as Shoutcast playlist files in ~/settings/Stations so they are available for other apps. 
 
-Please report back any bugs, for now by email to fishpond@esmio.de.
+Please report back any bugs at https://github.com/fishpond-haiku/Haiku-Radio/issues.
 
 Last Updates:
 - 0.0.3-10 Enhanced search on listen.live, handle http redirects 
