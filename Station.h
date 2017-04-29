@@ -93,6 +93,7 @@ protected:
     uint32                          fEncoding;
     uint32                          fMetaInterval;
     uint32                          fFlags;
+	static							BDirectory* fStationsDirectory;
 };
 #endif	/* STATION_H */
 

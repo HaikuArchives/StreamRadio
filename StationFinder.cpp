@@ -214,7 +214,7 @@ bool StationFinderWindow::QuitRequested() {
 void StationFinderWindow::MessageReceived(BMessage* msg) {
     switch (msg->what) {
         case MSG_BNSEARCH : {
-			if (txSearch->LayoutContext()) {
+			if (txSearch->IsEnabled()) {
                 if (txSearch->Text()[0]) {
                     DoSearch(txSearch->Text());
                     resultView->MakeFocus(true);
@@ -331,10 +331,14 @@ void StationFinderWindow::SelectCapability(int index) {
 		
 		searchGrid->RemoveView(txSearch);
 		searchGrid->AddView(kwSearch, 1, 2);
+		kwSearch->SetEnabled(true);
+		txSearch->SetEnabled(false);
 		Layout(true);
 	} else {
 		searchGrid->RemoveView(kwSearch);
 		searchGrid->AddView(txSearch, 1, 2);
+		kwSearch->SetEnabled(false);
+		txSearch->SetEnabled(true);
 		Layout(true);
 	}
 }

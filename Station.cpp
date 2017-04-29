@@ -89,9 +89,7 @@ status_t Station::InitCheck() {
 
 Station* Station::LoadFromPlsFile(BString Name) {
     BEntry stationEntry;
-    BDirectory* stationDir = StationDirectory();
-    stationEntry.SetTo(stationDir, Name);
-    delete stationDir;
+    stationEntry.SetTo(StationDirectory(), Name);
     Station* station = Load(Name, &stationEntry);
     if (station) station->unsaved = false;
     return station;
@@ -514,19 +512,23 @@ void Station::checkFlags() {
         fFlags |= STATION_HAS_META;
 }
 
+BDirectory* Station::fStationsDirectory = NULL;
+
 BDirectory* Station::StationDirectory() {
+	if (fStationsDirectory)
+		return fStationsDirectory;
+	
     status_t status;
     BPath configPath;
     BDirectory configDir;
-    BDirectory* stationDir;
     
     status = find_directory(B_USER_SETTINGS_DIRECTORY, &configPath);
     configDir.SetTo(configPath.Path());
     if (configDir.Contains(SubDirStations, B_DIRECTORY_NODE)) {
-        stationDir = new BDirectory(&configDir, SubDirStations);
+        fStationsDirectory = new BDirectory(&configDir, SubDirStations);
     } else {
-        stationDir = new BDirectory();
-        configDir.CreateDirectory(SubDirStations, stationDir);
+        fStationsDirectory = new BDirectory();
+        configDir.CreateDirectory(SubDirStations, fStationsDirectory);
         BAlert* alert = new BAlert("Stations directory created",
                 "A directory for saving stations has been created in your "
                 "settings folder. Link this directory to your deskbar menu "
@@ -534,5 +536,6 @@ BDirectory* Station::StationDirectory() {
                 "Ok");
         alert->Go();
     }
-    return stationDir;
+	
+    return fStationsDirectory;
 }

@@ -6,9 +6,7 @@
       </df>
       <df name="graphics">
       </df>
-      <df name="objects.x86-cc2-release">
-      </df>
-      <df name="objects.x86-cc5-release">
+      <df name="objects.x86-cc2-debug">
       </df>
       <in>About.cpp</in>
       <in>About.h</in>
