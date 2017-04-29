@@ -8,6 +8,7 @@ Stations including all their attributes are saved as Shoutcast playlist files in
 Please report back any bugs at https://github.com/fishpond-haiku/Haiku-Radio/issues.
 
 Last Updates:
+- 0.0.3-11 Allow station searches with keywords predefined by station search service
 - 0.0.3-10 Enhanced search on listen.live, handle http redirects 
 - 0.0.3-9 Limit data provided for sniffing format - allows ogg stations to play, better handling of m3u references, retrieve more information from Radio Networks database, increased network timeout for higher stability
 - 0.0.3-8 Stability enhancements, non-responsive stations are not added any more, accept command line parameters
@@ -16,7 +17,7 @@ Last Updates:
 - 0.0.3-5 Pull and display metadata from icecast streams 
 
 Known bugs:
-- Some stations will return a 'No handler' error message"
+- Some stations will return a 'No handler' error message. In most cases these stations simply do net respond."
 vendor      "Fishpond"
 packager    "Fishpond"
 architecture    $ARCH
@@ -27,6 +28,7 @@ urls {
             "mailto:fishpond@esmio.de"
             "http://www.esmio.de/haiku"
             "http://www.esmio.de/haiku_x86"
+            "http://www.esmio.de/haiku_x86_64"
 }
 licenses {
     "MIT"

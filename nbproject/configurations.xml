@@ -8,7 +8,6 @@
       <in>Debug.h</in>
       <in>Expander.cpp</in>
       <in>Expander.h</in>
-      <in>HttpListener.h</in>
       <in>HttpUtils.cpp</in>
       <in>HttpUtils.h</in>
       <in>MainWindow.cpp</in>
@@ -35,8 +34,6 @@
       <in>StreamPlayer.h</in>
       <in>Utils.cpp</in>
       <in>Utils.h</in>
-      <in>json_reader.cpp</in>
-      <in>json_tool.h</in>
     </df>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -108,11 +105,6 @@
             tool="3"
             flavor2="0">
       </item>
-      <item path="/boot/home/projects/Haiku-Radio/HttpListener.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
       <item path="/boot/home/projects/Haiku-Radio/HttpUtils.cpp"
             ex="false"
             tool="1"
@@ -239,16 +231,6 @@
             flavor2="0">
       </item>
       <item path="/boot/home/projects/Haiku-Radio/Utils.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/boot/home/projects/Haiku-Radio/json_reader.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="/boot/home/projects/Haiku-Radio/json_tool.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -310,11 +292,6 @@
             tool="3"
             flavor2="0">
       </item>
-      <item path="/boot/home/projects/Haiku-Radio/HttpListener.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
       <item path="/boot/home/projects/Haiku-Radio/HttpUtils.cpp"
             ex="false"
             tool="1"
@@ -441,16 +418,6 @@
             flavor2="0">
       </item>
       <item path="/boot/home/projects/Haiku-Radio/Utils.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/boot/home/projects/Haiku-Radio/json_reader.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="/boot/home/projects/Haiku-Radio/json_tool.h"
             ex="false"
             tool="3"
             flavor2="0">
