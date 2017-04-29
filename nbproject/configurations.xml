@@ -2,10 +2,6 @@
 <configurationDescriptor version="97">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <df root="/boot/home/projects/Haiku-Radio" name="0">
-      <df name="Helpers">
-        <in>TextReader.cpp</in>
-        <in>TextReader.h</in>
-      </df>
       <in>About.cpp</in>
       <in>About.h</in>
       <in>Buffering.h</in>
@@ -108,16 +104,6 @@
             flavor2="0">
       </item>
       <item path="/boot/home/projects/Haiku-Radio/Expander.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/boot/home/projects/Haiku-Radio/Helpers/TextReader.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="/boot/home/projects/Haiku-Radio/Helpers/TextReader.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -320,16 +306,6 @@
             flavor2="0">
       </item>
       <item path="/boot/home/projects/Haiku-Radio/Expander.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/boot/home/projects/Haiku-Radio/Helpers/TextReader.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="/boot/home/projects/Haiku-Radio/Helpers/TextReader.h"
             ex="false"
             tool="3"
             flavor2="0">
