@@ -9,10 +9,37 @@
 #include "RadioApp.h"
 #include "Utils.h"
 
-IconLookup::IconLookup(Station* station, BUrl iconUrl) 
-  : fStation(station),
-    fIconUrl(iconUrl)
-{ }
+StationFinderServices::~StationFinderServices() {
+	fServices.clear();
+}
+
+void
+StationFinderServices::Add(char* name, InstantiateFunc instantiate) {
+	pair<char*, InstantiateFunc> service(name, instantiate);
+	fServices.push_back(service);
+}
+
+int
+StationFinderServices::CountItems() {
+	return fServices.size();
+}
+
+StationFinderService*
+StationFinderServices::Instantiate(char* name) {
+	for (int i = 0; i < fServices.size(); i++) {
+		pair<char*, InstantiateFunc> service = fServices[i];
+		if (!strcmp(service.first, name))
+			return service.second();
+	}
+	return NULL;
+}
+
+char*
+StationFinderServices::Name(int i) {
+	return fServices[i].first;
+}
+
+
 
 const char*
 StationFinderService::FindByCapabilityName[] = {
@@ -38,8 +65,8 @@ StationFinderWindow::StationFinderWindow(BWindow* parent)
     ddServices  = new BOptionPopUp("ddServices", "", new BMessage(MSG_SELECT_SERVICE));
 	int currentServiceIndex = 0;
 	const char* settingsServiceName = ((RadioApp*)be_app)->Settings.StationFinderName();
-    for (int i = 0; i < StationFinderService::getStationFinderServices()->CountItems(); i++) {
-		const char* serviceName = StationFinderService::getStationFinderServices()->ItemAt(i)->Name();
+	for (int i = 0; i < StationFinderService::stationFinderServices.CountItems(); i++) {
+		const char* serviceName = StationFinderService::stationFinderServices.Name(i);
 		if (settingsServiceName && !strcmp(serviceName, settingsServiceName)) {
 			currentServiceIndex = i;
 		}
@@ -89,6 +116,8 @@ StationFinderWindow::StationFinderWindow(BWindow* parent)
 }
 
 StationFinderWindow::~StationFinderWindow() {
+	if (currentService)
+		delete currentService;
     resultView->MakeEmpty();
 	txSearch->StopWatchingAll(this);
     delete messenger;
@@ -152,10 +181,9 @@ void StationFinderWindow::MessageReceived(BMessage* msg) {
 			break;
 			
 		case MSG_VISIT_SERVICE : {
-			StationFinderService* service = StationFinderService::getStationFinderServices()->ItemAt(
-			  ddServices->Value());
-			if (service && service->serviceHomePage && service->serviceHomePage.IsValid()) {
-				service->serviceHomePage.OpenWithPreferredApplication(true);
+			if (currentService && currentService->serviceHomePage && 
+					currentService->serviceHomePage.IsValid()) {
+				currentService->serviceHomePage.OpenWithPreferredApplication(true);
 			}
 			break;
 		}
@@ -174,18 +202,25 @@ void StationFinderWindow::MessageReceived(BMessage* msg) {
 }
 
 void StationFinderWindow::SelectService(int index) {
-	if (index >= 0 && index < StationFinderService::getStationFinderServices()->CountItems()) {
-		currentService = StationFinderService::getStationFinderServices()->ItemAt(index);
-		((RadioApp*)be_app)->Settings.SetStationFinderName(currentService->serviceName);
-		while (this->ddSearchBy->CountOptions())
-			ddSearchBy->RemoveOptionAt(0);
+	if (currentService) {
+		delete currentService;
+		currentService = NULL;
+	}
+
+	char* serviceName = StationFinderServices::Name(index);
+	if (!serviceName) 
+		return;
+	
+	currentService = StationFinderServices::Instantiate(serviceName);
+	((RadioApp*)be_app)->Settings.SetStationFinderName(serviceName);
+	while (this->ddSearchBy->CountOptions())
+		ddSearchBy->RemoveOptionAt(0);
 		
-		set<int> caps = currentService->Capabilities();
-		for (set<int>::const_iterator i = caps.begin(); 
-				i != caps.end(); i++) {
-			ddSearchBy->AddOption(StationFinderService::FindByCapabilityName[*i], *i);
-		}
-	} else currentService = NULL;
+	set<int> caps = currentService->Capabilities();
+	for (set<int>::const_iterator i = caps.begin(); 
+			i != caps.end(); i++) {
+		ddSearchBy->AddOption(StationFinderService::FindByCapabilityName[*i], *i);
+	}
 }
 
 void StationFinderWindow::DoSearch(const char* text) {
@@ -209,18 +244,13 @@ StationFinderService::StationFinderService()
     serviceLogo(NULL)
 { }
 
-BObjectList<StationFinderService> 
-StationFinderService::stationFinderServices;
 
-inline BObjectList<StationFinderService>* 
-StationFinderService::getStationFinderServices() { 
-    return &stationFinderServices; 
-}
+vector<pair<char*, InstantiateFunc> >
+StationFinderServices::fServices;
 
-bool 
-StationFinderService::registerStationFinderService(StationFinderService* service) {
-    stationFinderServices.AddItem(service);
-    return true;
+void 
+StationFinderService::Register(char* name, InstantiateFunc instantiate) {
+	stationFinderServices.Add(name, instantiate);
 }
 
 BBitmap* 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configurationDescriptor version="97">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
-    <df root="/boot/home/projects/Radio" name="0">
+    <df root="/boot/home/projects/Haiku-Radio" name="0">
       <df name="dist">
       </df>
       <df name="graphics">
@@ -9,6 +9,22 @@
       <df name="Helpers">
         <in>TextReader.cpp</in>
         <in>TextReader.h</in>
+      </df>
+      <df name="objects.x86-cc2-debug">
+        <df name="package">
+          <df name="apps">
+          </df>
+          <df name="data">
+            <df name="deskbar">
+              <df name="menu">
+                <df name="Applications">
+                </df>
+              </df>
+            </df>
+          </df>
+        </df>
+      </df>
+      <df name="objects.x86-cc2-release">
       </df>
       <in>About.cpp</in>
       <in>About.h</in>

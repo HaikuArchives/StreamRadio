@@ -9,6 +9,7 @@
 #ifndef STATIONFINDER_H
 #define	STATIONFINDER_H
 #include <set>
+#include <vector>
 #include <iterator>
 #include <Window.h>
 #include <Messenger.h>
@@ -35,11 +36,19 @@
 
 using namespace std;
 
-class IconLookup {
+typedef class StationFinderService* (*InstantiateFunc)();
+
+class StationFinderServices {
 public:
-									IconLookup(Station* station, BUrl iconUrl);
-	Station*						fStation;
-	BUrl							fIconUrl;
+									StationFinderServices() { };
+	virtual							~StationFinderServices();
+	static void						Add(char*, InstantiateFunc);
+	static int						CountItems();
+	static StationFinderService*	Instantiate(char* s);
+	static char*					Name(int i);
+private:
+	static vector<pair<char*, InstantiateFunc> >
+									fServices;
 };
 
 class StationFinderService {
@@ -55,29 +64,29 @@ public:
 	
 									StationFinderService();
     virtual							~StationFinderService() {};
-    const char*						Name() { return serviceName.String(); }
-    set<int>						Capabilities() { return caps; }
-    virtual bool					canFindBy(FindByCapability capability) { 
+    static void						RegisterSelf();
+	static StationFinderService*	Instantiate(); 
+    const char*						Name() const { return serviceName.String(); }
+    set<int>						Capabilities() const { return caps; } 
+    virtual bool					canFindBy(FindByCapability capability) const { 
 										return caps.count(capability)==1; 
 									};
     virtual BObjectList<Station>*   FindBy(FindByCapability capability, 
 											const char* searchFor, 
 											BLooper* resultUpdateTarget) = 0;
 
-    static BObjectList<StationFinderService>* 
-									getStationFinderServices();
-    static bool						registerStationFinderService(StationFinderService* service);
-    
+    static void						Register(char* name, InstantiateFunc instantiate);
+    static StationFinderService*	Instantiate(char* name);
 protected:
     BString							serviceName;
     BUrl							serviceHomePage;
     BBitmap*						serviceLogo;
     set<int>						caps;
-    static BObjectList<StationFinderService> 
-									stationFinderServices;
     BBitmap*						logo(BUrl url);
-};
 
+    static StationFinderServices 
+									stationFinderServices;
+};
 
 class StationFinderWindow : public BWindow {
 public:

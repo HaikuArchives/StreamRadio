@@ -10,7 +10,7 @@
             <sourceEncoding>UTF-8</sourceEncoding>
             <make-dep-projects/>
             <sourceRootList>
-                <sourceRootElem>/boot/home/projects/Radio</sourceRootElem>
+                <sourceRootElem>/boot/home/projects/Haiku-Radio</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>

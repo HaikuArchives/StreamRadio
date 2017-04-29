@@ -66,8 +66,8 @@ RadioApp::AboutRequested() {
  */
 int 
 main(int argc, char * argv[]) {
-    StationFinderService::registerStationFinderService(new StationFinderRadioNetwork());
-    StationFinderService::registerStationFinderService(new StationFinderListenLive());
+    StationFinderRadioNetwork::RegisterSelf();
+	StationFinderListenLive::RegisterSelf();
 	
     new RadioApp();
     be_app->Run();

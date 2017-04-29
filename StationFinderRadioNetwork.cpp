@@ -12,6 +12,12 @@
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include "HttpUtils.h"
+#include "StationFinderListenLive.h"
+
+IconLookup::IconLookup(Station* station, BUrl iconUrl) 
+  : fStation(station),
+    fIconUrl(iconUrl)
+{ }
 
 StationFinderRadioNetwork::StationFinderRadioNetwork() 
   : StationFinderService(),
@@ -24,20 +30,25 @@ StationFinderRadioNetwork::StationFinderRadioNetwork()
 }
 
 StationFinderRadioNetwork::~StationFinderRadioNetwork() {
-    if (fIconLookupThread) {
-		kill_thread(fIconLookupThread);
-		fIconLookupList.MakeEmpty(false);
-    }
+	fIconLookupList.MakeEmpty(true);
+}
+
+StationFinderService*
+StationFinderRadioNetwork::Instantiate() {
+	return new StationFinderRadioNetwork();
+}
+
+void
+StationFinderRadioNetwork::RegisterSelf() {
+	Register("Radio Network", &StationFinderRadioNetwork::Instantiate);
 }
 
 BObjectList<Station>* 
 StationFinderRadioNetwork::FindBy(FindByCapability capability, const char* searchFor, 
 		BLooper* resultUpdateTarget) {
-    status_t status = B_OK;
-    if (fIconLookupThread) {
-		kill_thread(fIconLookupThread);
-		fIconLookupList.MakeEmpty(true);
-    }
+	if (fIconLookupThread)
+		suspend_thread(fIconLookupThread);
+	fIconLookupList.MakeEmpty(true);
     fIconLookupNotify = resultUpdateTarget;
     BObjectList<Station>* result = new BObjectList<Station>();
     BString urlString(baseUrl);
@@ -86,10 +97,11 @@ StationFinderRadioNetwork::FindBy(FindByCapability capability, const char* searc
             }
         }
         delete data;
-	if (!fIconLookupList.IsEmpty()) {
-	    fIconLookupThread = spawn_thread(&IconLookupFunc, "iconlookup", B_NORMAL_PRIORITY, this);
-	    resume_thread(fIconLookupThread);
-	}
+		if (!fIconLookupList.IsEmpty()) {
+			if (!fIconLookupThread) 
+				fIconLookupThread = spawn_thread(&IconLookupFunc, "iconlookup", B_NORMAL_PRIORITY, this);
+			resume_thread(fIconLookupThread);
+		}
     } else {
         delete result;
         result = NULL;
@@ -101,17 +113,18 @@ int32
 StationFinderRadioNetwork::IconLookupFunc(void* data) {
     StationFinderRadioNetwork* _this = (StationFinderRadioNetwork*)data;
     while (!_this->fIconLookupList.IsEmpty()) {
-	IconLookup* item = _this->fIconLookupList.FirstItem();
-	BBitmap* logo = _this->logo(item->fIconUrl);
-	if (logo) {
-	    _this->fIconLookupNotify->LockLooper();
-	    item->fStation->SetLogo(logo);
-	    BMessage* notification = new BMessage(MSG_UPDATE_STATION);
-	    notification->AddPointer("station", item->fStation);
-	    _this->fIconLookupNotify->PostMessage(notification);
-	    _this->fIconLookupNotify->UnlockLooper();
-	}
-	_this->fIconLookupList.RemoveItem(item, true);
+		IconLookup* item = _this->fIconLookupList.FirstItem();
+		BBitmap* logo = _this->logo(item->fIconUrl);
+		if (logo) {
+			item->fStation->SetLogo(logo);
+			BMessage* notification = new BMessage(MSG_UPDATE_STATION);
+			notification->AddPointer("station", item->fStation);
+			if (_this->fIconLookupNotify->LockLooper()) {
+				_this->fIconLookupNotify->PostMessage(notification);
+				_this->fIconLookupNotify->UnlockLooper();
+			}
+		}
+		_this->fIconLookupList.RemoveItem(item, true);
     }
     _this->fIconLookupThread = 0;
     return B_OK;

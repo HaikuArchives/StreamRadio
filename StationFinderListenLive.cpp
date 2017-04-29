@@ -38,21 +38,26 @@ StationFinderListenLive::StationFinderListenLive()
 	caps.insert(FindByGenre);
 }
 
+StationFinderService*
+StationFinderListenLive::Instantiate() {
+	return new StationFinderListenLive();
+}
+
+void
+StationFinderListenLive::RegisterSelf() {
+	Register("listenlive.eu [experimental]", &StationFinderListenLive::Instantiate);
+}
+
 StationFinderListenLive::~StationFinderListenLive() {
-    if (fLookupThread) {
-		kill_thread(fLookupThread);
-		fPlsLookupList.MakeEmpty(false);
-    }
+	fPlsLookupList.MakeEmpty(false);
 }
 
 BObjectList<Station>* 
 StationFinderListenLive::FindBy(FindByCapability capability, const char* searchFor, 
   BLooper* resultUpdateTarget) {
-    status_t status = B_OK;
-    if (fLookupThread) {
-		kill_thread(fLookupThread);
-		fPlsLookupList.MakeEmpty(false);
-    }
+	if (fLookupThread)
+		suspend_thread(fLookupThread);
+	fPlsLookupList.MakeEmpty(false);
     fLookupNotify = resultUpdateTarget;
 	
     BObjectList<Station>* result = new BObjectList<Station>();
@@ -117,6 +122,7 @@ StationFinderListenLive::FindBy(FindByCapability capability, const char* searchF
 					break;
 				}
 			
+			station->SetStation(doc + matches[1].rm_so);
 			station->SetGenre(doc + matches[8].rm_so);
 			BString country;
 			if (capability == FindByCountry) {
@@ -133,7 +139,8 @@ StationFinderListenLive::FindBy(FindByCapability capability, const char* searchF
 		
         delete data;
 		if (!fPlsLookupList.IsEmpty()) {
-			fLookupThread = spawn_thread(&PlsLookupFunc, "plslookup", B_NORMAL_PRIORITY, this);
+			if (!fLookupThread)
+				fLookupThread = spawn_thread(&PlsLookupFunc, "plslookup", B_NORMAL_PRIORITY, this);
 			resume_thread(fLookupThread);
 		}
     } else {
@@ -153,12 +160,13 @@ StationFinderListenLive::PlsLookupFunc(void* data) {
 			station->Source().UrlString().String());
 	Station* plsStation = Station::LoadIndirectUrl((BString&)station->Source().UrlString());
 	if (plsStation) {
-	    _this->fLookupNotify->LockLooper();
 		station->SetStreamUrl(plsStation->StreamUrl());
 	    BMessage* notification = new BMessage(MSG_UPDATE_STATION);
 	    notification->AddPointer("station", station);
-	    _this->fLookupNotify->PostMessage(notification);
-	    _this->fLookupNotify->UnlockLooper();
+		if (_this->fLookupNotify->LockLooper()) {
+			_this->fLookupNotify->PostMessage(notification);
+			_this->fLookupNotify->UnlockLooper();
+		}
 	}
 	_this->fPlsLookupList.RemoveItem(station, false);
     }

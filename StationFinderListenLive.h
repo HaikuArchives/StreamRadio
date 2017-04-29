@@ -30,18 +30,19 @@
 
 class StationFinderListenLive : public StationFinderService {
 public:
-								StationFinderListenLive();
-    virtual						~StationFinderListenLive();
-    virtual BObjectList<Station>* 
-								FindBy(FindByCapability capability, const char* searchFor, 
-								  BLooper* resultUpdateTarget);
+									StationFinderListenLive();
+    virtual							~StationFinderListenLive();
+	static void						RegisterSelf();
+	static StationFinderService*	Instantiate();
+    virtual BObjectList<Station>*	FindBy(FindByCapability capability, const char* searchFor, 
+											BLooper* resultUpdateTarget);
 private:
-    static const char*			baseUrl; 
-	thread_id					fLookupThread;
-	BObjectList<Station>		fPlsLookupList;
-	BLooper*					fLookupNotify;
+    static const char*				baseUrl; 
+	thread_id						fLookupThread;
+	BObjectList<Station>			fPlsLookupList;
+	BLooper*						fLookupNotify;
 	
-	static int32				PlsLookupFunc(void* data);
+	static int32					PlsLookupFunc(void* data);
 };
 
 #endif /* STATIONFINDERLISTENLIVE_H */
