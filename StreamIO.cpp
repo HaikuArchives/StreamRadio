@@ -43,7 +43,8 @@ StreamIO::StreamIO(Station* station, BLooper* MetaListener)
     fUntilMetaEnd(0),
     fMetaListener(MetaListener),
     fFrameSync(none),
-	fLimit(0)
+	fLimit(0),
+	fBuffered(0)
 {
     fReq = dynamic_cast<BHttpRequest*>(BUrlProtocolRoster::MakeRequest(station->StreamUrl(), this));
 
@@ -53,7 +54,7 @@ StreamIO::StreamIO(Station* station, BLooper* MetaListener)
     headers->AddHeader("Accept", "audio/*");
     fReq->AdoptHeaders(headers);
 	fReq->SetFollowLocation(true);
-	fReq->SetMaxRedirections(2);
+	fReq->SetMaxRedirections(3);
     fInputAdapter = BuildInputAdapter();
 
     if (*station->Mime() == "audio/mpeg" || *station->Mime() == "audio/aacp")
@@ -85,13 +86,22 @@ ssize_t
 StreamIO::ReadAt(off_t position, void* buffer, size_t size) {
 	if (fLimit == 0 || position < fLimit) {
 		ssize_t read = BAdapterIO::ReadAt(position, buffer, size);
-		if (read > 0)
-			TRACE("Read %ld of %ld bytes from position %ld\n", read, size, position);
-		else
-			TRACE("Readin %ld bytes from position %ld failed - %s\n", size, position, strerror(read));
+		if (read > 0) {
+			TRACE("Read %" B_PRIdSSIZE " of %" B_PRIuSIZE 
+					" bytes from position %" B_PRIdOFF 
+					", %" B_PRIuSIZE " remaining\n", 
+					read, size, position, Buffered());
+			fBuffered -= read;
+		} else
+			TRACE("Reading %" B_PRIuSIZE " bytes from position %" B_PRIdOFF 
+					" failed - %s\n", 
+					size, position, strerror(read));
+		
 		return read;
 	} else {
-		TRACE("Position %ld has reached limit of %ld, blocking...\n", position, fLimit);
+		TRACE("Position %" B_PRIuSIZE " has reached limit of %" B_PRIuSIZE 
+				", blocking...\n", 
+				position, fLimit);
 		return 0;
 	}
 }
@@ -99,6 +109,11 @@ StreamIO::ReadAt(off_t position, void* buffer, size_t size) {
 status_t
 StreamIO::SetSize(off_t size) {
     return B_NOT_SUPPORTED;
+}
+
+size_t
+StreamIO::Buffered() {
+	return fBuffered;
 }
 
 void 
@@ -141,7 +156,11 @@ StreamIO::HeadersReceived(BUrlRequest* request, const BUrlResult& result) {
 		if (httpResult->Length() > 0) {
 			fDataFuncs.Add(&StreamIO::DataRedirectReceived, 0);
 		}
-		TRACE("Redirected to %s\n", httpResult->Headers()["location"]);
+		if (httpResult->StatusCode() == 301) { // Permanent redirect
+			fStation->SetStreamUrl(httpResult->Headers()["location"]);
+			TRACE("Permanently redirected to %s\n", httpResult->Headers()["location"]);
+		} else 
+			TRACE("Redirected to %s\n", httpResult->Headers()["location"]);
 		return;
 	}
 	
@@ -165,6 +184,7 @@ StreamIO::HeadersReceived(BUrlRequest* request, const BUrlResult& result) {
 void
 StreamIO::DataSyncedReceived(BUrlRequest* request, const char* data, off_t position, ssize_t size, int next) {
 	fInputAdapter->Write(data, size);
+	fBuffered += size;
 }
 
 void
@@ -217,7 +237,7 @@ StreamIO::DataWithMetaReceived(BUrlRequest* request, const char* data, off_t pos
 				} else if (fUntilMetaEnd > 512) {
 					fUntilMetaStart = fMetaInt;
 					fUntilMetaEnd = 0;
-					TRACE("Meta: Size of %ld too large\n");
+					TRACE("Meta: Size of " B_PRIdOFF " too large\n");
 					data--;
 					position--;
 					size++;
@@ -254,7 +274,9 @@ StreamIO::DataUnsyncedReceived(BUrlRequest* request, const char* data, off_t pos
 			fFrameSync = none;
 	}
 	if (position + frameStart > 8192) {
-		MSG("No mp3 frame header encountered in first %ld bytes, giving up...", position + frameStart);
+		MSG("No mp3 frame header encountered in first %" B_PRIuSIZE 
+				" bytes, giving up...", 
+				position + frameStart);
 		next--;
 		fDataFuncs.Remove(next);
 		DataFunc nextFunc = fDataFuncs.Item(next);

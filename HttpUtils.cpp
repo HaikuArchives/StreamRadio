@@ -9,24 +9,32 @@
 
 class HttpIOReader : public BUrlProtocolListener {
 public:
-    HttpIOReader(BPositionIO* data, BHttpHeaders* responseHeaders, size_t limit) {
-        fData = data;
-		fLimit = limit;
-		fHeaders = responseHeaders;
+    HttpIOReader(BPositionIO* data, BHttpHeaders* responseHeaders, size_t limit) 
+	  : fData(data),
+	    fLimit(limit),
+	    fHeaders(responseHeaders),
+		fIsRedirect(false)
+	{
     }
+	  
     ~HttpIOReader() { }
+	
 	virtual void HeadersReceived(BUrlRequest* caller, const BUrlResult& result) {
 		const BHttpResult* httpResult = dynamic_cast<const BHttpResult*>(&result);
 		if (httpResult && fHeaders) {
 			*fHeaders = httpResult->Headers();
+			fIsRedirect = BHttpRequest::IsRedirectionStatusCode(httpResult->StatusCode());
 		}
 	}
     virtual void DataReceived(BUrlRequest* caller, const char* data, off_t position, ssize_t size) {
+		if (fIsRedirect)
+			return;
+		
 		if (fData == NULL) {
 			caller->Stop();
 			return;
 		}
-		
+
         fData->Write(data, size);
 		if (fLimit) {
 			if (fLimit < size) 
@@ -38,6 +46,8 @@ public:
 private:
     BPositionIO* fData;
 	BHttpHeaders* fHeaders;
+	bool		 fIsRedirect;
+	
 	size_t		 fLimit;
 };
 

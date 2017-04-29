@@ -93,6 +93,7 @@ public:
 	virtual status_t					Open();
 	virtual bool						IsRunning() const;
 	void								SetLimiter(size_t limit = 0);
+	size_t								Buffered();
 protected:
 	virtual	status_t					SeekRequested(off_t position);
 	virtual void						HeadersReceived(BUrlRequest* request, 
@@ -144,6 +145,7 @@ private:
 	};
 	FrameSync							fFrameSync;
 	size_t								fLimit;
+	size_t								fBuffered;
 };
 
 #endif /* STREAMIO_H */
