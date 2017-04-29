@@ -276,9 +276,9 @@ status_t
 Station::parseUrlReference(const char* body, const char* mime) {
     
     const char* patterns[4]={ "^file[0-9]+=([^\r\n]*)[\r\n$]+",		// ShoutcastUrl
-                             "^(http://.*)$",       // Mpeg Url;
-                             "^([^#]+[\r\n]*)[\r\n$]+",				// Mpeg Url;
-                             "^title[0-9]+=([^\r\n]*)[\r\n$]+" };	// Shoutcast alternativ;
+                             "^(http://[^\r\n]*)[\r\n]+$",       // Mpeg Url;
+                             "^([^#]+[^\r\n]*)[\r\n]+$",				// Mpeg Url;
+                             "^title[0-9]+=([^\r\n]*)[\r\n]+$" };	// Shoutcast alternativ;
 
     for (int i = 0; i < 3; i++) {
         char* match = regFind(body, patterns[i]);

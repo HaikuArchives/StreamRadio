@@ -14,8 +14,8 @@ StationFinderServices::~StationFinderServices() {
 }
 
 void
-StationFinderServices::Add(char* name, InstantiateFunc instantiate) {
-	pair<char*, InstantiateFunc> service(name, instantiate);
+StationFinderServices::Register(char* serviceName, InstantiateFunc instantiate) {
+	pair<char*, InstantiateFunc> service(serviceName, instantiate);
 	fServices.push_back(service);
 }
 
@@ -39,15 +39,94 @@ StationFinderServices::Name(int i) {
 	return fServices[i].first;
 }
 
+vector<pair<char*, InstantiateFunc> >
+StationFinderServices::fServices;
+
+FindByCapability::FindByCapability(char* name) 
+  : fName(name),
+	fKeywords()
+{ }
+
+FindByCapability::FindByCapability(char* name, char* KeyWords, char* delimiter)
+  : fName(name),
+	fKeywords()
+{
+	SetKeyWords(KeyWords, delimiter);
+}
+
+FindByCapability::~FindByCapability() {
+	fKeywords.MakeEmpty();
+}
+
+bool
+FindByCapability::HasKeyWords() {
+	return !fKeywords.IsEmpty();
+}
+
+const BStringList*
+FindByCapability::KeyWords() {
+	return &fKeywords;
+}
+
+const char* 
+FindByCapability::Name() {
+	return fName.String();
+}
+
+void
+FindByCapability::SetKeyWords(char* KeyWords, char* delimiter) {
+	BString tmp(KeyWords);
+	tmp.Split(delimiter, true, fKeywords);
+}
 
 
-const char*
-StationFinderService::FindByCapabilityName[] = {
-	"Name",
-	"Country",
-	"Genre",
-	"Keyword"
-};
+StationFinderService::StationFinderService() 
+  : serviceName("unknown"),
+    serviceHomePage(""),
+    serviceLogo(NULL),
+	findByCapabilities(5, true)
+{ }
+
+StationFinderService::~StationFinderService() {
+	if (serviceLogo)
+		delete serviceLogo;
+	findByCapabilities.MakeEmpty(true);
+}
+
+void
+StationFinderService::Register(char* name, InstantiateFunc instantiate) {
+	StationFinderServices::Register(name, instantiate);
+}
+
+BBitmap* 
+StationFinderService::logo(BUrl url) {
+    BBitmap* bm = NULL;
+	BString contentType("image/*");
+    BMallocIO* bmData = HttpUtils::GetAll(url, NULL, 3000, &contentType);
+    
+    if (bmData) {
+        
+        bm = BTranslationUtils::GetBitmap(bmData);
+        if (bm == NULL || bm->InitCheck() != B_OK) 
+            bm == NULL;
+        delete bmData;
+    }
+    return bm;
+}
+
+FindByCapability*
+StationFinderService::RegisterSearchCapability(char* name) {
+	FindByCapability* newCapability = new FindByCapability(name);
+	findByCapabilities.AddItem(newCapability);
+	return newCapability;
+}
+
+FindByCapability*
+StationFinderService::RegisterSearchCapability(char* name, char* keywords, char* delimiter) {
+	FindByCapability* newCapability = new FindByCapability(name, keywords, delimiter);
+	findByCapabilities.AddItem(newCapability);
+	return newCapability;
+}
 
 StationFinderWindow::StationFinderWindow(BWindow* parent) 
   : BWindow(BRect(0,0,300,150), "Find Stations", B_TITLED_WINDOW, B_CLOSE_ON_ESCAPE),
@@ -57,16 +136,17 @@ StationFinderWindow::StationFinderWindow(BWindow* parent)
     
     CenterIn(parent->Frame());
 	
-    txSearch    = new BTextControl("Search", NULL, new BMessage(MSG_TXSEARCH));
+    txSearch    = new BTextControl(NULL, NULL, new BMessage(MSG_TXSEARCH));
+	kwSearch	= new BOptionPopUp("kwSearch", NULL, new BMessage(MSG_KWSEARCH));
 	bnSearch    = new BButton("bnSearch", NULL, new BMessage(MSG_BNSEARCH));
 	bnSearch->SetIcon(Utils::ResourceBitmap(RES_BN_SEARCH));
 	
 	
-    ddServices  = new BOptionPopUp("ddServices", "", new BMessage(MSG_SELECT_SERVICE));
+    ddServices  = new BOptionPopUp("ddServices", NULL, new BMessage(MSG_SELECT_SERVICE));
 	int currentServiceIndex = 0;
 	const char* settingsServiceName = ((RadioApp*)be_app)->Settings.StationFinderName();
-	for (int i = 0; i < StationFinderService::stationFinderServices.CountItems(); i++) {
-		const char* serviceName = StationFinderService::stationFinderServices.Name(i);
+	for (int i = 0; i < StationFinderServices::CountItems(); i++) {
+		const char* serviceName = StationFinderServices::Name(i);
 		if (settingsServiceName && !strcmp(serviceName, settingsServiceName)) {
 			currentServiceIndex = i;
 		}
@@ -89,8 +169,11 @@ StationFinderWindow::StationFinderWindow(BWindow* parent)
 			.Add(new BStringView("lbSearchBy", "Search by"), 0, 1)
 			.Add(ddSearchBy, 1, 1)
 			
-			.AddTextControl(txSearch, 0, 2)
+			.Add(new BStringView("lbSearchFor", "Search for"), 0, 2)
+			.Add(txSearch, 1, 2)
+			.Add(kwSearch, 1, 2)
             .Add(bnSearch, 2, 2) 
+			.GetLayout(&searchGrid)
         .End()
 	
         .Add(new BScrollView("srollResult", resultView, 0, B_FOLLOW_ALL_SIDES, false, true), 0.9)
@@ -131,13 +214,18 @@ bool StationFinderWindow::QuitRequested() {
 void StationFinderWindow::MessageReceived(BMessage* msg) {
     switch (msg->what) {
         case MSG_BNSEARCH : {
+			if (txSearch->LayoutContext()) {
                 if (txSearch->Text()[0]) {
                     DoSearch(txSearch->Text());
                     resultView->MakeFocus(true);
-                }
-            }
+                } 
+			} else {
+				if (kwSearch->Value() >= 0) {
+					DoSearch(currentService->Capability(ddSearchBy->Value())->KeyWords()->StringAt(kwSearch->Value()));
+				}
+			}
             break;
-                
+		}
         case MSG_ADD_STATION : {
             int32 index = msg->GetInt32("index", -1);
             if (index < 0) index = resultView->CurrentSelection(0);
@@ -180,6 +268,10 @@ void StationFinderWindow::MessageReceived(BMessage* msg) {
 			SelectService(ddServices->Value());
 			break;
 			
+		case MSG_SEARCH_BY :
+			SelectCapability(ddSearchBy->Value());
+			break;
+			
 		case MSG_VISIT_SERVICE : {
 			if (currentService && currentService->serviceHomePage && 
 					currentService->serviceHomePage.IsValid()) {
@@ -213,13 +305,37 @@ void StationFinderWindow::SelectService(int index) {
 	
 	currentService = StationFinderServices::Instantiate(serviceName);
 	((RadioApp*)be_app)->Settings.SetStationFinderName(serviceName);
-	while (this->ddSearchBy->CountOptions())
+	while (ddSearchBy->CountOptions())
 		ddSearchBy->RemoveOptionAt(0);
 		
-	set<int> caps = currentService->Capabilities();
-	for (set<int>::const_iterator i = caps.begin(); 
-			i != caps.end(); i++) {
-		ddSearchBy->AddOption(StationFinderService::FindByCapabilityName[*i], *i);
+	for (int i = 0; i < currentService->CountCapabilities(); i++) 
+		ddSearchBy->AddOption(currentService->Capability(i)->Name(), i);
+	
+	if (ddSearchBy->CountOptions())
+		SelectCapability(0);
+}
+
+void StationFinderWindow::SelectCapability(int index) {
+	if (!currentService)
+		return;
+	
+	FindByCapability* capability = currentService->Capability(index);
+	if (!capability) 
+		return;
+	
+	if (capability->HasKeyWords()) {
+		while (kwSearch->CountOptions())
+			kwSearch->RemoveOptionAt(0);
+		for (int i = 0; i < capability->KeyWords()->CountStrings(); i++)
+			kwSearch->AddOption(capability->KeyWords()->StringAt(i), i);
+		
+		searchGrid->RemoveView(txSearch);
+		searchGrid->AddView(kwSearch, 1, 2);
+		Layout(true);
+	} else {
+		searchGrid->RemoveView(kwSearch);
+		searchGrid->AddView(txSearch, 1, 2);
+		Layout(true);
 	}
 }
 
@@ -228,7 +344,7 @@ void StationFinderWindow::DoSearch(const char* text) {
 	if (!currentService) 
 		return;
     
-    BObjectList<Station>* result = currentService->FindBy((StationFinderService::FindByCapability)ddSearchBy->Value(), text, this);
+    BObjectList<Station>* result = currentService->FindBy(ddSearchBy->Value(), text, this);
     if (result) {
         for (unsigned i = 0; i < result->CountItems(); i++) {
             resultView->AddItem(new StationListViewItem(result->ItemAt(i)));
@@ -238,33 +354,3 @@ void StationFinderWindow::DoSearch(const char* text) {
     }
 }
 
-StationFinderService::StationFinderService() 
-  : serviceName("unknown"),
-    serviceHomePage(""),
-    serviceLogo(NULL)
-{ }
-
-
-vector<pair<char*, InstantiateFunc> >
-StationFinderServices::fServices;
-
-void 
-StationFinderService::Register(char* name, InstantiateFunc instantiate) {
-	stationFinderServices.Add(name, instantiate);
-}
-
-BBitmap* 
-StationFinderService::logo(BUrl url) {
-    BBitmap* bm = NULL;
-	BString contentType("image/*");
-    BMallocIO* bmData = HttpUtils::GetAll(url, NULL, 3000, &contentType);
-    
-    if (bmData) {
-        
-        bm = BTranslationUtils::GetBitmap(bmData);
-        if (bm == NULL || bm->InitCheck() != B_OK) 
-            bm == NULL;
-        delete bmData;
-    }
-    return bm;
-}

@@ -23,7 +23,7 @@ public:
     virtual							~StationFinderRadioNetwork();
 	static void						RegisterSelf();
 	static StationFinderService*	Instantiate();
-    virtual BObjectList<Station>*	FindBy(FindByCapability capability, const char* searchFor, 
+    virtual BObjectList<Station>*	FindBy(int capabilityIndex, const char* searchFor, 
 											BLooper* resultUpdateTarget);
 private:
     static const char*				baseUrl; 

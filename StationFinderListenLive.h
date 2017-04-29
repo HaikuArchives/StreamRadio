@@ -34,8 +34,10 @@ public:
     virtual							~StationFinderListenLive();
 	static void						RegisterSelf();
 	static StationFinderService*	Instantiate();
-    virtual BObjectList<Station>*	FindBy(FindByCapability capability, const char* searchFor, 
+    virtual BObjectList<Station>*	FindBy(int capabilityIndex, const char* searchFor, 
 											BLooper* resultUpdateTarget);
+	BObjectList<Station>*			ParseCountryReturn(BMallocIO* data, const char* country);
+	BObjectList<Station>*			ParseGenreReturn(BMallocIO* data, const char* genre);
 private:
     static const char*				baseUrl; 
 	thread_id						fLookupThread;
@@ -43,6 +45,8 @@ private:
 	BLooper*						fLookupNotify;
 	
 	static int32					PlsLookupFunc(void* data);
+	BStringList						countryKeywordAndPath;
+	BStringList						genreKeywordAndPath;
 };
 
 #endif /* STATIONFINDERLISTENLIVE_H */

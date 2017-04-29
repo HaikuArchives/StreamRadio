@@ -11,18 +11,6 @@
         <in>TextReader.h</in>
       </df>
       <df name="objects.x86-cc2-debug">
-        <df name="package">
-          <df name="apps">
-          </df>
-          <df name="data">
-            <df name="deskbar">
-              <df name="menu">
-                <df name="Applications">
-                </df>
-              </df>
-            </df>
-          </df>
-        </df>
       </df>
       <df name="objects.x86-cc2-release">
       </df>

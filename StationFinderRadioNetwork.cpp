@@ -26,7 +26,7 @@ StationFinderRadioNetwork::StationFinderRadioNetwork()
 {
     serviceName.SetTo("Radio Network");
     serviceHomePage.SetUrlString("http://www.radio-browser.info");
-    caps.insert(FindByKeyword);
+	RegisterSearchCapability("Keyword");
 }
 
 StationFinderRadioNetwork::~StationFinderRadioNetwork() {
@@ -44,7 +44,7 @@ StationFinderRadioNetwork::RegisterSelf() {
 }
 
 BObjectList<Station>* 
-StationFinderRadioNetwork::FindBy(FindByCapability capability, const char* searchFor, 
+StationFinderRadioNetwork::FindBy(int capabilityIndex, const char* searchFor, 
 		BLooper* resultUpdateTarget) {
 	if (fIconLookupThread)
 		suspend_thread(fIconLookupThread);

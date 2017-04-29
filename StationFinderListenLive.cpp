@@ -27,15 +27,100 @@
 #include <regex.h>
 #include "Debug.h"
 
+
+const char* genreList =
+"Top 40|top40\r\
+Hot Adult Contemporary|hotac\r\
+Adult Contemporary|ac\r\
+Oldies/80s/90s|oldies\r\
+Country music|country\r\
+RnB/HipHop|rnb\r\
+Dance/Techno|dance\r\
+Rock/Classic Rock|rock\r\
+Alternative|alternative\r\
+Chillout/Lounge|chillout";
+
+
+const char* countryList = 
+"Andorra|andorra\r\
+Armenia|armenia\r\
+Austria|austria\r\
+Azerbaijan|azerbaijan\r\
+Belarus|belarus\r\
+Belgium|belgium\r\
+Bosnia-Herzegovina|bosnia\r\
+Bulgaria|bulgaria\r\
+Croatia|croatia\r\
+Cyprus|cyprus\r\
+Czech Republic|czech-republic\r\
+Denmark|denmark\r\
+Estonia|estonia\r\
+Faroe Islands|faroe\r\
+Finland|finland\r\
+France|france\r\
+Georgia|georgia\r\
+Germany|germany\r\
+Gibraltar|gibraltar\r\
+Greece|greece\r\
+Hungary|hungary\r\
+Iceland|iceland\r\
+Ireland|ireland\r\
+Italy|italy\r\
+Kosovo|kosovo\r\
+Latvia|latvia\r\
+Liechtenstein|liechtenstein\r\
+Lithuania|lithuania\r\
+Luxembourg|luxembourg\r\
+Macedonia|macedonia\r\
+Malta|malta\r\
+Moldova|moldova\r\
+Monaco|monaco\r\
+Montenegro|montenegro\r\
+Netherlands|netherlands\r\
+Norway|norway\r\
+Poland|poland\r\
+Portugal|portugal\r\
+Romania|romania\r\
+Russia|russia\r\
+San Marino|san-marino\r\
+Serbia|serbia\r\
+Slovakia|slovakia\r\
+Slovenia|slovenia\r\
+Spain|spain\r\
+Sweden|sweden\r\
+Switzerland|switzerland\r\
+Turkey|turkey\r\
+Ukraine|ukraine\r\
+United Kingdom|uk\r\
+Vatican State|vatican";
+
 StationFinderListenLive::StationFinderListenLive()
   : StationFinderService(),
+	countryKeywordAndPath(),
+	genreKeywordAndPath(),
 	fLookupThread(0),
     fPlsLookupList()
 {
     serviceName.SetTo("listenlive.eu [experimental]");
     serviceHomePage.SetUrlString("http://www.listenlive.eu/");
-    caps.insert(FindByCountry);
-	caps.insert(FindByGenre);
+	BString tmp(countryList);
+	tmp.Split("\r", true, countryKeywordAndPath);
+	FindByCapability* findByCountry = RegisterSearchCapability("Country");
+	BStringList* keywords = (BStringList*)findByCountry->KeyWords();
+	for (int i = 0; i < countryKeywordAndPath.CountStrings(); i++) {
+		BString keyword(countryKeywordAndPath.StringAt(i));
+		keyword.Truncate(keyword.FindFirst('|'));
+		keywords->Add(keyword);
+	}
+	tmp.SetTo(genreList);
+	tmp.Split("\r", true, genreKeywordAndPath);
+	FindByCapability* findByGenre = RegisterSearchCapability("Genre");
+	keywords = (BStringList*)findByGenre->KeyWords();
+	for (int i = 0; i < genreKeywordAndPath.CountStrings(); i++) {
+		BString keyword(genreKeywordAndPath.StringAt(i));
+		keyword.Truncate(keyword.FindFirst('|'));
+		keywords->Add(keyword);
+	}
 }
 
 StationFinderService*
@@ -53,21 +138,52 @@ StationFinderListenLive::~StationFinderListenLive() {
 }
 
 BObjectList<Station>* 
-StationFinderListenLive::FindBy(FindByCapability capability, const char* searchFor, 
+StationFinderListenLive::FindBy(int capabilityIndex, const char* searchFor, 
   BLooper* resultUpdateTarget) {
 	if (fLookupThread)
 		suspend_thread(fLookupThread);
 	fPlsLookupList.MakeEmpty(false);
     fLookupNotify = resultUpdateTarget;
 	
-    BObjectList<Station>* result = new BObjectList<Station>();
+    BObjectList<Station>* result = NULL;
     
 	BString urlString(baseUrl);
 	strlwr((char*)searchFor);
-    urlString << searchFor << ".html";
+	int keywordIndex = Capability(capabilityIndex)->KeyWords()->IndexOf(searchFor);
+	BStringList* keywordAndPaths = capabilityIndex ? &genreKeywordAndPath : &countryKeywordAndPath;
+	BString path(keywordAndPaths->StringAt(keywordIndex));
+	path.Remove(0, path.FindFirst('|') + 1);
+    urlString << path << ".html";
     BUrl url(urlString);
     BMallocIO* data = HttpUtils::GetAll(url);
 
+    if (data) {
+		switch(capabilityIndex) {
+		case 0: // findByCountry
+			result = ParseCountryReturn(data, searchFor);
+			break;
+		case 1: // findByGenre
+			result = ParseGenreReturn(data, searchFor);
+			break;
+		}
+
+		data->Flush();
+        delete data;
+		if (!fPlsLookupList.IsEmpty()) {
+			if (!fLookupThread)
+				fLookupThread = spawn_thread(&PlsLookupFunc, "plslookup", B_NORMAL_PRIORITY, this);
+			resume_thread(fLookupThread);
+		}
+    } 
+    return result;
+}
+
+BObjectList<Station>*
+StationFinderListenLive::ParseCountryReturn(BMallocIO* data, const char* searchFor) {
+	BObjectList<Station>* result = new BObjectList<Station>(20, true);
+	regmatch_t matches[10];
+	regex_t	   regex;
+	
 //	<tr>
 //	<td><a href="http://oe1.orf.at/"><b>ORF Ö-1</b></a></td>
 //	<td>Vienna</td>
@@ -76,78 +192,142 @@ StationFinderListenLive::FindBy(FindByCapability capability, const char* searchF
 //	<td>Information/Culture</td>
 //	</tr>
 	
-	
-    if (data) {
-		regmatch_t matches[10];
-		regex_t	   regex;
-		int res = regcomp(&regex,  
-				"<tr>\\s*<td>\\s*<a\\s+href=\"([^\"]*)\"><b>([^<]*)</b>\\s*</a>\\s*</td>\\s*"
-				"<td>([^<]*)</td>\\s*"
-				"<td>([^<]|<[^/]|</[^t]|</t[^d])*</td>\\s*"
-				"<td>\\s*<a\\s+href=\"([^\"]*)\">([^<]*)</a>([^<]|<[^/]|</[^t]|</t[^d])*</td>\\s*"
-				"<td>([^<]*)</td>\\s*</tr>",
-				RE_ICASE | RE_DOT_NEWLINE | RE_DOT_NOT_NULL | RE_NO_BK_PARENS | RE_NO_BK_VBAR | 
-				RE_BACKSLASH_ESCAPE_IN_LISTS);
+	int res = regcomp(&regex,  
+			"<tr>\\s*<td>\\s*<a\\s+href=\"([^\"]*)\"><b>([^<]*)</b>\\s*</a>\\s*</td>\\s*"
+			"<td>([^<]*)</td>\\s*"
+			"<td>([^<]|<[^/]|</[^t]|</t[^d])*</td>\\s*"
+			"<td>\\s*<a\\s+href=\"([^\"]*)\">([^<]*)</a>([^<]|<[^/]|</[^t]|</t[^d])*</td>\\s*"
+			"<td>([^<]*)</td>\\s*</tr>",
+			RE_ICASE | RE_DOT_NEWLINE | RE_DOT_NOT_NULL | RE_NO_BK_PARENS | RE_NO_BK_VBAR | 
+			RE_BACKSLASH_ESCAPE_IN_LISTS);
 
-		char* doc = (char*)data->Buffer();
-		doc[data->BufferLength()]=0;
-		
-		while ((res = regexec(&regex, doc, 10, matches, 0)) == 0) {
-			doc[matches[1].rm_eo] = 0;
-			doc[matches[2].rm_eo] = 0;
-			doc[matches[3].rm_eo] = 0;
-			doc[matches[5].rm_eo] = 0;
-			doc[matches[6].rm_eo] = 0;
-			doc[matches[8].rm_eo] = 0;
-			printf("Station %s at %s in %s address %s, data rate=%s, genre=%s\n", 
-					doc + matches[2].rm_so, 
-					doc + matches[1].rm_so, 
-					doc + matches[3].rm_so, 
-					doc + matches[5].rm_so, 
-					doc + matches[6].rm_so,
-					doc + matches[8].rm_so);
+	char* doc = (char*)data->Buffer();
+	off_t size;
+	data->GetSize(&size);
+	doc[size]=0;
 
-			Station* station = new Station(doc + matches[2].rm_so, NULL);
-			BString source(doc + matches[5].rm_so);
-			if (source.EndsWith(".pls") || source.EndsWith(".m3u")) {
-				station->SetSource(BUrl(source));
-				fPlsLookupList.AddItem(station);
-			} else
-				station->SetStreamUrl(BUrl(source));
-			
-			for (int i = matches[6].rm_so; i < matches[6].rm_eo; i++)
-				if (!strchr("0123456789.", doc[i])) {
-					doc[i] = 0;
-					station->SetBitRate(atof(doc + matches[6].rm_so) * 1000);
-					break;
-				}
-			
-			station->SetStation(doc + matches[1].rm_so);
-			station->SetGenre(doc + matches[8].rm_so);
-			BString country;
-			if (capability == FindByCountry) {
-				country.SetTo(searchFor);
-				country.Append(" - ");
+	while ((res = regexec(&regex, doc, 10, matches, 0)) == 0) {
+		doc[matches[1].rm_eo] = 0;
+		doc[matches[2].rm_eo] = 0;
+		doc[matches[3].rm_eo] = 0;
+		doc[matches[5].rm_eo] = 0;
+		doc[matches[6].rm_eo] = 0;
+		doc[matches[8].rm_eo] = 0;
+		printf("Station %s at %s in %s address %s, data rate=%s, genre=%s\n", 
+				doc + matches[2].rm_so, 
+				doc + matches[1].rm_so, 
+				doc + matches[3].rm_so, 
+				doc + matches[5].rm_so, 
+				doc + matches[6].rm_so,
+				doc + matches[8].rm_so);
+
+		Station* station = new Station(doc + matches[2].rm_so, NULL);
+		result->AddItem(station);
+
+		BString source(doc + matches[5].rm_so);
+		if (source.EndsWith(".pls") || source.EndsWith(".m3u")) {
+			station->SetSource(BUrl(source));
+			fPlsLookupList.AddItem(station);
+		} else
+			station->SetStreamUrl(BUrl(source));
+
+		for (int i = matches[6].rm_so; i < matches[6].rm_eo; i++)
+			if (!strchr("0123456789.", doc[i])) {
+				doc[i] = 0;
+				station->SetBitRate(atof(doc + matches[6].rm_so) * 1000);
+				break;
 			}
-			country.Append(doc + matches[3].rm_so);
-			station->SetCountry(country);
-			result->AddItem(station);
-			if (station->Source().Path().EndsWith(".pls") || station->Source().Path().EndsWith(".m3u"))
-				fPlsLookupList.AddItem(station);			
-			doc += matches[0].rm_eo;
-		}
-		
-        delete data;
-		if (!fPlsLookupList.IsEmpty()) {
-			if (!fLookupThread)
-				fLookupThread = spawn_thread(&PlsLookupFunc, "plslookup", B_NORMAL_PRIORITY, this);
-			resume_thread(fLookupThread);
-		}
-    } else {
-        delete result;
-        result = NULL;
-    }
-    return result;
+
+		station->SetStation(doc + matches[1].rm_so);
+		station->SetGenre(doc + matches[8].rm_so);
+		BString country;
+		country.SetTo(searchFor);
+		country.Append(" - ");
+		country.Append(doc + matches[3].rm_so);
+		station->SetCountry(country);
+		doc += matches[0].rm_eo;
+	}	
+	return result;
+}
+
+BObjectList<Station>*
+StationFinderListenLive::ParseGenreReturn(BMallocIO* data, const char* searchFor) {
+	BObjectList<Station>* result = new BObjectList<Station>(20, true);
+	regmatch_t matches[9];
+	regex_t	   regex;
+	
+//	<tr>
+//	<td><a href="http://oe1.orf.at/"><b>ORF Ö-1</b></a></td>
+//	<td>Vienna</td>
+//	<td><img src="wma.gif" width="12" height="12" alt="Windows Media"><br><img src="mp3.gif" width="12" height="12" alt="MP3"></td>
+//	<td><a href="mms://apasf.apa.at/oe1_live_worldwide">128 Kbps</a><br><a href="http://mp3stream3.apasf.apa.at:8000/listen.pls">192 Kbps</a></td>
+//	<td>Information/Culture</td>
+//	</tr>
+	
+//	<tr>
+//	<td><a href="http://www.radiostephansdom.at/"><b>Radio Stephansdom</b></a></td>
+//	<td>Vienna</td>
+//	<td>Austria</td>
+//	<td><img src="mp3.gif" width="12" height="12" alt="MP3"><br></td>
+//	<td><a href="http://streaming.lxcluster.at:8000/live32.m3u">32 Kbps</a>, <a href="http://streaming.lxcluster.at:8000/live56.m3u">56 Kbps</a><br><a href="http://streaming.lxcluster.at:8000/live128.m3u">128 Kbps</a></td>
+//	</tr>	
+	
+	int res = regcomp(&regex,  
+			"<tr>\\s*<td>\\s*<a\\s+href=\"([^\"]*)\"><b>([^<]*)</b>\\s*</a>\\s*</td>\\s*"
+			"<td>([^<]*)</td>\\s*"
+			"<td>([^<]*)</td>\\s*"
+			"<td>([^<]|<[^/]|</[^t]|</t[^d])*</td>\\s*"
+			"<td>\\s*<a\\s+href=\"([^\"]*)\">([^<]*)</a>([^<]|<[^/]|</[^t]|</t[^d])*</td>\\s*"
+			"</tr>",
+			RE_ICASE | RE_DOT_NEWLINE | RE_DOT_NOT_NULL | RE_NO_BK_PARENS | RE_NO_BK_VBAR | 
+			RE_BACKSLASH_ESCAPE_IN_LISTS);
+
+	char* doc = (char*)data->Buffer();
+	off_t size;
+	data->GetSize(&size);
+	doc[size]=0;
+
+	while ((res = regexec(&regex, doc, 9, matches, 0)) == 0) {
+		doc[matches[1].rm_eo] = 0;
+		doc[matches[2].rm_eo] = 0;
+		doc[matches[3].rm_eo] = 0;
+		doc[matches[4].rm_eo] = 0;
+		doc[matches[6].rm_eo] = 0;
+		doc[matches[7].rm_eo] = 0;
+		printf("Station %s at %s in %s - %s address %s, data rate=%s, genre=%s\n", 
+				doc + matches[2].rm_so, 
+				doc + matches[1].rm_so, 
+				doc + matches[3].rm_so, 
+				doc + matches[4].rm_so, 
+				doc + matches[6].rm_so, 
+				doc + matches[7].rm_so,
+				searchFor);
+
+		Station* station = new Station(doc + matches[2].rm_so, NULL);
+		result->AddItem(station);
+		BString source(doc + matches[6].rm_so);
+		if (source.EndsWith(".pls") || source.EndsWith(".m3u")) {
+			station->SetSource(BUrl(source));
+			fPlsLookupList.AddItem(station);
+		} else
+			station->SetStreamUrl(BUrl(source));
+
+		for (int i = matches[7].rm_so; i < matches[7].rm_eo; i++)
+			if (!strchr("0123456789.", doc[i])) {
+				doc[i] = 0;
+				station->SetBitRate(atof(doc + matches[7].rm_so) * 1000);
+				break;
+			}
+
+		station->SetStation(doc + matches[1].rm_so);
+		station->SetGenre(searchFor);
+		BString country(doc + matches[4].rm_so);
+		country.Append(" - ");
+		country.Append(doc + matches[5].rm_so);
+		station->SetCountry(country);
+		doc += matches[0].rm_eo;
+	}
+	return result;
 }
 
 int32
