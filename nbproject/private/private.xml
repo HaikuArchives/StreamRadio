@@ -12,9 +12,17 @@
         <group>
             <file>file:/boot/home/projects/Haiku-Radio/StationFinder.h</file>
             <file>file:/boot/home/projects/Haiku-Radio/StationFinderListenLive.cpp</file>
-            <file>file:/boot/home/projects/Haiku-Radio/StationFinderRadioNetwork.cpp</file>
+            <file>file:/boot/home/projects/Haiku-Radio/Station.h</file>
             <file>file:/boot/home/projects/Haiku-Radio/StreamIO.h</file>
+            <file>file:/boot/home/projects/Haiku-Radio/Makefile</file>
+            <file>file:/boot/home/projects/Haiku-Radio/Station.cpp</file>
             <file>file:/boot/home/projects/Haiku-Radio/StationFinder.cpp</file>
+            <file>file:/boot/home/projects/Haiku-Radio/StationFinderRadioNetwork.h</file>
+            <file>file:/boot/home/projects/Haiku-Radio/RadioApp.cpp</file>
+            <file>file:/boot/home/projects/Haiku-Radio/StationFinderRadioNetwork.cpp</file>
+            <file>file:/boot/home/projects/Haiku-Radio/StationFinderListenLive.h</file>
+            <file>file:/boot/home/projects/Haiku-Radio/Utils.cpp</file>
+            <file>file:/boot/home/projects/Haiku-Radio/.gitignore</file>
             <file>file:/boot/home/projects/Haiku-Radio/HttpUtils.cpp</file>
             <file>file:/boot/home/projects/Haiku-Radio/StreamIO.cpp</file>
         </group>

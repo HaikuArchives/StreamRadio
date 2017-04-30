@@ -160,7 +160,6 @@ status_t Station::Save() {
     }
     stationInfo.SetType(MimePls);
     stationFile.Unset();
-    delete stationDir;
     return status;
 }
 
