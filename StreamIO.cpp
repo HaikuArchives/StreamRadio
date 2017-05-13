@@ -199,7 +199,6 @@ StreamIO::DataWithMetaReceived(BUrlRequest* request, const char* data, off_t pos
 			if (fUntilMetaEnd <= size) {
 				memcpy(fMetaBuffer + fMetaSize, (void*)data, fUntilMetaEnd);
 				data += fUntilMetaEnd;
-				position += fUntilMetaEnd;
 				size -= fUntilMetaEnd;
 				fMetaSize += fUntilMetaEnd;
 				fMetaBuffer[fMetaSize] = 0;
@@ -214,9 +213,8 @@ StreamIO::DataWithMetaReceived(BUrlRequest* request, const char* data, off_t pos
 				memcpy(fMetaBuffer + fMetaSize, (void*)data, size);
 				fMetaSize += size;
 				data += size;
-				size = 0;
-				position += size;
 				fUntilMetaEnd -= size;
+				size = 0;
 			}
 		} else {
 			DataFunc nextFunc = fDataFuncs.Item(next);
@@ -235,15 +233,13 @@ StreamIO::DataWithMetaReceived(BUrlRequest* request, const char* data, off_t pos
 					fUntilMetaStart = fMetaInt;
 					TRACE("Meta: Empty\n");
 				} else if (fUntilMetaEnd > 512) {
+					TRACE("Meta: Size of %" B_PRIdOFF " too large\n", fUntilMetaEnd);
 					fUntilMetaStart = fMetaInt;
 					fUntilMetaEnd = 0;
-					TRACE("Meta: Size of " B_PRIdOFF " too large\n");
 					data--;
-					position--;
 					size++;
 				}
 				data++;
-				position++;
 				size--;
 			}
 		}
