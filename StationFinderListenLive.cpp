@@ -135,6 +135,9 @@ StationFinderListenLive::RegisterSelf() {
 
 StationFinderListenLive::~StationFinderListenLive() {
 	fPlsLookupList.MakeEmpty(false);
+	status_t status;
+	if (fLookupThread)
+		wait_for_thread(fLookupThread, &status);
 }
 
 BObjectList<Station>* 

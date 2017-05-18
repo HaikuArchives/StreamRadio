@@ -8,6 +8,8 @@ Stations including all their attributes are saved as Shoutcast playlist files in
 Please report back any bugs at https://github.com/fishpond-haiku/Haiku-Radio/issues.
 
 Last Updates:
+- 0.0.3-14 Terminate worker threads in listenlive station finder
+- 0.0.3-13 Fix cases where meta-info spans two different http buffers
 - 0.0.3-12 Allow station searches with keywords predefined by station search service
 - 0.0.3-10 Enhanced search on listen.live, handle http redirects 
 - 0.0.3-9 Limit data provided for sniffing format - allows ogg stations to play, better handling of m3u references, retrieve more information from Radio Networks database, increased network timeout for higher stability

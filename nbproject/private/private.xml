@@ -5,26 +5,15 @@
     </code-assistance-data>
     <data xmlns="http://www.netbeans.org/ns/make-project-private/1">
         <activeConfTypeElem>0</activeConfTypeElem>
-        <activeConfIndexElem>0</activeConfIndexElem>
+        <activeConfIndexElem>1</activeConfIndexElem>
     </data>
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/boot/home/projects/Haiku-Radio/StationFinder.h</file>
-            <file>file:/boot/home/projects/Haiku-Radio/StationFinderListenLive.cpp</file>
-            <file>file:/boot/home/projects/Haiku-Radio/Station.h</file>
-            <file>file:/boot/home/projects/Haiku-Radio/StreamIO.h</file>
             <file>file:/boot/home/projects/Haiku-Radio/Makefile</file>
             <file>file:/boot/home/projects/Haiku-Radio/Station.cpp</file>
             <file>file:/boot/home/projects/Haiku-Radio/StationFinder.cpp</file>
-            <file>file:/boot/home/projects/Haiku-Radio/StationFinderRadioNetwork.h</file>
-            <file>file:/boot/home/projects/Haiku-Radio/RadioApp.cpp</file>
-            <file>file:/boot/home/projects/Haiku-Radio/StationFinderRadioNetwork.cpp</file>
-            <file>file:/boot/home/projects/Haiku-Radio/StationFinderListenLive.h</file>
-            <file>file:/boot/home/projects/Haiku-Radio/Utils.cpp</file>
-            <file>file:/boot/home/projects/Haiku-Radio/.gitignore</file>
-            <file>file:/boot/home/projects/Haiku-Radio/HttpUtils.cpp</file>
-            <file>file:/boot/home/projects/Haiku-Radio/StreamIO.cpp</file>
+            <file>file:/boot/home/projects/Haiku-Radio/PackageInfo</file>
         </group>
     </open-files>
 </project-private>

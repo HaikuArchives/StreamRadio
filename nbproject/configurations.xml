@@ -39,7 +39,7 @@
                    displayName="Important Files"
                    projectFiles="false"
                    kind="IMPORTANT_FILES_FOLDER">
-      <itemPath>/boot/home/projects/Radio/Makefile</itemPath>
+      <itemPath>/boot/home/projects/Haiku-Radio/Makefile</itemPath>
       <itemPath>/boot/home/projects/Radio/nbproject/private/launcher.properties</itemPath>
     </logicalFolder>
   </logicalFolder>
@@ -246,8 +246,8 @@
       </codeAssistance>
       <makefileType>
         <makeTool>
-          <buildCommandWorkingDir>/boot/home/projects/Radio</buildCommandWorkingDir>
-          <buildCommand>${MAKE} -f Makefile DEBUGGER=TRUE</buildCommand>
+          <buildCommandWorkingDir>/boot/home/projects/Haiku-Radio</buildCommandWorkingDir>
+          <buildCommand>${MAKE} -f Makefile "DEBUGGER=TRUE"</buildCommand>
           <cleanCommand>${MAKE} -f Makefile clean</cleanCommand>
           <executablePath>dist/Radio</executablePath>
           <ccTool>

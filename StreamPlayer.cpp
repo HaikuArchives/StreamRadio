@@ -173,11 +173,11 @@ StreamPlayer::StartPlayThreadFunc(StreamPlayer* _this) {
         delete _this->fPlayer;
         _this->fPlayer    = NULL;
 		_this->Unlock();
-        _this->setState(StreamPlayer::Stopped);
+        _this->setState(Stopped);
         return _this->fInitStatus;
     }
     
-    _this->setState(StreamPlayer::Playing);
+    _this->setState(Playing);
 	_this->Unlock();
     return _this->fStatus;
 }
