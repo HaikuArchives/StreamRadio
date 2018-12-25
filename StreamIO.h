@@ -79,6 +79,7 @@ private:
 	int									fLast;
 };
 
+using namespace BCodecKit;
 class StreamIO : public BAdapterIO, protected BUrlProtocolListener {
 public:
 										StreamIO(Station* station, 
