@@ -24,9 +24,9 @@
 #include "Station.h"
 #include "Debug.h"
 #include "StreamIO.h"
+#include "MediaIO.h"
 #define __USE_GNU
 #include <regex.h>
-
 
 #define HTTP_TIMEOUT 30000000
 
@@ -174,6 +174,7 @@ StreamIO::HeadersReceived(BUrlRequest* request, const BUrlResult& result) {
         fIsMutable = true;
 
     const char* sMetaInt = httpResult->Headers()["icy-metaint"];
+    icyName = httpResult->Headers()["icy-name"];
     if (sMetaInt) {
         fMetaInt = atoi(sMetaInt);
         fUntilMetaStart = fMetaInt;
@@ -310,8 +311,12 @@ StreamIO::ProcessMeta() {
 	while ((res = regexec(&regex, text, 3, matches, 0)) == 0) {
 		text[matches[1].rm_eo] = 0;
 		text[matches[2].rm_eo] = 0;
-		
-		msg->AddString(strlwr(text + matches[1].rm_so), text + matches[2].rm_so);
+		if (text + matches[2].rm_so && !(text + matches[2].rm_so)[0]) {
+			msg->AddString(strlwr(text + matches[1].rm_so), icyName);
+		}
+		else { 
+			msg->AddString(strlwr(text + matches[1].rm_so), text + matches[2].rm_so);
+		}
 		text += matches[0].rm_eo;
 	}
 	fMetaListener->PostMessage(msg);
@@ -319,3 +324,4 @@ StreamIO::ProcessMeta() {
 
 
 
+  

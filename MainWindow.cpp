@@ -28,9 +28,11 @@
 #include <Autolock.h>
 #include <ScrollView.h>
 #include <LayoutBuilder.h>
+#include <GroupLayout.h>
+#include <Dragger.h>
 
 MainWindow::MainWindow()
-  : BWindow(BRect(0,0,400,200), "Radio", B_DOCUMENT_WINDOW, B_WILL_ACCEPT_FIRST_CLICK),
+  : BWindow(BRect(0,0,400,200), "StreamRadio", B_DOCUMENT_WINDOW, B_WILL_ACCEPT_FIRST_CLICK),
     fStationFinder(NULL)
 {
 	fSettings = &((RadioApp*)be_app)->Settings;
@@ -56,7 +58,7 @@ MainWindow::MainWindow()
  	fStationPanel = new StationPanel(this);
 	fExpander = new Expander("expStationPanel", fStationPanel);			
 
-    BLayoutBuilder::Group<>(this, B_VERTICAL, 0)
+    BGroupLayout* layout = (BGroupLayout *)BLayoutBuilder::Group<>(this, B_VERTICAL, 0)
         .SetExplicitAlignment(BAlignment(B_ALIGN_USE_FULL_WIDTH, B_ALIGN_USE_FULL_HEIGHT))
         .Add(stationScroll, 1.0f)
 		.Add(fExpander, 0.0f)
@@ -265,7 +267,7 @@ void MainWindow::MessageReceived(BMessage* message) {
 }
 
 bool MainWindow::QuitRequested() {
-    fSettings->Save();
+	fSettings->Save();
     be_app->PostMessage(B_QUIT_REQUESTED);
     return true;
 }

@@ -52,7 +52,7 @@ void StationListViewItem::DrawItem(BView* owner, BRect frame, bool complete) {
     ownerList->FillRect(frame);
     
     owner->SetHighColor(ui_color(IsSelected() ? B_MENU_SELECTED_ITEM_TEXT_COLOR : B_MENU_ITEM_TEXT_COLOR));
-    owner->SetLowColor(ui_color(IsSelected() ? B_MENU_SELECTION_BACKGROUND_COLOR : B_MENU_BACKGROUND_COLOR));
+    owner->SetLowColor(ui_color(IsSelected() ? B_MENU_SELECTION_BACKGROUND_COLOR : ((index % 2) ? B_MENU_BACKGROUND_COLOR : B_DOCUMENT_BACKGROUND_COLOR)));
     if (BBitmap* logo = fStation->Logo()) {
         BRect target(SLV_INSET, SLV_INSET, SLV_HEIGHT - 2 * SLV_INSET, SLV_HEIGHT - 2 * SLV_INSET);
 	target.OffsetBy(frame.LeftTop());
