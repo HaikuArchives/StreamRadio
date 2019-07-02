@@ -5,7 +5,7 @@
 ## architecture of Haiku.
 
 # The name of the binary.
-NAME = Radio
+NAME = StreamRadio
 ARCH = $(shell getarch)
 
 V_MAJOR = 0
@@ -57,11 +57,11 @@ SRCS := About.cpp \
 
 #	Specify the resource definition files to use. Full or relative paths can be
 #	used.
-RDEFS = 
+RDEFS = Radio.rdef
 
 #	Specify the resource files to use. Full or relative paths can be used.
 #	Both RDEFS and RSRCS can be utilized in the same Makefile.
-RSRCS = Radio.rsrc
+RSRCS = 
 
 # End Pe/Eddie support.
 # @<-src@ 
@@ -92,6 +92,7 @@ LIBPATHS =
 #	"#include <header>". Directories that contain the files in SRCS are
 #	NOT auto-included here.
 SYSTEM_INCLUDE_PATHS = /boot/system/develop/headers/private/media \
+        /boot/system/develop/headers/os/codec \
         /boot/system/develop/headers/private/media/experimental \
         /boot/system/develop/headers/private/shared \
         /boot/system/develop/headers/libxml2 

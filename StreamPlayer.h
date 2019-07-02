@@ -9,6 +9,9 @@
 #define STREAMPLAYER_H
 //#include <MediaExtractor.h>
 //#include <DecoderPlugin.h>
+
+
+#include <MediaIO.h>
 #include <SoundPlayer.h>
 #include <MediaFile.h>
 #include "Station.h"

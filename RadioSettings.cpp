@@ -11,7 +11,7 @@
 
 #include "RadioSettings.h"
 
-const char* SettingsFileName = "Radio.settings";
+const char* SettingsFileName = "StreamRadio.settings";
 
 StationsList::StationsList() 
   : BObjectList<Station>() 

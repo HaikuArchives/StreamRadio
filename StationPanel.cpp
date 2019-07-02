@@ -50,7 +50,7 @@ StationPanel::StationPanel(MainWindow* mainWindow, bool expanded)
 	fVisitStation = new BButton("bnVisitStation", "", new BMessage(MSG_VISIT_STATION));
 	fVisitStation->SetIcon(Utils::ResourceBitmap(RES_BN_WEB));
 	fVolume = new BSlider("volume", NULL, new BMessage(MSG_CHG_VOLUME), 0, 100, B_VERTICAL);
-	fVolume->SetModificationMessage(fVolume->Message());
+//fVolume->SetModificationMessage(fVolume->Message());
 	BLayoutBuilder::Grid<>(this, 7, 3)
 		.SetInsets(B_USE_SMALL_INSETS)
 		.SetSpacing(B_USE_ITEM_SPACING, B_USE_SMALL_SPACING)
@@ -150,7 +150,7 @@ StationPanel::MessageReceived(BMessage* msg) {
             case MSG_CHG_VOLUME: {
                 StreamPlayer* player = fStationItem->Player();
                 if (player) {
-                        player->SetVolume(fVolume->Value() / 100.0);
+                       player->SetVolume(fVolume->Value() / 100.0);
                 }
                 break;
             }

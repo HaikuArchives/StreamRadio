@@ -146,6 +146,7 @@ private:
 	FrameSync							fFrameSync;
 	size_t								fLimit;
 	size_t								fBuffered;
+	const char*							icyName;
 };
 
 #endif /* STREAMIO_H */
