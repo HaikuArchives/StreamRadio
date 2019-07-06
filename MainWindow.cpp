@@ -173,6 +173,7 @@ void MainWindow::MessageReceived(BMessage* message) {
             if (station) {
                 fSettings->Stations->RemoveItem(station);
                 fStationList->Sync(fSettings->Stations);
+                fSettings->Stations->Save();
             }
             break;
         }
