@@ -10,6 +10,7 @@
 #include <File.h>
 
 #include "RadioSettings.h"
+#include "Debug.h"
 
 const char* SettingsFileName = "StreamRadio.settings";
 
@@ -70,9 +71,14 @@ StationsList::Load() {
 
 status_t 
 StationsList::Save() {
-    BEntry stationEntry;
+    status_t status;
     BDirectory* stationsDir = Station::StationDirectory();
-    while ((stationsDir->GetNextEntry(&stationEntry)) == B_OK) {
+    BEntry stationEntry;
+    
+    // Reset BDirectory so it returns all files
+    stationsDir->Rewind();
+    
+    while ((status = stationsDir->GetNextEntry(&stationEntry)) == B_OK) {
         stationEntry.Remove();
     }
     EachListItemIgnoreResult<Station, status_t>(this, &Station::Save);
