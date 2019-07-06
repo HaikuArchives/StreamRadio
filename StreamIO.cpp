@@ -21,12 +21,14 @@
  * 
  * Created on April 11, 2017, 10:21 PM
  */
+
 #include "Station.h"
 #include "Debug.h"
 #include "StreamIO.h"
 #include "MediaIO.h"
 #define __USE_GNU
 #include <regex.h>
+#include <NetworkAddressResolver.h>
 
 #define HTTP_TIMEOUT 30000000
 
@@ -45,9 +47,18 @@ StreamIO::StreamIO(Station* station, BLooper* MetaListener)
     fFrameSync(none),
 	fLimit(0),
 	fBuffered(0)
+	
 {
-    fReq = dynamic_cast<BHttpRequest*>(BUrlProtocolRoster::MakeRequest(station->StreamUrl(), this));
-
+	url = station->StreamUrl();
+    portStatus = StreamIO::CheckPort(url.Host(), url.Port());
+	if (portStatus != B_OK)
+    	return;
+    newUrl = ipAddress.ToString().Prepend("http://");
+    if (url.HasPath())
+    	newUrl.Append(url.Path());
+     	
+    fReq = dynamic_cast<BHttpRequest*>(BUrlProtocolRoster::MakeRequest(newUrl.String(), this));
+    
     BHttpHeaders* headers = new BHttpHeaders();
     headers->AddHeader("Icy-MetaData", 1);
     headers->AddHeader("Icy-Reset", 1);
@@ -57,8 +68,10 @@ StreamIO::StreamIO(Station* station, BLooper* MetaListener)
 	fReq->SetMaxRedirections(3);
     fInputAdapter = BuildInputAdapter();
 
-    if (*station->Mime() == "audio/mpeg" || *station->Mime() == "audio/aacp")
+    const char* mime = fStation->Mime()->Type();
+    if (!strcmp(mime, "audio/mpeg") || !strcmp(mime, "audio/aacp")) {
         fDataFuncs.Add(&StreamIO::DataUnsyncedReceived);
+    } 
 	
     fDataFuncs.Add(&StreamIO::DataSyncedReceived);
 }
@@ -170,8 +183,9 @@ StreamIO::HeadersReceived(BUrlRequest* request, const BUrlResult& result) {
     off_t size = result.Length();
     if (size > 0)
         BAdapterIO::SetSize(size);
-    else 
+    else {
         fIsMutable = true;
+    }
 
     const char* sMetaInt = httpResult->Headers()["icy-metaint"];
     icyName = httpResult->Headers()["icy-name"];
@@ -270,6 +284,7 @@ StreamIO::DataUnsyncedReceived(BUrlRequest* request, const char* data, off_t pos
 		} else 
 			fFrameSync = none;
 	}
+	
 	if (position + frameStart > 8192) {
 		MSG("No mp3 frame header encountered in first %" B_PRIuSIZE 
 				" bytes, giving up...", 
@@ -291,6 +306,11 @@ void
 StreamIO::RequestCompleted(BUrlRequest* request, bool success) {
 	fReqThread = -1;
 }
+
+//void
+//StreamIO::DebugMessage(BUrlRequest* caller, BUrlProtocolDebugMessage type, const char* text) {
+//	MSG("Debug: %s\n", text);
+//}
 
 void
 StreamIO::ProcessMeta() {
@@ -322,6 +342,31 @@ StreamIO::ProcessMeta() {
 	fMetaListener->PostMessage(msg);
 }
 
-
-
-  
+status_t
+StreamIO::CheckPort(const char* host, uint16 port, uint32 flags) {
+	  
+    BReference<const BNetworkAddressResolver> resolver = BNetworkAddressResolver::Resolve(host, port, flags);
+    if (resolver.Get() == NULL)
+    	return B_NO_MEMORY;
+    status_t status = resolver->InitCheck();
+    if (status != B_OK) {
+    	return status;
+    }
+    
+    uint32 cookie = 0;
+    status_t portStatus = B_ERROR;
+    while (portStatus != B_OK)
+    {
+    	status = resolver->GetNextAddress(AF_INET6, &cookie, ipAddress);
+    	if (status != B_OK) {
+    		status = resolver->GetNextAddress(&cookie, ipAddress);
+    		if (status != B_OK)
+    			return status;
+    	}
+    	delete fSocket;
+    	fSocket = new(std::nothrow) BSocket();
+    	portStatus = fSocket->Connect(ipAddress);
+    }
+    return B_OK;
+}
+    
