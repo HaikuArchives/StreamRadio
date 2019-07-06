@@ -90,7 +90,6 @@ StreamPlayer::StartPlayThreadFunc(StreamPlayer* _this) {
     _this->setState(Buffering);
 	_this->fStopRequested = false;
 	_this->fStream->SetLimiter(0x40000);
-	
 	_this->fMediaFile = new (std::nothrow) BMediaFile(_this->fStream);
 	_this->fInitStatus = _this->fMediaFile->InitCheck();
     if (_this->fInitStatus != B_OK) 
