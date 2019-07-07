@@ -12,6 +12,7 @@
 #include <HttpRequest.h>
 #include <Url.h>
 #include <StringList.h>
+#include <Socket.h>
 
 class HttpRequest : public BHttpRequest {
 public:
@@ -28,6 +29,7 @@ public:
 
 class HttpUtils {
 public:
+	static status_t			CheckPort(BUrl url, BUrl* newUrl, uint32 flags = 0);
     static BMallocIO*       GetAll(BUrl url, BHttpHeaders* returnHeaders = NULL, bigtime_t timeOut=3000, BString* contentType = NULL, size_t sizeLimit = 0);
     static status_t         GetStreamHeader(BUrl url, BHttpHeaders* headers);
 };

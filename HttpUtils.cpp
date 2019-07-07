@@ -5,7 +5,10 @@
  * Created on 12. Oktober 2015, 23:14
  */
 
+#include <NetworkAddressResolver.h>
+
 #include "HttpUtils.h"
+#include "Debug.h"
 
 class HttpIOReader : public BUrlProtocolListener {
 public:
@@ -84,6 +87,47 @@ private:
     ssize_t             fSize;
     off_t               fPos;
 };
+
+/**
+ * Loops on the DNS responses looking for connectivity on specified port.
+ */
+status_t
+HttpUtils::CheckPort(BUrl url, BUrl* newUrl, uint32 flags) {
+	  
+    BReference<const BNetworkAddressResolver> resolver = BNetworkAddressResolver::Resolve(url.Host(), url.Port(), flags);
+    if (resolver.Get() == NULL)
+    	return B_NO_MEMORY;
+    status_t status = resolver->InitCheck();
+    MSG("HEU!\n");
+    if (status != B_OK)
+    	return status;
+     
+    BString newUrlString;
+    BNetworkAddress ipAddress;
+    BSocket* socket;
+    uint32 cookie = 0;
+    status_t portStatus = B_ERROR;
+    while (portStatus != B_OK)
+    {
+    	status = resolver->GetNextAddress(AF_INET6, &cookie, ipAddress);
+    	if (status != B_OK) {
+    		status = resolver->GetNextAddress(&cookie, ipAddress);
+    		if (status != B_OK)
+    			return status;
+    	}
+    	//delete socket;
+    	socket = new(std::nothrow) BSocket();
+    	portStatus = socket->Connect(ipAddress);
+    }
+    
+	newUrlString = ipAddress.ToString().Prepend("http://");
+    if (url.HasPath())
+    	newUrlString.Append(url.Path());	
+    newUrl->SetUrlString(newUrlString.String());
+    MSG("URL: %s\n", newUrl->UrlString().String());
+    return B_OK;
+}    
+	
 
 /**
  * Helper to make Http request and return body
