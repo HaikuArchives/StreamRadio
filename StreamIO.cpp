@@ -26,6 +26,7 @@
 #include "Debug.h"
 #include "StreamIO.h"
 #include "MediaIO.h"
+#include "HttpUtils.h"
 #define __USE_GNU
 #include <regex.h>
 #include <NetworkAddressResolver.h>
@@ -49,15 +50,13 @@ StreamIO::StreamIO(Station* station, BLooper* MetaListener)
 	fBuffered(0)
 	
 {
-	url = station->StreamUrl();
-    portStatus = StreamIO::CheckPort(url.Host(), url.Port());
+	BUrl url = station->StreamUrl();
+	BUrl* newUrl = new BUrl();
+    status_t portStatus = HttpUtils::CheckPort(url, newUrl);
 	if (portStatus != B_OK)
     	return;
-    newUrl = ipAddress.ToString().Prepend("http://");
-    if (url.HasPath())
-    	newUrl.Append(url.Path());
-     	
-    fReq = dynamic_cast<BHttpRequest*>(BUrlProtocolRoster::MakeRequest(newUrl.String(), this));
+    
+    fReq = dynamic_cast<BHttpRequest*>(BUrlProtocolRoster::MakeRequest(newUrl->UrlString().String(), this));
     
     BHttpHeaders* headers = new BHttpHeaders();
     headers->AddHeader("Icy-MetaData", 1);
@@ -74,6 +73,7 @@ StreamIO::StreamIO(Station* station, BLooper* MetaListener)
     } 
 	
     fDataFuncs.Add(&StreamIO::DataSyncedReceived);
+    delete newUrl;
 }
 
 StreamIO::~StreamIO() {
@@ -341,32 +341,3 @@ StreamIO::ProcessMeta() {
 	}
 	fMetaListener->PostMessage(msg);
 }
-
-status_t
-StreamIO::CheckPort(const char* host, uint16 port, uint32 flags) {
-	  
-    BReference<const BNetworkAddressResolver> resolver = BNetworkAddressResolver::Resolve(host, port, flags);
-    if (resolver.Get() == NULL)
-    	return B_NO_MEMORY;
-    status_t status = resolver->InitCheck();
-    if (status != B_OK) {
-    	return status;
-    }
-    
-    uint32 cookie = 0;
-    status_t portStatus = B_ERROR;
-    while (portStatus != B_OK)
-    {
-    	status = resolver->GetNextAddress(AF_INET6, &cookie, ipAddress);
-    	if (status != B_OK) {
-    		status = resolver->GetNextAddress(&cookie, ipAddress);
-    		if (status != B_OK)
-    			return status;
-    	}
-    	delete fSocket;
-    	fSocket = new(std::nothrow) BSocket();
-    	portStatus = fSocket->Connect(ipAddress);
-    }
-    return B_OK;
-}
-    

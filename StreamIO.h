@@ -125,9 +125,6 @@ protected:
 	//										const char* text);
 	void								UpdateSize();
 	void								ProcessMeta();
-	status_t							CheckPort(const char* host,
-											uint16 port,
-											uint32 flags = 0);
 private:
 	DataFuncs							fDataFuncs;
 	Station*							fStation;
@@ -154,11 +151,6 @@ private:
 	size_t								fLimit;
 	size_t								fBuffered;
 	const char*							icyName;
-	BNetworkAddress						ipAddress;
-	BUrl								url;
-	BString								newUrl;
-	status_t							portStatus;
-	BSocket*							fSocket;
 	
 };
 
