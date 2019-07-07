@@ -180,8 +180,14 @@ status_t Station::RetrieveStreamUrl() {
 
 status_t Station::Probe() {
     BHttpHeaders headers;
+    BUrl* resolvedUrl = new BUrl();
+	status_t resolveStatus;
 	BString contentType("audio/*, application/*");
-    BMallocIO* buffer = HttpUtils::GetAll(fStreamUrl, &headers, 2 * 1000 * 1000, &contentType, 4096);
+	resolveStatus = HttpUtils::CheckPort(fStreamUrl, resolvedUrl);
+	if (resolveStatus != B_OK)
+		return B_ERROR;
+	MSG("Resolved URL: %s\n", resolvedUrl->UrlString().String());
+    BMallocIO* buffer = HttpUtils::GetAll(*resolvedUrl, &headers, 2 * 1000 * 1000, &contentType, 4096);
 #ifdef DEBUGGING
     for (int i=0; i < headers.CountHeaders(); i++) {
         TRACE("Header: %s\r\n", headers.HeaderAt(i).Header());
@@ -189,10 +195,12 @@ status_t Station::Probe() {
 #endif
     if (buffer == NULL) {
 		fFlags &= !STATION_URI_VALID;
+		MSG("Buffer NULL\n");
 		return B_ERROR;
 	}
 	if (headers.CountHeaders() == 0) {
 		fFlags &= !STATION_URI_VALID;
+		MSG("No headers\n");
 		return B_TIMED_OUT;
 	}
 
