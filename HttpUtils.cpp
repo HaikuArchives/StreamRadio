@@ -98,7 +98,6 @@ HttpUtils::CheckPort(BUrl url, BUrl* newUrl, uint32 flags) {
     if (resolver.Get() == NULL)
     	return B_NO_MEMORY;
     status_t status = resolver->InitCheck();
-    MSG("HEU!\n");
     if (status != B_OK)
     	return status;
      
@@ -115,16 +114,15 @@ HttpUtils::CheckPort(BUrl url, BUrl* newUrl, uint32 flags) {
     		if (status != B_OK)
     			return status;
     	}
-    	//delete socket;
-    	socket = new(std::nothrow) BSocket();
+       	socket = new(std::nothrow) BSocket();
     	portStatus = socket->Connect(ipAddress);
+    	delete socket;
     }
     
 	newUrlString = ipAddress.ToString().Prepend("http://");
     if (url.HasPath())
     	newUrlString.Append(url.Path());	
     newUrl->SetUrlString(newUrlString.String());
-    MSG("URL: %s\n", newUrl->UrlString().String());
     return B_OK;
 }    
 	

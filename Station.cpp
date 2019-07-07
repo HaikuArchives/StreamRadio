@@ -188,6 +188,7 @@ status_t Station::Probe() {
 		return B_ERROR;
 	MSG("Resolved URL: %s\n", resolvedUrl->UrlString().String());
     BMallocIO* buffer = HttpUtils::GetAll(*resolvedUrl, &headers, 2 * 1000 * 1000, &contentType, 4096);
+    delete resolvedUrl;
 #ifdef DEBUGGING
     for (int i=0; i < headers.CountHeaders(); i++) {
         TRACE("Header: %s\r\n", headers.HeaderAt(i).Header());
