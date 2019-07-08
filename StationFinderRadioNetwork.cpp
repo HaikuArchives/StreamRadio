@@ -87,12 +87,10 @@ StationFinderRadioNetwork::FindBy(int capabilityIndex, const char* searchFor,
 						station->SetBitRate(kbitRate * 1000);
 					}
                 }
-                if (station->Source().Path().EndsWith(".pls") || 
-						station->Source().Path().EndsWith(".m3u") || 
-						station->Source().Path().EndsWith(".m3u8"))
-                    station->RetrieveStreamUrl();
-                else 
-                    station->SetStreamUrl((const BUrl)station->Source());
+                // Set source URL as stream URL
+                // If the source is a playlist, this setting will be overriding
+                // when probing the station.
+                station->SetStreamUrl((const BUrl)station->Source());
                 result->AddItem(station);
             }
         }
