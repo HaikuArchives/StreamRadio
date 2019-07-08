@@ -181,12 +181,17 @@ status_t Station::RetrieveStreamUrl() {
 status_t Station::Probe() {
     BHttpHeaders headers;
     BUrl* resolvedUrl = new BUrl();
-	status_t resolveStatus;
-	BString contentType("audio/*, application/*");
-	resolveStatus = HttpUtils::CheckPort(fStreamUrl, resolvedUrl);
+	BString contentType("audio/*");
+	
+	// If source URL is a playlist, retrieve the actual stream URL
+	if (fSource.Path().EndsWith(".pls") || 
+						fSource.Path().EndsWith(".m3u") || 
+						fSource.Path().EndsWith(".m3u8"))
+                    RetrieveStreamUrl();
+	
+	status_t resolveStatus = HttpUtils::CheckPort(fStreamUrl, resolvedUrl);
 	if (resolveStatus != B_OK)
 		return B_ERROR;
-	MSG("Resolved URL: %s\n", resolvedUrl->UrlString().String());
     BMallocIO* buffer = HttpUtils::GetAll(*resolvedUrl, &headers, 2 * 1000 * 1000, &contentType, 4096);
     delete resolvedUrl;
 #ifdef DEBUGGING

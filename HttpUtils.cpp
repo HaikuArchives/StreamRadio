@@ -40,10 +40,13 @@ public:
 
         fData->Write(data, size);
 		if (fLimit) {
-			if (fLimit < size) 
+			// Was fLimit < size, which could lead to fLimit = 0 and an endless loop
+			if (fLimit <= size) 
 				caller->Stop();
-			else
+			else {
 				fLimit -= size;
+			}
+				
 		}
     }
 private:
@@ -93,8 +96,14 @@ private:
  */
 status_t
 HttpUtils::CheckPort(BUrl url, BUrl* newUrl, uint32 flags) {
+	
+	uint16 port;
+	if (url.HasPort())
+		port = url.Port();
+	else
+		port = 80;
 	  
-    BReference<const BNetworkAddressResolver> resolver = BNetworkAddressResolver::Resolve(url.Host(), url.Port(), flags);
+    BReference<const BNetworkAddressResolver> resolver = BNetworkAddressResolver::Resolve(url.Host(), port, flags);
     if (resolver.Get() == NULL)
     	return B_NO_MEMORY;
     status_t status = resolver->InitCheck();
@@ -147,7 +156,7 @@ BMallocIO* HttpUtils::GetAll(BUrl url, BHttpHeaders* responseHeaders, bigtime_t 
     request.SetFollowLocation(true);
     request.SetTimeout(timeOut);
     thread_id threadId = request.Run();
-    status_t status = B_OK;
+    status_t status;
     wait_for_thread(threadId, &status);
     int32 statusCode = request.Result().StatusCode();
     size_t bufferLen = data->BufferLength();
