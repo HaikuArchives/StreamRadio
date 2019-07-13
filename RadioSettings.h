@@ -22,7 +22,7 @@ public:
     bool						RemoveItem(BString* StationName);
     Station*					FindItem(BString* Name);
     status_t					Load();
-    status_t					Save();
+    void						Save();
 };
 
 class RadioSettings : private BMessage {
