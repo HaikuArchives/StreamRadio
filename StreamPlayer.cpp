@@ -59,14 +59,13 @@ StreamPlayer::Play() {
 	switch(fState) {
 	case Playing:
 	case Buffering:
-		return B_OK;
 		break;
 	case Stopped:
 		thread_id playThreadId = spawn_thread((thread_func)StreamPlayer::StartPlayThreadFunc, fStation->Name()->String(), B_NORMAL_PRIORITY, this);
 		resume_thread(playThreadId);
 		break;
 	}
-    
+	return B_OK;
 }
 
 #ifdef DEBUG
@@ -204,9 +203,9 @@ StreamPlayer::Stop() {
 		break;
 	case Stopped:
 		case StreamPlayer::InActive:
-		return B_OK;
 		break;
 	}
+	return B_OK;
 }
 
 void 
