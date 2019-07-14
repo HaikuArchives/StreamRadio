@@ -13,6 +13,7 @@
 #include <libxml/tree.h>
 #include "HttpUtils.h"
 #include "StationFinderListenLive.h"
+#include "Debug.h"
 
 IconLookup::IconLookup(Station* station, BUrl iconUrl) 
   : fStation(station),
@@ -52,8 +53,9 @@ StationFinderRadioNetwork::FindBy(int capabilityIndex, const char* searchFor,
     fIconLookupNotify = resultUpdateTarget;
     BObjectList<Station>* result = new BObjectList<Station>();
     BString urlString(baseUrl);
-	searchFor = BUrl::UrlEncode(searchFor, true, true);
-    urlString << searchFor;
+	BString searchForString(searchFor);
+	searchForString = BUrl::UrlEncode(searchForString, true, true);
+    urlString.Append(searchForString);
     BUrl url(urlString);
     BMallocIO* data = HttpUtils::GetAll(url);
     if (data) {

@@ -66,10 +66,11 @@ StationsList::Load() {
         if (station && FindItem(station->Name()) == NULL)
             AddItem(station);
     }
+    return B_OK;
 }
 
 
-status_t 
+void 
 StationsList::Save() {
     status_t status;
     BDirectory* stationsDir = Station::StationDirectory();

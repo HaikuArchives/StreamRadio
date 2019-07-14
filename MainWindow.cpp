@@ -205,7 +205,8 @@ void MainWindow::MessageReceived(BMessage* message) {
 		case MSG_INVOKE_STATION : {
             int32 stationIndex = message->GetInt32("index", -1);
             StationListViewItem* stationItem = fStationList->ItemAt(stationIndex);
-			TogglePlay(stationItem);
+            if (stationItem)
+				TogglePlay(stationItem);
             break;
         }
         

@@ -53,7 +53,7 @@ public:
 											  for (int i = 0; i < fSize; i++)
 												  fFuncs[i] = NULL;
 										};
-	int									Add(DataFunc f) {
+	void								Add(DataFunc f) {
 											fFuncs[++fLast] = f;
 										}
 	void								Add(DataFunc f, int before) {
@@ -62,7 +62,7 @@ public:
 											fFuncs[before] = f;
 											fLast++;
 										};
-	DataFunc							Remove(int index) {
+	void								Remove(int index) {
 											DataFunc result = fFuncs[index];
 											for (int i = index; i < fLast; i++) 
 												fFuncs[i] = fFuncs[i + 1];
