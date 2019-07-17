@@ -25,7 +25,11 @@
 #include "StationFinderListenLive.h"
 #define __USE_GNU
 #include <regex.h>
+#include <Catalog.h>
 #include "Debug.h"
+
+#undef B_TRANSLATION_CONTEXT
+#define B_TRANSLATION_CONTEXT "StationFinderListenLive"
 
 
 const char* genreList =
@@ -101,7 +105,7 @@ StationFinderListenLive::StationFinderListenLive()
 	fLookupThread(0),
     fPlsLookupList()
 {
-    serviceName.SetTo("listenlive.eu [experimental]");
+    serviceName.SetTo(B_TRANSLATE("listenlive.eu [experimental]"));
     serviceHomePage.SetUrlString("http://www.listenlive.eu/");
 	BString tmp(countryList);
 	tmp.Split("\r", true, countryKeywordAndPath);
@@ -216,7 +220,7 @@ StationFinderListenLive::ParseCountryReturn(BMallocIO* data, const char* searchF
 		doc[matches[5].rm_eo] = 0;
 		doc[matches[6].rm_eo] = 0;
 		doc[matches[8].rm_eo] = 0;
-		printf("Station %s at %s in %s address %s, data rate=%s, genre=%s\n", 
+		printf(B_TRANSLATE("Station %s at %s in %s address %s, data rate=%s, genre=%s\n"), 
 				doc + matches[2].rm_so, 
 				doc + matches[1].rm_so, 
 				doc + matches[3].rm_so, 
@@ -297,7 +301,7 @@ StationFinderListenLive::ParseGenreReturn(BMallocIO* data, const char* searchFor
 		doc[matches[4].rm_eo] = 0;
 		doc[matches[6].rm_eo] = 0;
 		doc[matches[7].rm_eo] = 0;
-		printf("Station %s at %s in %s - %s address %s, data rate=%s, genre=%s\n", 
+		printf(B_TRANSLATE("Station %s at %s in %s - %s address %s, data rate=%s, genre=%s\n"), 
 				doc + matches[2].rm_so, 
 				doc + matches[1].rm_so, 
 				doc + matches[3].rm_so, 
@@ -338,7 +342,7 @@ StationFinderListenLive::PlsLookupFunc(void* data) {
     StationFinderListenLive* _this = (StationFinderListenLive*)data;
     while (!_this->fPlsLookupList.IsEmpty()) {
 	Station* station = _this->fPlsLookupList.FirstItem();
-	TRACE("Looking up stream URL for station %s in %s\n", 
+	TRACE(B_TRANSLATE("Looking up stream URL for station %s in %s\n"), 
 			station->Name()->String(), 
 			station->Source().UrlString().String());
 	Station* plsStation = Station::LoadIndirectUrl((BString&)station->Source().UrlString());

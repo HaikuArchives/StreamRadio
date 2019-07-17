@@ -22,6 +22,7 @@
  * Created on March 20, 2017, 4:11 PM
  */
 
+#include <Catalog.h>
 #include <TranslationUtils.h>
 #include <Bitmap.h>
 #include <StringView.h>
@@ -34,8 +35,11 @@
 #include "About.h"
 #include "Utils.h"
 
+#undef B_TRANSLATION_CONTEXT
+#define B_TRANSLATION_CONTEXT "About"
+
 About::About() 
-  : BWindow(BRect(0, 0, 180, 50), "About", B_TITLED_WINDOW, B_NOT_ZOOMABLE | B_NOT_RESIZABLE) 
+  : BWindow(BRect(0, 0, 180, 50), B_TRANSLATE("About"), B_TITLED_WINDOW, B_NOT_ZOOMABLE | B_NOT_RESIZABLE) 
 {
     BRect bounds = Bounds();
     BStringView* versionView = new BStringView(bounds, "versionView", GetAppVersion(), B_FOLLOW_LEFT_RIGHT | B_FOLLOW_BOTTOM);

@@ -1,0 +1,41 @@
+1	English	application/x-vnd.StreamRadio	4021813946
+A directory for saving stations has been created in your settings folder. Link this directory to your deskbar menu to play stations directly.	Station		A directory for saving stations has been created in your settings folder. Link this directory to your deskbar menu to play stations directly.
+Service	StationFinder		Service
+Added station %s to list	MainWindow		Added station %s to list
+About	MainWindow		About
+Stations directory created	Station		Stations directory created
+Add Station Failed	StationFinder		Add Station Failed
+Unknown station	MainWindow		Unknown station
+Quit	MainWindow		Quit
+File %s could not be loaded as a station	MainWindow		File %s could not be loaded as a station
+Now playing %s	MainWindow		Now playing %s
+%s now plays %s	MainWindow		%s now plays %s
+Failed playing station %s: %s	MainWindow		Failed playing station %s: %s
+Search for	StationFinder		Search for
+Station %s did not respond correctly and could not be added	StationFinder		Station %s did not respond correctly and could not be added
+Station %s at %s in %s - %s address %s, data rate=%s, genre=%s\n	StationFinderListenLive		Station %s at %s in %s - %s address %s, data rate=%s, genre=%s\n
+listenlive.eu [experimental]	StationFinderListenLive		listenlive.eu [experimental]
+failed	MainWindow		failed
+Add	StationFinder		Add
+Search	MainWindow		Search
+StreamRadio	System name		StreamRadio
+successful	MainWindow		successful
+Station URL	StationPanel		Station URL
+Search by	StationFinder		Search by
+Usage: Radio <filename>\n<filename> should be a Shoutcast playlist file.\nIf the station already exists, it is made to play otherwise it is added.\n	RadioApp		Usage: Radio <filename>\n<filename> should be a Shoutcast playlist file.\nIf the station already exists, it is made to play otherwise it is added.\n
+Ok	StationFinder		Ok
+Genre	StationPanel		Genre
+Stream URL	StationPanel		Stream URL
+Edit	MainWindow		Edit
+Check Station	MainWindow		Check Station
+File	MainWindow		File
+Paste Shoutcast URL	MainWindow		Paste Shoutcast URL
+Find Stations	StationFinder		Find Stations
+Name	StationPanel		Name
+Remove	MainWindow		Remove
+Station %s at %s in %s address %s, data rate=%s, genre=%s\n	StationFinderListenLive		Station %s at %s in %s address %s, data rate=%s, genre=%s\n
+Probing station %s %s	MainWindow		Probing station %s %s
+About	About		About
+Radio Network	StationFinderRadioNetwork		Radio Network
+unknown title	MainWindow		unknown title
+Ok	Station		Ok

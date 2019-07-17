@@ -5,6 +5,7 @@
  * Created on January 25, 2016, 6:49 PM
  */
 
+#include <Catalog.h>
 #include <MediaDecoder.h>
 #include <MediaFile.h>
 #include <MediaTrack.h>
@@ -16,6 +17,9 @@
 #define milliseconds * 1000
 #define seconds * 1000 milliseconds
 
+#undef B_TRANSLATION_CONTEXT
+#define B_TRANSLATION_CONTEXT "StreamPlayer"
+
 StreamPlayer::StreamPlayer(Station* station, BLooper* Notify) 
   : BLocker(),
 	fStation(station),
@@ -25,7 +29,7 @@ StreamPlayer::StreamPlayer(Station* station, BLooper* Notify)
     fPlayer(NULL),
     fState(Stopped)
 {
-    TRACE("Trying to set player for stream %s\n", station->StreamUrl().UrlString().String());
+    TRACE(B_TRANSLATE("Trying to set player for stream %s\n"), station->StreamUrl().UrlString().String());
 	
 	fStream = new (std::nothrow) StreamIO(station, Notify);
 	fInitStatus = fStream->Open();
@@ -139,7 +143,7 @@ StreamPlayer::StartPlayThreadFunc(StreamPlayer* _this) {
 		return _this->fInitStatus;
 	}
 
-	TRACE("Found stream with %ld channels with %f Hz\n", 
+	TRACE(B_TRANSLATE("Found stream with %ld channels with %f Hz\n"), 
 	    _this->fDecodedFormat.u.raw_audio.channel_count,
 	    _this->fDecodedFormat.u.raw_audio.frame_rate);
 	

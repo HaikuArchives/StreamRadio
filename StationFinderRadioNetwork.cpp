@@ -9,11 +9,15 @@
 #include <HttpRequest.h>
 #include <HttpResult.h>
 #include <DataIO.h>
+#include <Catalog.h>
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include "HttpUtils.h"
 #include "StationFinderListenLive.h"
 #include "Debug.h"
+
+#undef B_TRANSLATION_CONTEXT
+#define B_TRANSLATION_CONTEXT "StationFinderRadioNetwork"
 
 IconLookup::IconLookup(Station* station, BUrl iconUrl) 
   : fStation(station),
@@ -25,7 +29,7 @@ StationFinderRadioNetwork::StationFinderRadioNetwork()
     fIconLookupThread(0),
     fIconLookupList()
 {
-    serviceName.SetTo("Radio Network");
+    serviceName.SetTo(B_TRANSLATE("Radio Network"));
     serviceHomePage.SetUrlString("http://www.radio-browser.info");
 	RegisterSearchCapability("Keyword");
 }

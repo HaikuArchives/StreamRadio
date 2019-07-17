@@ -5,9 +5,13 @@
 #include <TranslationUtils.h>
 #include <View.h>
 #include <Alert.h>
+#include <Catalog.h>
 #include "HttpUtils.h"
 #include "RadioApp.h"
 #include "Utils.h"
+
+#undef B_TRANSLATION_CONTEXT
+#define B_TRANSLATION_CONTEXT "StationFinder"
 
 StationFinderServices::~StationFinderServices() {
 	fServices.clear();
@@ -129,7 +133,7 @@ StationFinderService::RegisterSearchCapability(char* name, char* keywords, char*
 }
 
 StationFinderWindow::StationFinderWindow(BWindow* parent) 
-  : BWindow(BRect(0,0,300,150), "Find Stations", B_TITLED_WINDOW, B_CLOSE_ON_ESCAPE),
+  : BWindow(BRect(0,0,300,150), B_TRANSLATE("Find Stations"), B_TITLED_WINDOW, B_CLOSE_ON_ESCAPE),
 	currentService(NULL)
 {
     messenger   = new BMessenger(parent);
@@ -158,18 +162,18 @@ StationFinderWindow::StationFinderWindow(BWindow* parent)
 	ddSearchBy  = new BOptionPopUp("ddSearchBy", NULL, new BMessage(MSG_SEARCH_BY));
     resultView  = new StationListView();
     resultView->SetExplicitAlignment(BAlignment(B_ALIGN_USE_FULL_WIDTH, B_ALIGN_USE_FULL_HEIGHT));
-    bnAdd       = new BButton("bnAdd", "Add", new BMessage(MSG_ADD_STATION));
+    bnAdd       = new BButton("bnAdd", B_TRANSLATE("Add"), new BMessage(MSG_ADD_STATION));
     BLayoutBuilder::Group<>(this, B_VERTICAL, 0)
         .AddGrid(3, 3, 0.0)
             .SetInsets(B_USE_WINDOW_INSETS)
-            .Add(new BStringView("lbServices", "Service"), 0, 0)
+            .Add(new BStringView("lbServices", B_TRANSLATE("Service")), 0, 0)
             .Add(ddServices, 1, 0)
 		    .Add(bnVisit, 2, 0)
 			
-			.Add(new BStringView("lbSearchBy", "Search by"), 0, 1)
+			.Add(new BStringView("lbSearchBy", B_TRANSLATE("Search by")), 0, 1)
 			.Add(ddSearchBy, 1, 1)
 			
-			.Add(new BStringView("lbSearchFor", "Search for"), 0, 2)
+			.Add(new BStringView("lbSearchFor", B_TRANSLATE("Search for")), 0, 2)
 			.Add(txSearch, 1, 2)
 			.Add(kwSearch, 1, 2)
             .Add(bnSearch, 2, 2) 
@@ -240,9 +244,9 @@ void StationFinderWindow::MessageReceived(BMessage* msg) {
                     }
                 } else {
 					BString msg;
-					msg.SetToFormat("Station %s did not respond correctly and could not be added", 
+					msg.SetToFormat(B_TRANSLATE("Station %s did not respond correctly and could not be added"), 
 							station->Name()->String());
-					(new BAlert("Add Station Failed", msg, "Ok"))->Go();
+					(new BAlert(B_TRANSLATE("Add Station Failed"), msg, B_TRANSLATE("Ok")))->Go();
 				}
             }
             break;

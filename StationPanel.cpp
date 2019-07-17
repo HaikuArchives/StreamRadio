@@ -30,7 +30,11 @@
 #include <Layout.h>
 #include <LayoutBuilder.h>
 #include <TranslationUtils.h>
+#include <Catalog.h>
 #include "MainWindow.h"
+
+#undef B_TRANSLATION_CONTEXT
+#define B_TRANSLATION_CONTEXT "StationPanel"
 
 
 StationPanel::StationPanel(MainWindow* mainWindow, bool expanded)
@@ -43,10 +47,10 @@ StationPanel::StationPanel(MainWindow* mainWindow, bool expanded)
 	fLogo = new BView("logo", B_WILL_DRAW);
 	fLogo->SetExplicitSize(BSize(96, 96));
 	fLogo->SetViewColor(tint_color(ui_color(B_PANEL_BACKGROUND_COLOR), B_DARKEN_2_TINT));
-	fName = new BTextControl("name", "Name", "-", new BMessage(MSG_CHG_NAME));
-	fUrl  = new BTextControl("url", "Stream URL", "-", new BMessage(MSG_CHG_STREAMURL));
-	fGenre = new BTextControl("genre", "Genre", "-", new BMessage(MSG_CHG_GENRE));
-	fStationUrl  = new BTextControl("surl", "Station URL", "-", new BMessage(MSG_CHG_STATIONURL));
+	fName = new BTextControl("name", B_TRANSLATE("Name"), "-", new BMessage(MSG_CHG_NAME));
+	fUrl  = new BTextControl("url", B_TRANSLATE("Stream URL"), "-", new BMessage(MSG_CHG_STREAMURL));
+	fGenre = new BTextControl("genre", B_TRANSLATE("Genre"), "-", new BMessage(MSG_CHG_GENRE));
+	fStationUrl  = new BTextControl("surl", B_TRANSLATE("Station URL"), "-", new BMessage(MSG_CHG_STATIONURL));
 	fVisitStation = new BButton("bnVisitStation", "", new BMessage(MSG_VISIT_STATION));
 	fVisitStation->SetIcon(Utils::ResourceBitmap(RES_BN_WEB));
 	fVolume = new BSlider("volume", NULL, new BMessage(MSG_CHG_VOLUME), 0, 100, B_VERTICAL);

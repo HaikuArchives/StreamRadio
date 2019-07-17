@@ -30,10 +30,13 @@
 #include <TranslationUtils.h>
 #include <MediaFile.h>
 #include <MediaTrack.h>
+#include <Catalog.h>
 #include "Station.h"
 #include "HttpUtils.h"
 #include "Debug.h"
 
+#undef B_TRANSLATION_CONTEXT
+#define B_TRANSLATION_CONTEXT "Station"
 
 const char* SubDirStations = "Stations";    
 const char* MimePls = "audio/x-scpls";
@@ -201,12 +204,10 @@ status_t Station::Probe() {
 #endif
     if (buffer == NULL) {
 		fFlags &= !STATION_URI_VALID;
-		MSG("Buffer NULL\n");
 		return B_ERROR;
 	}
 	if (headers.CountHeaders() == 0) {
 		fFlags &= !STATION_URI_VALID;
-		MSG("No headers\n");
 		return B_TIMED_OUT;
 	}
 
@@ -542,11 +543,11 @@ BDirectory* Station::StationDirectory() {
     } else {
         fStationsDirectory = new BDirectory();
         configDir.CreateDirectory(SubDirStations, fStationsDirectory);
-        BAlert* alert = new BAlert("Stations directory created",
-                "A directory for saving stations has been created in your "
+        BAlert* alert = new BAlert(B_TRANSLATE("Stations directory created"),
+                B_TRANSLATE("A directory for saving stations has been created in your "
                 "settings folder. Link this directory to your deskbar menu "
-                "to play stations directly.",
-                "Ok");
+                "to play stations directly."),
+                B_TRANSLATE("Ok"));
         alert->Go();
     }
 	
