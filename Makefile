@@ -10,9 +10,9 @@ ARCH = $(shell getarch)
 
 V_MAJOR = 0
 V_MIDDLE = 0
-V_MINOR = 3
+V_MINOR = 4
 V_VARIETY = B_APPV_DEVELOPMENT
-V_BUILD = 14
+V_BUILD = 1
 
 TARGET_DIR := ./dist
 PACKAGE = $(TARGET_DIR)/$(NAME)_$(VERSION)-$(ARCH).hpkg

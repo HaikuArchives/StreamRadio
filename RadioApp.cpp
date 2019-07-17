@@ -38,7 +38,7 @@ RadioApp::ArgvReceived(int32 argc, char** argv) {
 	for (int32 i = 1; i < argc; i++) {
 		char* arg = argv[i];
 		if (!strncmp(arg, "--help", 7)) {
-			printf(B_TRANSLATE("Usage: Radio <filename>\n"
+			printf(B_TRANSLATE("Usage: StreamRadio <filename>\n"
 					"<filename> should be a Shoutcast playlist file.\n"
 					"If the station already exists, it is made to play otherwise it is added.\n"));
 			continue;

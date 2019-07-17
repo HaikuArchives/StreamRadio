@@ -1,7 +1,7 @@
 resource app_signature "application/x-vnd.StreamRadio";
 resource app_version {
-     major = 0, middle = 0, minor = 3,
-     variety = B_APPV_ALPHA, internal = 14,
+     major = 0, middle = 0, minor = 4,
+     variety = B_APPV_ALPHA, internal = 1,
      short_info="StreamRadio",
-	   long_info="StreamRadio v0.0.3-14, ©Fishpond 2017"
+	   long_info="StreamRadio v0.0.4-1, ©Fishpond 2017"
 };
