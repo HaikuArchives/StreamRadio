@@ -183,6 +183,7 @@ status_t Station::RetrieveStreamUrl() {
 
 status_t Station::Probe() {
     BHttpHeaders headers;
+    BMallocIO* buffer;
     BUrl* resolvedUrl = new BUrl();
 	BString contentType("audio/*");
 	
@@ -192,11 +193,28 @@ status_t Station::Probe() {
 						fSource.Path().EndsWith(".m3u8"))
                     RetrieveStreamUrl();
 	
-	status_t resolveStatus = HttpUtils::CheckPort(fStreamUrl, resolvedUrl);
-	if (resolveStatus != B_OK)
-		return B_ERROR;
-    BMallocIO* buffer = HttpUtils::GetAll(*resolvedUrl, &headers, 2 * 1000 * 1000, &contentType, 4096);
-    delete resolvedUrl;
+	// FIXME: UGLY HACK!
+	// Currently Haiku's HttpRequest is not able to check for connection on a specified IP address/port pair
+	// before actually resolving the hostname to that pair. That means, if the first server in the DNS
+	// response is down or has its port closed for some reason, the request will simply fail.
+	//
+	// Creating a socket and trying to connect to the specified IP/port pair is enough for our purposes. That
+	// way, if a server is down we can use the next DNS record, and craft a new URL like http://192.168.0.1/path/to/stream
+	// 
+	// On HTTPS, unfortunately, this isn't possible, as the certificate is associated to the hostname, and so we have to
+	// make the request using it. The solution to this would be to fix the BHttpRequest class, but, for the moment,
+	// we'll just use the hostname directly if HTTPS is used. The number of streams using HTTPS and load balancing between
+	// two or more different IP's should be small, anyway.
+	
+	if (fStreamUrl.Protocol() == "https")
+		buffer = HttpUtils::GetAll(fStreamUrl, &headers, 2 * 1000 * 1000, &contentType, 4096);
+	else {
+		status_t resolveStatus = HttpUtils::CheckPort(fStreamUrl, resolvedUrl);
+		if (resolveStatus != B_OK)
+			return B_ERROR;
+    	buffer = HttpUtils::GetAll(*resolvedUrl, &headers, 2 * 1000 * 1000, &contentType, 4096);
+    	delete resolvedUrl;
+	}
 #ifdef DEBUGGING
     for (int i=0; i < headers.CountHeaders(); i++) {
         TRACE("Header: %s\r\n", headers.HeaderAt(i).Header());
