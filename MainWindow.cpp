@@ -32,6 +32,8 @@
 #include <Dragger.h>
 #include <Catalog.h>
 
+#include "Debug.h"
+
 #undef B_TRANSLATION_CONTEXT
 #define B_TRANSLATION_CONTEXT "MainWindow"
 
@@ -71,7 +73,7 @@ MainWindow::MainWindow()
     .End();
 	
     fStationList->Sync(fSettings->Stations);
-    fStationList->SetInvocationMessage(new BMessage(MSG_INVOKE_STATION));
+     fStationList->SetInvocationMessage(new BMessage(MSG_INVOKE_STATION));
 	fStationList->SetSelectionMessage(new BMessage(MSG_SELECT_STATION));
     fStationList->SetPlayMessage(new BMessage(MSG_INVOKE_STATION));
 	fStatusBar->SetExplicitAlignment(BAlignment(B_ALIGN_USE_FULL_WIDTH, B_ALIGN_VERTICAL_UNSET));
@@ -144,11 +146,13 @@ void MainWindow::MessageReceived(BMessage* message) {
                 url[numBytes]=0;
                 BString sUrl(url);
                 Station* station = Station::LoadIndirectUrl(sUrl);
-                if (station) 
-                    if (fSettings->Stations->AddItem(station) == B_OK) {
+                if (station) {
+                    if (fSettings->Stations->AddItem(station)) {
                         fStationList->Sync(fSettings->Stations);
                         fSettings->Stations->Save();
                     }
+                }
+                
             }
             break;
         }

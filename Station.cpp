@@ -174,9 +174,11 @@ status_t Station::RetrieveStreamUrl() {
     BMallocIO* plsData = HttpUtils::GetAll(fSource, NULL, 100000, &contentType, 2000);
     if (plsData) {
         status = parseUrlReference((const char*)plsData->Buffer(), contentType);
-		if (status != B_OK && contentType.StartsWith(("audio/")))
+		delete plsData;
+		if (status != B_OK && contentType.StartsWith("audio/")) {
 			SetStreamUrl(fSource);
-        delete plsData;
+			return B_OK;
+		}
     }
     return status;
 }
@@ -188,10 +190,10 @@ status_t Station::Probe() {
 	BString contentType("audio/*");
 	
 	// If source URL is a playlist, retrieve the actual stream URL
-	if (fSource.Path().EndsWith(".pls") || 
-						fSource.Path().EndsWith(".m3u") || 
-						fSource.Path().EndsWith(".m3u8"))
-                    RetrieveStreamUrl();
+	//if (fSource.Path().EndsWith(".pls") || 
+	//					fSource.Path().EndsWith(".m3u") || 
+	//					fSource.Path().EndsWith(".m3u8"))
+	RetrieveStreamUrl();
 	
 	// FIXME: UGLY HACK!
 	// Currently Haiku's HttpRequest is not able to check for connection on a specified IP address/port pair
@@ -232,6 +234,9 @@ status_t Station::Probe() {
     int index;
     if ((index = headers.HasHeader("content-type")) >= 0)
         fMime.SetTo(headers.HeaderValue("content-type"));
+    // If the station has no name, try to use the Icy-Name header
+    if ((index = headers.HasHeader("Icy-Name")) >= 0 && fName.IsEmpty())
+    	SetName(headers.HeaderValue("Icy-Name"));
     if ((index = headers.HasHeader("Icy-Br")) >= 0) 
         fBitRate = atoi(headers[index].Value()) * 1000;
     if ((index = headers.HasHeader("Icy-Genre")) >= 0) {
@@ -426,29 +431,23 @@ Station::LoadIndirectUrl(BString& sUrl) {
     const char* patternIcon = "<link\\s*rel=\"shortcut icon\"\\s*href=\"([^\"]*?)\".*?";
 
     BUrl url(sUrl);
-    BString contentType("*/*");
-    BMallocIO* dataIO = HttpUtils::GetAll(url, NULL, 10000, &contentType, 2000);
-     
-    if (dataIO == NULL) {
-        return NULL;
-    }
     
     Station* station = new Station(B_EMPTY_STRING, B_EMPTY_STRING);
-    dataIO->Write("", 1);
-    const char* body = (char*)dataIO->Buffer();
-    int32 pos = contentType.FindFirst(';');
-    if (pos >= 0) 
-        contentType.Truncate(pos);
     
-    status = station->parseUrlReference(body, contentType.String());
-    station->fSource.SetUrlString(sUrl);      
-    delete dataIO;
-
+    station->fSource.SetUrlString(sUrl);
+    status = station->RetrieveStreamUrl();
+          	
     if (status != B_OK || !station->fStreamUrl.IsValid()) {
         delete station;
         return NULL;
     }
     
+    // Probe station to get MIME type and confirm is working
+    status = station->Probe();
+    if (status != B_OK) {
+    	delete station;
+    	return NULL;
+    }
     /* 
      *  Check for name and logo on same server by calling main page
      */

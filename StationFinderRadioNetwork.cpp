@@ -96,7 +96,7 @@ StationFinderRadioNetwork::FindBy(int capabilityIndex, const char* searchFor,
                 // Set source URL as stream URL
                 // If the source is a playlist, this setting will be overriding
                 // when probing the station.
-                station->SetStreamUrl((const BUrl)station->Source());
+                // station->SetStreamUrl((const BUrl)station->Source());
                 result->AddItem(station);
             }
         }

@@ -26,9 +26,10 @@ StationsList::~StationsList() {
 }
 
 bool    
-StationsList::AddItem(Station* station) { 
-    if (FindItem(station->Name())) return false;
-        return BObjectList<Station>::AddItem(station); 
+StationsList::AddItem(Station* station) {
+    if (FindItem(station->Name()))
+    	return false;
+    return BObjectList<Station>::AddItem(station); 
 }
 
 bool
