@@ -64,13 +64,12 @@ MainWindow::MainWindow()
  	fStationPanel = new StationPanel(this);
 	fExpander = new Expander("expStationPanel", fStationPanel);			
 
-    BGroupLayout* layout = (BGroupLayout *)BLayoutBuilder::Group<>(this, B_VERTICAL, 0)
+    BGroupLayout* layout = (BGroupLayout*)BLayoutBuilder::Group<>(this, B_VERTICAL, 0)
         .SetExplicitAlignment(BAlignment(B_ALIGN_USE_FULL_WIDTH, B_ALIGN_USE_FULL_HEIGHT))
         .Add(stationScroll, 1.0f)
 		.Add(fExpander, 0.0f)
 		.Add(fStationPanel, 0.0f)
-        .Add(fStatusBar = new BStringView("status", ""), 0.0f)            
-    .End();
+        .Add(fStatusBar = new BStringView("status", ""), 0.0f);            
 	
     fStationList->Sync(fSettings->Stations);
      fStationList->SetInvocationMessage(new BMessage(MSG_INVOKE_STATION));

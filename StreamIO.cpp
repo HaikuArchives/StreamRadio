@@ -121,20 +121,20 @@ StreamIO::ReadAt(off_t position, void* buffer, size_t size) {
 	if (fLimit == 0 || position < fLimit) {
 		ssize_t read = BAdapterIO::ReadAt(position, buffer, size);
 		if (read > 0) {
-			TRACE(B_TRANSLATE("Read %") B_PRIdSSIZE B_TRANSLATE(" of %") B_PRIuSIZE 
-					B_TRANSLATE(" bytes from position %") B_PRIdOFF 
-					B_TRANSLATE(", %") B_PRIuSIZE B_TRANSLATE(" remaining\n"), 
+			TRACE("Read %" B_PRIdSSIZE " of %" B_PRIuSIZE 
+					" bytes from position %" B_PRIdOFF 
+					", %" B_PRIuSIZE " remaining\n", 
 					read, size, position, Buffered());
 			fBuffered -= read;
 		} else
-			TRACE(B_TRANSLATE("Reading %") B_PRIuSIZE B_TRANSLATE(" bytes from position %") B_PRIdOFF 
-					B_TRANSLATE(" failed - %s\n"), 
+			TRACE("Reading %" B_PRIuSIZE " bytes from position %" B_PRIdOFF 
+					" failed - %s\n", 
 					size, position, strerror(read));
 		
 		return read;
 	} else {
-		TRACE(B_TRANSLATE("Position %") B_PRIuSIZE B_TRANSLATE(" has reached limit of %") B_PRIuSIZE 
-				B_TRANSLATE(", blocking...\n"), 
+		TRACE("Position %" B_PRIuSIZE " has reached limit of %" B_PRIuSIZE 
+				", blocking...\n", 
 				position, fLimit);
 		return 0;
 	}
@@ -192,9 +192,9 @@ StreamIO::HeadersReceived(BUrlRequest* request, const BUrlResult& result) {
 		}
 		if (httpResult->StatusCode() == 301) { // Permanent redirect
 			fStation->SetStreamUrl(httpResult->Headers()["location"]);
-			TRACE(B_TRANSLATE("Permanently redirected to %s\n"), httpResult->Headers()["location"]);
+			TRACE("Permanently redirected to %s\n", httpResult->Headers()["location"]);
 		} else 
-			TRACE(B_TRANSLATE("Redirected to %s\n"), httpResult->Headers()["location"]);
+			TRACE("Redirected to %s\n", httpResult->Headers()["location"]);
 		return;
 	}
 	
@@ -267,9 +267,9 @@ StreamIO::DataWithMetaReceived(BUrlRequest* request, const char* data, off_t pos
 				fUntilMetaEnd = *data * 16;
 				if (fUntilMetaEnd == 0) {
 					fUntilMetaStart = fMetaInt;
-					TRACE(B_TRANSLATE("Meta: Empty\n"));
+					TRACE("Meta: Empty\n");
 				} else if (fUntilMetaEnd > 512) {
-					TRACE(B_TRANSLATE("Meta: Size of %") B_PRIdOFF B_TRANSLATE(" too large\n"), fUntilMetaEnd);
+					TRACE("Meta: Size of %" B_PRIdOFF " too large\n", fUntilMetaEnd);
 					fUntilMetaStart = fMetaInt;
 					fUntilMetaEnd = 0;
 					data--;
@@ -335,7 +335,7 @@ StreamIO::RequestCompleted(BUrlRequest* request, bool success) {
 
 void
 StreamIO::ProcessMeta() {
-	TRACE(B_TRANSLATE("Meta: %s\n"), fMetaBuffer);
+	TRACE("Meta: %s\n", fMetaBuffer);
 
 	if (!fMetaListener) return;
 	

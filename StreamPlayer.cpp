@@ -29,7 +29,7 @@ StreamPlayer::StreamPlayer(Station* station, BLooper* Notify)
     fPlayer(NULL),
     fState(Stopped)
 {
-    TRACE(B_TRANSLATE("Trying to set player for stream %s\n"), station->StreamUrl().UrlString().String());
+    TRACE("Trying to set player for stream %s\n", station->StreamUrl().UrlString().String());
 	
 	fStream = new (std::nothrow) StreamIO(station, Notify);
 	fInitStatus = fStream->Open();
@@ -143,7 +143,7 @@ StreamPlayer::StartPlayThreadFunc(StreamPlayer* _this) {
 		return _this->fInitStatus;
 	}
 
-	TRACE(B_TRANSLATE("Found stream with %ld channels with %f Hz\n"), 
+	TRACE("Found stream with %ld channels with %f Hz\n", 
 	    _this->fDecodedFormat.u.raw_audio.channel_count,
 	    _this->fDecodedFormat.u.raw_audio.frame_rate);
 	

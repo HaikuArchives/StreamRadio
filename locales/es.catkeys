@@ -34,9 +34,11 @@ Find Stations	StationFinder		Encontrar estaciones
 Name	StationPanel		Nombre
 Remove	MainWindow		Eliminar
 Station %s at %s in %s address %s, data rate=%s, genre=%s\n	StationFinderListenLive		La estación %s a %s en %s address %s, data rate=%s, genre=%s\n
-Probing station %s %s	MainWindow		Comprobando estación %s %s
+Probing station %s %s	MainWindow		Conexión a %s %s
 About	About		Acerca de
 Radio Network	StationFinderRadioNetwork		Radio Network
 unknown title	MainWindow		Título desconocido
 Ok	Station		Ok
+Ok			
+	Ok
 Ok
