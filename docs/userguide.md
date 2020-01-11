@@ -55,11 +55,13 @@ The results will appear in the box below. Select your preferred station, then pr
 When you're finished, close *Find Stations* to return to the main window.
 
 ## Start/Stop streaming a station <a name = "part_start"></a>
-To start streaming a station, simply click on the little square on the bottom left corner of the station's icon. The status bar should then indicate the name of the station you're currently playing.  
+To start streaming a station, simply click on the little square on the bottom left corner of the station's icon. The status bar should then indicate the name of the station you're currently playing, also, the "Play" triangle icon should appear on the station's icon.
 ![Play](screenshots/04_Play_a_station.png)  
-Click on the corresponding square on another station to switch to that station. To stop streaming, click on the square again.  
+Click on the corresponding square on another station to switch to that station.
 
-You can also double-click on the station instead of the square to do the same actions.
+To stop streaming, click on the triangle. The triangle should then switch back to the square, showing that the stream has stopped.
+
+You can also double-click on the station to do the same actions.
 
 ## Managing radio stations <a name = "part_manage"></a>
 
