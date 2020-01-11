@@ -7,7 +7,7 @@ StreamRadio is an open-source native Haiku internet radio player created by [Fis
 *	[First run](#part_first_run)
 *	[Adding a station](#part_add_station)
 *	[Managing stations](#part_manage)
-	*	[The Station Panel](#manage_panel)
+	*	[The station panel](#manage_panel)
 	*	[Adding a station using Shoutcast URL](#manage_add)
 	*	[Probing a station](#manage_check)
 	*	[Deleting a station](#manage_delete)
