@@ -10,7 +10,7 @@ StreamRadio, an open-source native Haiku Internet radio player created by [Fishp
 	*	[Probing a station](#manage_check)
 	*	[Deleting a station](#manage_delete)
 
-##Installation <a name = "part_install"></a>
+## Installation <a name = "part_install"></a>
 StreamRadio is available on HaikuDepot on both 32-bit and 64-bit Haiku. To install it, open HaikuDepot, and search for the term *StreamRadio*. Select *install* to download the package to your computer.
 
 ![Installation](/screenshots/00_Installation.png)
