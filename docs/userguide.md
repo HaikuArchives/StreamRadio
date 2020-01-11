@@ -24,7 +24,7 @@ StreamRadio. The source is available [here](https://github.com/HaikuArchives/Hai
 
 ![FirstRun](screenshots/01_First_run_GUI.png)
 
-During the first time you run this app, you will see an empty window, as you haven't added any radio stations yet. To begin, click on *Search* on the menu bar.
+When you launch StreamRadio for the first time, you will see an empty window, as you haven't added any radio stations yet. To begin, click on *Search* on the menu bar.
 
 ## Add new radio stations <a name = "part_add_station"></a>
 
