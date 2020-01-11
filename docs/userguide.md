@@ -15,8 +15,6 @@ StreamRadio is an open-source native Haiku internet radio player created by [Fis
 ## Installation <a name = "part_install"></a>
 StreamRadio is available on HaikuDepot on both 32-bit and 64-bit Haiku. To install it, open HaikuDepot, and search for the term *StreamRadio*. Select *install* to download the package to your computer.
 
-![Installation](screenshots/00_Installation.png)
-
 You can also build StreamRadio from source to get a newer (but unstable) version of 
 StreamRadio. The source is available [here](https://github.com/HaikuArchives/Haiku-Radio).
 
@@ -28,12 +26,13 @@ When you launch StreamRadio for the first time, you will see an empty window, as
 
 ## Add new radio stations <a name = "part_add_station"></a>
 
-![AddNewStation](screenshots/02_Add_New_Stations_2.png)
+![AddNewStation](screenshots/02_Add_New_Stations_1.png)
 
 To add new radio stations, select *Search* on the menu bar to begin. A dialog box will appear, allowing you to choose radio stations to add to your collection.
 
 #### Service
 Here, you can choose between two services:
+
 - [Radio Station](http://www.radio-browser.info) - A free community radio station browser.
 - [listenlive.eu](http://www.listenlive.eu/) - An experimental server, currently down.
 Adding your own radio internet radio service is currently not supported.
