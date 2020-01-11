@@ -6,6 +6,7 @@ StreamRadio is an open-source native Haiku internet radio player created by [Fis
 *	[Installation](#part_install)
 *	[First run](#part_first_run)
 *	[Adding a station](#part_add_station)
+*	[Start/Stop streaming a station](#part_start)
 *	[Managing stations](#part_manage)
 	*	[The station panel](#manage_panel)
 	*	[Adding a station using Shoutcast URL](#manage_add)
@@ -53,11 +54,24 @@ The results will appear in the box below. Select your preferred station, then pr
 
 When you're finished, close *Find Stations* to return to the main window.
 
+## Start/Stop streaming a station <a name = "part_start"></a>
+To start streaming a station, simply click on the little square on the bottom left corner of the station's icon. 
+
+The status bar should then indicate the name of the station you're currently playing.
+
+![Play](screenshots/04_Play_a_station.png)
+
+Click on the corresponding square on another station to switch to that station.
+
+To stop streaming, click on the square again.
+
+> **Note**: Stopping a stream this way may cause crashes in the current version of StreamRadio.
+
 ## Managing radio stations <a name = "part_manage"></a>
 
 In the main window, you can see the list of stations you have added. It also provides you with a number of options to manage your radio stations.
 
-![StationInfo](screenshots/04_Station_Info.png)
+![StationInfo](screenshots/05_Station_Info.png)
 
 ### The Station Panel <a name = "manage_panel"></a>
 The *Station Panel*, located at the bottom of the window can be revealed and hidden by clicking on the arrow. It allows the user to view and edit a few details about the radio station such as the Name, Genre, Stream URL.
@@ -74,10 +88,10 @@ Copy the URL to your clipboard, then go to `Edit -> Paste Shoutcast URL` to add 
 
 Choose a station, then go to `Edit -> Check Station` to probe it. After a few seconds, the status bar should indicate whether the station is broadcasting.
 
-![ProbeStation](screenshots/05_Probing_Station.png)
+![ProbeStation](screenshots/06_Probing_Station.png)
 
 ### Deleting a radio station <a name = "manage_delete"></a>
 
 To remove a station from your collection, simply select it and go to `Edit -> Remove`.
 
-![RemoveStation](screenshots/06_Remove_Station.png)
+![RemoveStation](screenshots/07_Remove_Station.png)
