@@ -1,3 +1,5 @@
+# StreamRadio user guide
+
 StreamRadio, an open-source native Haiku Internet radio player created by [Fishpond](https://github.com/fishpond-haiku/Haiku-Radio). It allows users to find, add, manage and listen to online radio stations.
 
 ### Index
