@@ -69,7 +69,7 @@ The slider on the side of the Station Panel controls the volume.
 
 ### Adding a station using the Shoutcast URL <a name = "manage_add"></a>
 
-Copy the URL onto your clipboard. Then, go to `Edit -> Paste Shoutcast URL`, and the new station will be added to your list.
+Copy the URL to your clipboard, then go to `Edit -> Paste Shoutcast URL` to add the new station to your list.
 
 ### Checking a radio station <a name = "manage_check"></a>
 
