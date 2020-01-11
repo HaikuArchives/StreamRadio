@@ -79,6 +79,6 @@ Choose a station, then go to `Edit -> Check Station` to probe it. After a few se
 
 ### Deleting a radio station <a name = "manage_delete"></a>
 
-To remove a station that you no longer want from your collection, simply select it and go to `Edit -> Remove`
+To remove a station from your collection, simply select it and go to `Edit -> Remove`.
 
 ![RemoveStation](screenshots/06_Remove_Station.png)
