@@ -73,7 +73,7 @@ Copy the URL onto your clipboard. Then, go to `Edit -> Paste Shoutcast URL`, and
 
 ### Checking a radio station <a name = "manage_check"></a>
 
-Choose a station, then go to `Edit -> Check Station` to probe it. After a few seconds, the status bar should indicate whether the probe was successful or not.
+Choose a station, then go to `Edit -> Check Station` to probe it. After a few seconds, the status bar should indicate whether the station is broadcasting.
 
 ![ProbeStation](screenshots/05_Probing_Station.png)
 
