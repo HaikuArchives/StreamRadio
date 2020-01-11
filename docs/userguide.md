@@ -50,7 +50,7 @@ After you've done with your choices, press ![SearchIcon](bnSearch.png) or hit <k
 
 ![NewStation](screenshots/03_Add_New_Stations_2.png)
 
-The results will appear in the box below. Select your preferred station, then press *Add* to add it to your list of stations. You can do this any number of times you like.
+The results will appear in the box below. Select your preferred station, then press *Add* to add it to your list of stations. You can continue searching and adding stations like this.
 
 When you're finished, close *Find Stations* to return to the main window.
 
