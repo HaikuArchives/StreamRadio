@@ -13,20 +13,20 @@ StreamRadio, an open-source native Haiku Internet radio player created by [Fishp
 ## Installation <a name = "part_install"></a>
 StreamRadio is available on HaikuDepot on both 32-bit and 64-bit Haiku. To install it, open HaikuDepot, and search for the term *StreamRadio*. Select *install* to download the package to your computer.
 
-![Installation](/screenshots/00_Installation.png)
+![Installation](screenshots/00_Installation.png)
 
 You can also build StreamRadio from source to get a newer (but unstable) version of 
 StreamRadio. The source is available [here](https://github.com/HaikuArchives/Haiku-Radio).
 
 ## First run <a name = "part_first_run"></a>
 
-![FirstRun](/screenshots/01_First_run_GUI.png)
+![FirstRun](screenshots/01_First_run_GUI.png)
 
 During the first time you run this app, you will see an empty window, as you haven't added any radio stations yet. To begin, click on *Search* on the menu bar.
 
 ## Add new radio stations <a name = "part_add_station"></a>
 
-![](/screenshots/02_Add_New_Stations_2.png)
+![AddNewStation](screenshots/02_Add_New_Stations_2.png)
 
 To add new radio stations, select *Search* on the menu bar to begin. A dialog box will appear, allowing you to choose radio stations to add to your collection.
 
@@ -46,7 +46,7 @@ This can either be a menu or a text box, according to the option you chose for *
 
 After you've done with your choices, press ![SearchIcon](bnSearch.png) or hit <kbd>Enter</kbd> to start your search. The search may take up to a minute.
 
-![NewStation](/screenshots/03_Add_New_Stations_2.png)
+![NewStation](screenshots/03_Add_New_Stations_2.png)
 
 The results will appear in the box below. Select your preferred station, then press *Add* to add it to your list of stations. You can do this any number of times you like.
 
@@ -56,7 +56,7 @@ When you're finished, close *Find Stations* to return to the main window.
 
 In the main window, you can see the list of stations you have added. It also provides you with a number of options to manage your radio stations.
 
-![](/screenshots/04_Station_Info.png)
+![StationInfo](screenshots/04_Station_Info.png)
 
 ### The Station Panel <a name = "manage_panel"></a>
 The *Station Panel*, located at the bottom of the window can be revealed and hidden by clicking on the arrow. It allows the user to view and edit a few details about the radio station such as the Name, Genre, Stream URL.
@@ -73,10 +73,10 @@ Copy the URL onto your clipboard. Then, go to `Edit -> Paste Shoutcast URL`, and
 
 Choose a station, then go to `Edit -> Check Station` to probe it. After a few seconds, the status bar should indicate whether the probe was successful or not.
 
-![](/screenshots/05_Probing_Station.png)
+![ProbeStation](screenshots/05_Probing_Station.png)
 
 ### Deleting a radio station <a name = "manage_delete"></a>
 
 To remove a station that you no longer want from your collection, simply select it and go to `Edit -> Remove`
 
-![](/screenshots/06_Remove_Station.png)
+![RemoveStation](screenshots/06_Remove_Station.png)
