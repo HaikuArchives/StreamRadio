@@ -63,7 +63,7 @@ In the main window, you can see the list of stations you have added. It also pro
 ### The Station Panel <a name = "manage_panel"></a>
 The *Station Panel*, located at the bottom of the window can be revealed and hidden by clicking on the arrow. It allows the user to view and edit a few details about the radio station such as the Name, Genre, Stream URL.
 
-Clicking on the ![Web](bnWeb.png) icon next to the *Station URL* text box brings you to the homepage of the radio station.
+Clicking on the ![Web](bnWeb.png) icon next to the *Station URL* text box opens the homepage of the radio station in your browser.
 
 The slider on the side of the Station Panel is the Volume Controller, which adjusts the Radio Player's volume.
 
