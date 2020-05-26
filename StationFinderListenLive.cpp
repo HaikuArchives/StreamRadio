@@ -342,9 +342,9 @@ StationFinderListenLive::PlsLookupFunc(void* data) {
     StationFinderListenLive* _this = (StationFinderListenLive*)data;
     while (!_this->fPlsLookupList.IsEmpty()) {
 	Station* station = _this->fPlsLookupList.FirstItem();
-	TRACE("Looking up stream URL for station %s in %s\n"), 
+	TRACE("Looking up stream URL for station %s in %s\n", 
 			station->Name()->String(), 
-			station->Source().UrlString().String();
+			station->Source().UrlString().String());
 	Station* plsStation = Station::LoadIndirectUrl((BString&)station->Source().UrlString());
 	if (plsStation) {
 		station->SetStreamUrl(plsStation->StreamUrl());

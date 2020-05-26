@@ -311,7 +311,7 @@ Station::parseUrlReference(const char* body, const char* mime) {
     const char* patterns[4]={ "^file[0-9]+=([^\r\n]*)[\r\n$]+",		// ShoutcastUrl
                              "^(http://[^\r\n]*)[\r\n]+$",       // Mpeg Url;
                              "^([^#]+[^\r\n]*)[\r\n]+$",				// Mpeg Url;
-                             "^title[0-9]+=([^\r\n]*)[\r\n]+$" };	// Shoutcast alternativ;
+                             "^title[0-9]+=([^\r\n]*)[\r\n$]+" };	// Shoutcast alternativ;
 
     for (int i = 0; i < 3; i++) {
         char* match = regFind(body, patterns[i]);
@@ -431,29 +431,36 @@ Station::LoadIndirectUrl(BString& sUrl) {
     const char* patternIcon = "<link\\s*rel=\"shortcut icon\"\\s*href=\"([^\"]*?)\".*?";
 
     BUrl url(sUrl);
+    BString contentType("*/*");
+    BMallocIO* dataIO = HttpUtils::GetAll(url, NULL, 10000, &contentType, 2000);
+     
+    if (dataIO == NULL) {
+        return NULL;
+    }
     
     Station* station = new Station(B_EMPTY_STRING, B_EMPTY_STRING);
-    
-    station->fSource.SetUrlString(sUrl);
-    status = station->RetrieveStreamUrl();
-          	
-    if (status != B_OK || !station->fStreamUrl.IsValid()) {
+    dataIO->Write("", 1);
+    const char* body = (char*)dataIO->Buffer();
+    int32 pos = contentType.FindFirst(';');
+    if (pos >= 0) 
+        contentType.Truncate(pos);
+    status = station->parseUrlReference(body, contentType.String());
+    if (status != B_OK && contentType.StartsWith(("audio/")))
+		station->SetStreamUrl(url);
+    station->fSource.SetUrlString(sUrl);      
+    delete dataIO;
+
+    if (!station->fStreamUrl.IsValid()) {
         delete station;
         return NULL;
     }
     
-    // Probe station to get MIME type and confirm is working
-    status = station->Probe();
-    if (status != B_OK) {
-    	delete station;
-    	return NULL;
-    }
     /* 
      *  Check for name and logo on same server by calling main page
      */
     
-    /*
-	BUrl finalUrl = station->fUri;
+    
+	BUrl finalUrl = station->fStationUrl;
     if ((!finalUrl.HasPort() || finalUrl.Port()==80) && 
             (!finalUrl.HasPath() || finalUrl.Path().IsEmpty() || finalUrl.Path() == "/")) {
         if (station->fName.IsEmpty()) station->SetName("New Station");
@@ -473,22 +480,23 @@ Station::LoadIndirectUrl(BString& sUrl) {
             char* title = regFind(body, patternTitle);
             if (title) station->fName.SetTo(title);
 
+			/*
             char* icon = regFind(body, patternIcon);
             if (icon) {
                 finalUrl.SetPath(BString(icon));
 
                 BMallocIO* iconIO = HttpUtils::GetAll(finalUrl, "image/*", &contentType);
-
                 if (iconIO) {
                     iconIO->Seek(0, SEEK_SET);
                     station->fLogo = BTranslationUtils::GetBitmap(iconIO);
                     delete iconIO;
                 }
             }
+            */
             delete dataIO;
         }
     }
-	*/
+	
     return station;
 }
 

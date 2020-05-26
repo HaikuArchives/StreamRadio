@@ -22,6 +22,7 @@
 #include "RadioApp.h"
 #include <View.h>
 #include <Application.h>
+#include <Alert.h>
 #include <MenuBar.h>
 #include <MenuItem.h>
 #include <Clipboard.h>
@@ -146,12 +147,18 @@ void MainWindow::MessageReceived(BMessage* message) {
                 BString sUrl(url);
                 Station* station = Station::LoadIndirectUrl(sUrl);
                 if (station) {
-                    if (fSettings->Stations->AddItem(station)) {
-                        fStationList->Sync(fSettings->Stations);
-                        fSettings->Stations->Save();
-                    }
+                	status_t probeStatus = station->Probe();
+                	if (probeStatus == B_OK) {
+                		fSettings->Stations->AddItem(station);
+                    	fStationList->Sync(fSettings->Stations);
+                    	fSettings->Stations->Save();
+                	} else {
+					BString msg;
+					msg.SetToFormat("Station %s did not respond correctly and could not be added", 
+							station->Name()->String());
+					(new BAlert("Add Station Failed", msg, "Ok"))->Go();
+				   	}
                 }
-                
             }
             break;
         }
