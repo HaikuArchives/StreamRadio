@@ -480,19 +480,21 @@ Station::LoadIndirectUrl(BString& sUrl) {
             char* title = regFind(body, patternTitle);
             if (title) station->fName.SetTo(title);
 
-			/*
+			
             char* icon = regFind(body, patternIcon);
             if (icon) {
                 finalUrl.SetPath(BString(icon));
+                
+                contentType = "image/*";
 
-                BMallocIO* iconIO = HttpUtils::GetAll(finalUrl, "image/*", &contentType);
+                BMallocIO* iconIO = HttpUtils::GetAll(finalUrl, NULL, 10000, &contentType, 2000);
                 if (iconIO) {
                     iconIO->Seek(0, SEEK_SET);
                     station->fLogo = BTranslationUtils::GetBitmap(iconIO);
                     delete iconIO;
                 }
             }
-            */
+            
             delete dataIO;
         }
     }

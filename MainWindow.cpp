@@ -141,8 +141,7 @@ void MainWindow::MessageReceived(BMessage* message) {
             be_clipboard->Unlock();
             char* url;
             ssize_t numBytes;
-            if (data->FindData("text/plain", B_MIME_TYPE, 
-					(const void**)&url, &numBytes) == B_OK) {
+            if (data->FindData("text/plain", B_MIME_TYPE, (const void**)&url, &numBytes) == B_OK) {
                 url[numBytes]=0;
                 BString sUrl(url);
                 Station* station = Station::LoadIndirectUrl(sUrl);
@@ -153,10 +152,9 @@ void MainWindow::MessageReceived(BMessage* message) {
                     	fStationList->Sync(fSettings->Stations);
                     	fSettings->Stations->Save();
                 	} else {
-					BString msg;
-					msg.SetToFormat("Station %s did not respond correctly and could not be added", 
-							station->Name()->String());
-					(new BAlert("Add Station Failed", msg, "Ok"))->Go();
+						BString msg;
+						msg.SetToFormat(B_TRANSLATE("Station %s did not respond correctly and could not be added"), station->Name()->String());
+						(new BAlert(B_TRANSLATE("Add Station Failed"), msg, B_TRANSLATE("Ok")))->Go();
 				   	}
                 }
             }
@@ -168,13 +166,14 @@ void MainWindow::MessageReceived(BMessage* message) {
             Station* station = fStationList->StationAt(fStationList->CurrentSelection(0));
             if (stationItem) {
 				Station* station = stationItem->GetStation();
-                BString statusText(B_TRANSLATE("Probing station %s %s"));
                 status_t stationStatus = station->Probe();
+                BString statusText;
                 if (stationStatus == B_OK) {
-                    statusText.SetToFormat(statusText, station->Name()->String(), B_TRANSLATE("successful"));
+                	statusText = B_TRANSLATE("Probing station %station% successful");
                 } else {
-                    statusText.SetToFormat(statusText, station->Name()->String(), B_TRANSLATE("failed"));
-                }
+                	statusText = B_TRANSLATE("Probing station %station% failed");
+                }           
+                statusText.ReplaceFirst("%station%", station->Name()->String());
                 fStatusBar->SetText(statusText);
                 fStationList->Invalidate();
 				fStationPanel->SetStation(stationItem);
@@ -265,10 +264,9 @@ void MainWindow::MessageReceived(BMessage* message) {
         }
 		
 		case MSG_META_CHANGE : {
-			BString meta;
-			meta.SetToFormat(B_TRANSLATE("%s now plays %s"), 
-					message->GetString("station", B_TRANSLATE("Unknown station")),
-					message->GetString("streamtitle", B_TRANSLATE("unknown title")));
+			BString meta = B_TRANSLATE("%station% now plays %title%");
+			meta.ReplaceFirst("%station%", message->GetString("station", B_TRANSLATE("Unknown station")));
+			meta.ReplaceFirst("%title%", message->GetString("streamtitle", B_TRANSLATE("unknown title")));
 			fStatusBar->SetText(meta.String());
 			break;
 		}
