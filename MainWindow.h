@@ -71,6 +71,7 @@ class MainWindow : public BWindow
 	Expander*												fExpander;
 	BObjectList<StationListViewItem>						activeStations;
 	bool													allowParallelPlayback;
+	BMenuItem*												menuParallelPlayback;
 	
 	void							TogglePlay(StationListViewItem* stationItem);
 	

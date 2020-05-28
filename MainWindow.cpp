@@ -46,23 +46,23 @@ MainWindow::MainWindow()
 	fSettings = &((RadioApp*)be_app)->Settings;
 	
 	allowParallelPlayback = fSettings->GetAllowParallelPlayback();
+	menuParallelPlayback = new BMenuItem(B_TRANSLATE("Allow parallel playback"), new BMessage(MSG_PARALLEL_PLAYBACK));
 	
     //initialize central widget
     BLayoutBuilder::Menu<>(fMainMenu = new BMenuBar(Bounds(), "MainMenu"))
-        .AddMenu(B_TRANSLATE("File"))
+        .AddMenu(B_TRANSLATE("App"))
+          	.AddItem(B_TRANSLATE("Help..."), MSG_HELP)
+    		.AddItem(B_TRANSLATE("About"), B_ABOUT_REQUESTED)
+    		.AddSeparator()
             .AddItem(B_TRANSLATE("Quit"), B_QUIT_REQUESTED, 'Q')
         .End()
         .AddMenu(B_TRANSLATE("Edit"))
-        	.AddItem(B_TRANSLATE("Toggle parallel playback"), MSG_PARALLEL_PLAYBACK)
+        	.AddItem(menuParallelPlayback)
             .AddItem(B_TRANSLATE("Paste Shoutcast URL"), MSG_PASTE_URL)
             .AddItem(B_TRANSLATE("Check Station"), MSG_CHECK)
             .AddItem(B_TRANSLATE("Remove"), MSG_REMOVE, B_DELETE)
         .End()
         .AddItem(B_TRANSLATE("Search"), MSG_SEARCH, 'S')
-        .AddMenu(B_TRANSLATE("Help"))
-        	.AddItem(B_TRANSLATE("Help..."), MSG_HELP, 'H')
-        	.AddSeparator()
-            .AddItem(B_TRANSLATE("About"), B_ABOUT_REQUESTED)
     .End();
     AddChild(fMainMenu);
     fStationList = new StationListView(true);
@@ -301,6 +301,7 @@ void MainWindow::MessageReceived(BMessage* message) {
 		case MSG_PARALLEL_PLAYBACK : {
 			allowParallelPlayback = !allowParallelPlayback;
 			fSettings->SetAllowParallelPlayback(allowParallelPlayback);
+			menuParallelPlayback->SetMarked(allowParallelPlayback);
 			break;
 		}
 		
