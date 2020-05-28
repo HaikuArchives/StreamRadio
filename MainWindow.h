@@ -70,6 +70,7 @@ class MainWindow : public BWindow
     BStringView*											fStatusBar;
 	Expander*												fExpander;
 	BObjectList<StationListViewItem>						activeStations;
+	bool													allowParallelPlayback;
 	
 	void							TogglePlay(StationListViewItem* stationItem);
 	

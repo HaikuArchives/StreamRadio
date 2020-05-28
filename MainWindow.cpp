@@ -44,6 +44,9 @@ MainWindow::MainWindow()
     fStationFinder(NULL)
 {
 	fSettings = &((RadioApp*)be_app)->Settings;
+	
+	allowParallelPlayback = fSettings->GetAllowParallelPlayback();
+	
     //initialize central widget
     BLayoutBuilder::Menu<>(fMainMenu = new BMenuBar(Bounds(), "MainMenu"))
         .AddMenu(B_TRANSLATE("File"))
@@ -222,7 +225,7 @@ void MainWindow::MessageReceived(BMessage* message) {
 		case MSG_INVOKE_STATION : {
             int32 stationIndex = message->GetInt32("index", -1);
             StationListViewItem* stationItem = fStationList->ItemAt(stationIndex);
-            if (fSettings->allowParallelPlayback == false) {
+            if (allowParallelPlayback == false) {
  	        	if (activeStations.HasItem(stationItem)) {
  	        		while (!activeStations.IsEmpty()) {
             			TogglePlay(activeStations.LastItem());
@@ -296,7 +299,8 @@ void MainWindow::MessageReceived(BMessage* message) {
 		}
 		
 		case MSG_PARALLEL_PLAYBACK : {
-			fSettings->allowParallelPlayback = !fSettings->allowParallelPlayback;
+			allowParallelPlayback = !allowParallelPlayback;
+			fSettings->SetAllowParallelPlayback(allowParallelPlayback);
 			break;
 		}
 		

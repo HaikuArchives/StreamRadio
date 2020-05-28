@@ -103,6 +103,14 @@ RadioSettings::~RadioSettings() {
     delete Stations;
 }
 
+bool RadioSettings::GetAllowParallelPlayback() {
+	return GetBool("allowParallelPlayback");
+}
+
+void RadioSettings::SetAllowParallelPlayback(bool set) {
+	SetBool("allowParallelPlayback", set);
+}
+
 const char*
 RadioSettings::StationFinderName() {
 	return GetString("stationfinder", NULL);
