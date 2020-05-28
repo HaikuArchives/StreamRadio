@@ -13,7 +13,7 @@
 #include "MainWindow.h"
 #include "RadioSettings.h"
 
-#define appSignature "application/x-vnd.StreamRadio"
+#define appSignature "application/x-vnd.Fishpond-Radio"
 
 /**
  * Application class
