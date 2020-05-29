@@ -47,6 +47,7 @@ MainWindow::MainWindow()
 	
 	allowParallelPlayback = fSettings->GetAllowParallelPlayback();
 	menuParallelPlayback = new BMenuItem(B_TRANSLATE("Allow parallel playback"), new BMessage(MSG_PARALLEL_PLAYBACK));
+	menuParallelPlayback->SetMarked(allowParallelPlayback);
 	
     //initialize central widget
     BLayoutBuilder::Menu<>(fMainMenu = new BMenuBar(Bounds(), "MainMenu"))
