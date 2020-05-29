@@ -10,7 +10,7 @@ ARCH = $(shell getarch)
 
 V_MAJOR = 0
 V_MIDDLE = 0
-V_MINOR = 4
+V_MINOR = 5
 V_VARIETY = B_APPV_DEVELOPMENT
 V_BUILD = 1
 

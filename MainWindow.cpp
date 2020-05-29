@@ -32,6 +32,7 @@
 #include <GroupLayout.h>
 #include <Dragger.h>
 #include <Catalog.h>
+#include <Url.h>
 
 #include "Debug.h"
 
@@ -43,19 +44,25 @@ MainWindow::MainWindow()
     fStationFinder(NULL)
 {
 	fSettings = &((RadioApp*)be_app)->Settings;
+	
+	allowParallelPlayback = fSettings->GetAllowParallelPlayback();
+	menuParallelPlayback = new BMenuItem(B_TRANSLATE("Allow parallel playback"), new BMessage(MSG_PARALLEL_PLAYBACK));
+	
     //initialize central widget
     BLayoutBuilder::Menu<>(fMainMenu = new BMenuBar(Bounds(), "MainMenu"))
-        .AddMenu(B_TRANSLATE("File"))
+        .AddMenu(B_TRANSLATE("App"))
+          	.AddItem(B_TRANSLATE("Help..."), MSG_HELP)
+    		.AddItem(B_TRANSLATE("About"), B_ABOUT_REQUESTED)
+    		.AddSeparator()
             .AddItem(B_TRANSLATE("Quit"), B_QUIT_REQUESTED, 'Q')
-            .AddSeparator()
-            .AddItem(B_TRANSLATE("About"), B_ABOUT_REQUESTED)
         .End()
         .AddMenu(B_TRANSLATE("Edit"))
+        	.AddItem(menuParallelPlayback)
             .AddItem(B_TRANSLATE("Paste Shoutcast URL"), MSG_PASTE_URL)
             .AddItem(B_TRANSLATE("Check Station"), MSG_CHECK)
             .AddItem(B_TRANSLATE("Remove"), MSG_REMOVE, B_DELETE)
         .End()
-        .AddItem(B_TRANSLATE("Search"), MSG_SEARCH, 's')
+        .AddItem(B_TRANSLATE("Search"), MSG_SEARCH, 'S')
     .End();
     AddChild(fMainMenu);
     fStationList = new StationListView(true);
@@ -73,7 +80,7 @@ MainWindow::MainWindow()
         .Add(fStatusBar = new BStringView("status", ""), 0.0f);            
 	
     fStationList->Sync(fSettings->Stations);
-     fStationList->SetInvocationMessage(new BMessage(MSG_INVOKE_STATION));
+    fStationList->SetInvocationMessage(new BMessage(MSG_INVOKE_STATION));
 	fStationList->SetSelectionMessage(new BMessage(MSG_SELECT_STATION));
     fStationList->SetPlayMessage(new BMessage(MSG_INVOKE_STATION));
 	fStatusBar->SetExplicitAlignment(BAlignment(B_ALIGN_USE_FULL_WIDTH, B_ALIGN_VERTICAL_UNSET));
@@ -218,8 +225,22 @@ void MainWindow::MessageReceived(BMessage* message) {
 		case MSG_INVOKE_STATION : {
             int32 stationIndex = message->GetInt32("index", -1);
             StationListViewItem* stationItem = fStationList->ItemAt(stationIndex);
-            if (stationItem)
-				TogglePlay(stationItem);
+            if (allowParallelPlayback == false) {
+ 	        	if (activeStations.HasItem(stationItem)) {
+ 	        		while (!activeStations.IsEmpty()) {
+            			TogglePlay(activeStations.LastItem());
+ 	        		}
+ 	        	} else {
+ 	           		while (!activeStations.IsEmpty()) {
+            			TogglePlay(activeStations.LastItem());
+ 	        		}
+ 	        		TogglePlay(stationItem);
+            	}
+ 	        } else {
+            	if (stationItem) {
+					TogglePlay(stationItem);
+            	}
+ 	        }
             break;
         }
         
@@ -271,6 +292,19 @@ void MainWindow::MessageReceived(BMessage* message) {
 			break;
 		}
 		
+		case MSG_HELP : {
+			BUrl userguide = BUrl("https://github.com/HaikuArchives/Haiku-Radio/blob/master/docs/userguide.md");
+			userguide.OpenWithPreferredApplication(true);
+			break;
+		}
+		
+		case MSG_PARALLEL_PLAYBACK : {
+			allowParallelPlayback = !allowParallelPlayback;
+			fSettings->SetAllowParallelPlayback(allowParallelPlayback);
+			menuParallelPlayback->SetMarked(allowParallelPlayback);
+			break;
+		}
+		
 		case B_ABOUT_REQUESTED :
 			be_app->AboutRequested();
 			break;
@@ -310,6 +344,7 @@ MainWindow::TogglePlay(StationListViewItem* stationItem) {
 				stationItem->GetStation()->Name()->String());
 				fStatusBar->SetText(success);
 				fStatusBar->Invalidate();
+				activeStations.AddItem(stationItem);
 			} else {
 				delete player;
 				player = NULL;
@@ -329,6 +364,7 @@ MainWindow::TogglePlay(StationListViewItem* stationItem) {
 
 			stationItem->StateChanged(StreamPlayer::Stopped);
 			fStatusBar->SetText(NULL);
+			activeStations.RemoveItem(stationItem);
 			break;
 		}
 	}

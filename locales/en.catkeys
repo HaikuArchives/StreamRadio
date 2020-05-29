@@ -1,40 +1,44 @@
-1	English	application/x-vnd.StreamRadio	4021813946
+1	English	application/x-vnd.Fishpond-Radio	668410028
 A directory for saving stations has been created in your settings folder. Link this directory to your deskbar menu to play stations directly.	Station		A directory for saving stations has been created in your settings folder. Link this directory to your deskbar menu to play stations directly.
+Station %s did not respond correctly and could not be added	MainWindow		Station %s did not respond correctly and could not be added
 Service	StationFinder		Service
-Added station %s to list	MainWindow		Added station %s to list
-About	MainWindow		About
 Stations directory created	Station		Stations directory created
+Allow parallel playback	MainWindow		Allow parallel playback
+Help...	MainWindow		Help...
+About	MainWindow		About
+Added station %s to list	MainWindow		Added station %s to list
 Add Station Failed	StationFinder		Add Station Failed
+%station% now plays %title%	MainWindow		%station% now plays %title%
 Unknown station	MainWindow		Unknown station
 Quit	MainWindow		Quit
 File %s could not be loaded as a station	MainWindow		File %s could not be loaded as a station
 Now playing %s	MainWindow		Now playing %s
-%s now plays %s	MainWindow		%s now plays %s
 Failed playing station %s: %s	MainWindow		Failed playing station %s: %s
 Search for	StationFinder		Search for
 Station %s did not respond correctly and could not be added	StationFinder		Station %s did not respond correctly and could not be added
 Station %s at %s in %s - %s address %s, data rate=%s, genre=%s\n	StationFinderListenLive		Station %s at %s in %s - %s address %s, data rate=%s, genre=%s\n
+Add Station Failed	MainWindow		Add Station Failed
 listenlive.eu [experimental]	StationFinderListenLive		listenlive.eu [experimental]
-failed	MainWindow		failed
 Add	StationFinder		Add
 Search	MainWindow		Search
 StreamRadio	System name		StreamRadio
-successful	MainWindow		successful
 Station URL	StationPanel		Station URL
 Search by	StationFinder		Search by
-Usage: Radio <filename>\n<filename> should be a Shoutcast playlist file.\nIf the station already exists, it is made to play otherwise it is added.\n	RadioApp		Usage: Radio <filename>\n<filename> should be a Shoutcast playlist file.\nIf the station already exists, it is made to play otherwise it is added.\n
 Ok	StationFinder		Ok
+Probing station %station% failed	MainWindow		Probing station %station% failed
 Genre	StationPanel		Genre
+Usage: StreamRadio <filename>\n<filename> should be a Shoutcast playlist file.\nIf the station already exists, it is made to play otherwise it is added.\n	RadioApp		Usage: StreamRadio <filename>\n<filename> should be a Shoutcast playlist file.\nIf the station already exists, it is made to play otherwise it is added.\n
 Stream URL	StationPanel		Stream URL
+App	MainWindow		App
 Edit	MainWindow		Edit
+Ok	MainWindow		Ok
 Check Station	MainWindow		Check Station
-File	MainWindow		File
 Paste Shoutcast URL	MainWindow		Paste Shoutcast URL
 Find Stations	StationFinder		Find Stations
 Name	StationPanel		Name
 Remove	MainWindow		Remove
 Station %s at %s in %s address %s, data rate=%s, genre=%s\n	StationFinderListenLive		Station %s at %s in %s address %s, data rate=%s, genre=%s\n
-Probing station %s %s	MainWindow		Probing station %s %s
+Probing station %station% successful	MainWindow		Probing station %station% successful
 About	About		About
 Radio Network	StationFinderRadioNetwork		Radio Network
 unknown title	MainWindow		unknown title

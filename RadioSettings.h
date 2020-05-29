@@ -34,6 +34,8 @@ public:
     const char*					StationFinderName();
 	void						SetStationFinderName(const char* name);
     StationsList*				Stations;
+    bool						GetAllowParallelPlayback();
+    void						SetAllowParallelPlayback(bool set);
 	
 private:
     status_t Load();
