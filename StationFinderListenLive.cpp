@@ -220,7 +220,7 @@ StationFinderListenLive::ParseCountryReturn(BMallocIO* data, const char* searchF
 		doc[matches[5].rm_eo] = 0;
 		doc[matches[6].rm_eo] = 0;
 		doc[matches[8].rm_eo] = 0;
-		printf(B_TRANSLATE("Station %s at %s in %s address %s, data rate=%s, genre=%s\n"), 
+		printf("Station %s at %s in %s address %s, data rate=%s, genre=%s\n", 
 				doc + matches[2].rm_so, 
 				doc + matches[1].rm_so, 
 				doc + matches[3].rm_so, 
@@ -301,7 +301,7 @@ StationFinderListenLive::ParseGenreReturn(BMallocIO* data, const char* searchFor
 		doc[matches[4].rm_eo] = 0;
 		doc[matches[6].rm_eo] = 0;
 		doc[matches[7].rm_eo] = 0;
-		printf(B_TRANSLATE("Station %s at %s in %s - %s address %s, data rate=%s, genre=%s\n"), 
+		printf("Station %s at %s in %s - %s address %s, data rate=%s, genre=%s\n", 
 				doc + matches[2].rm_so, 
 				doc + matches[1].rm_so, 
 				doc + matches[3].rm_so, 

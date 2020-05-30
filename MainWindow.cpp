@@ -61,7 +61,7 @@ MainWindow::MainWindow()
         	.AddItem(menuParallelPlayback)
             .AddItem(B_TRANSLATE("Paste Shoutcast URL"), MSG_PASTE_URL)
             .AddItem(B_TRANSLATE("Check station"), MSG_CHECK)
-            .AddItem(B_TRANSLATE("Remove"), MSG_REMOVE, B_DELETE)
+            .AddItem(B_TRANSLATE("Remove"), MSG_REMOVE, 'R')
         .End()
         .AddItem(B_TRANSLATE("Search"), MSG_SEARCH, 'S')
     .End();

@@ -29,7 +29,7 @@ StationFinderRadioNetwork::StationFinderRadioNetwork()
     fIconLookupThread(0),
     fIconLookupList()
 {
-    serviceName.SetTo(B_TRANSLATE("Radio Network"));
+    serviceName.SetTo(B_TRANSLATE("Community Radio Browser"));
     serviceHomePage.SetUrlString("http://www.radio-browser.info");
 	RegisterSearchCapability("Keyword");
 }
@@ -45,7 +45,7 @@ StationFinderRadioNetwork::Instantiate() {
 
 void
 StationFinderRadioNetwork::RegisterSelf() {
-	Register("Radio Network", &StationFinderRadioNetwork::Instantiate);
+	Register("Community Radio Browser", &StationFinderRadioNetwork::Instantiate);
 }
 
 BObjectList<Station>* 

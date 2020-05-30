@@ -480,7 +480,6 @@ Station::LoadIndirectUrl(BString& sUrl) {
             char* title = regFind(body, patternTitle);
             if (title) station->fName.SetTo(title);
 
-			
             char* icon = regFind(body, patternIcon);
             if (icon) {
                 finalUrl.SetPath(BString(icon));
@@ -574,7 +573,7 @@ BDirectory* Station::StationDirectory() {
                 B_TRANSLATE("A directory for saving stations has been created in your "
                 "settings folder. Link this directory to your deskbar menu "
                 "to play stations directly."),
-                B_TRANSLATE("Ok"));
+                B_TRANSLATE("OK"));
         alert->Go();
     }
 	
