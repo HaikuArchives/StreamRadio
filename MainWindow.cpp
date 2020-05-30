@@ -52,7 +52,7 @@ MainWindow::MainWindow()
     //initialize central widget
     BLayoutBuilder::Menu<>(fMainMenu = new BMenuBar(Bounds(), "MainMenu"))
         .AddMenu(B_TRANSLATE("App"))
-          	.AddItem(B_TRANSLATE("Help..."), MSG_HELP)
+          	.AddItem(B_TRANSLATE("Help" B_UTF8_ELLIPSIS), MSG_HELP)
     		.AddItem(B_TRANSLATE("About"), B_ABOUT_REQUESTED)
     		.AddSeparator()
             .AddItem(B_TRANSLATE("Quit"), B_QUIT_REQUESTED, 'Q')
