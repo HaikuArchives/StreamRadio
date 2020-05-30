@@ -162,7 +162,7 @@ void MainWindow::MessageReceived(BMessage* message) {
                 	} else {
 						BString msg;
 						msg.SetToFormat(B_TRANSLATE("Station %s did not respond correctly and could not be added"), station->Name()->String());
-						(new BAlert(B_TRANSLATE("Add Station Failed"), msg, B_TRANSLATE("Ok")))->Go();
+						(new BAlert(B_TRANSLATE("Add station failed"), msg, B_TRANSLATE("OK")))->Go();
 				   	}
                 }
             }
