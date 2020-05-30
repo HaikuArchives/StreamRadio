@@ -133,7 +133,7 @@ StationFinderService::RegisterSearchCapability(char* name, char* keywords, char*
 }
 
 StationFinderWindow::StationFinderWindow(BWindow* parent) 
-  : BWindow(BRect(0,0,300,150), B_TRANSLATE("Find Stations"), B_TITLED_WINDOW, B_CLOSE_ON_ESCAPE),
+  : BWindow(BRect(0,0,300,150), B_TRANSLATE("Find stations"), B_TITLED_WINDOW, B_CLOSE_ON_ESCAPE),
 	currentService(NULL)
 {
     messenger   = new BMessenger(parent);
@@ -361,4 +361,3 @@ void StationFinderWindow::DoSearch(const char* text) {
         delete result;
     }
 }
-
