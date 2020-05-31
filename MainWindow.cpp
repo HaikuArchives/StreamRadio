@@ -22,6 +22,7 @@
 #include "RadioApp.h"
 #include <View.h>
 #include <Application.h>
+#include <Alert.h>
 #include <MenuBar.h>
 #include <MenuItem.h>
 #include <Clipboard.h>
@@ -30,25 +31,39 @@
 #include <LayoutBuilder.h>
 #include <GroupLayout.h>
 #include <Dragger.h>
+#include <Catalog.h>
+#include <Url.h>
+
+#include "Debug.h"
+
+#undef B_TRANSLATION_CONTEXT
+#define B_TRANSLATION_CONTEXT "MainWindow"
 
 MainWindow::MainWindow()
-  : BWindow(BRect(0,0,400,200), "StreamRadio", B_DOCUMENT_WINDOW, B_WILL_ACCEPT_FIRST_CLICK),
+  : BWindow(BRect(0,0,400,200), B_TRANSLATE_SYSTEM_NAME("StreamRadio"), B_DOCUMENT_WINDOW, B_WILL_ACCEPT_FIRST_CLICK),
     fStationFinder(NULL)
 {
 	fSettings = &((RadioApp*)be_app)->Settings;
+	
+	allowParallelPlayback = fSettings->GetAllowParallelPlayback();
+	menuParallelPlayback = new BMenuItem(B_TRANSLATE("Allow parallel playback"), new BMessage(MSG_PARALLEL_PLAYBACK));
+	menuParallelPlayback->SetMarked(allowParallelPlayback);
+	
     //initialize central widget
     BLayoutBuilder::Menu<>(fMainMenu = new BMenuBar(Bounds(), "MainMenu"))
-        .AddMenu("File")
-            .AddItem("Quit", B_QUIT_REQUESTED, 'Q')
-            .AddSeparator()
-            .AddItem("About", B_ABOUT_REQUESTED)
+        .AddMenu(B_TRANSLATE("App"))
+          	.AddItem(B_TRANSLATE("Help" B_UTF8_ELLIPSIS), MSG_HELP)
+    		.AddItem(B_TRANSLATE("About"), B_ABOUT_REQUESTED)
+    		.AddSeparator()
+            .AddItem(B_TRANSLATE("Quit"), B_QUIT_REQUESTED, 'Q')
         .End()
-        .AddMenu("Edit")
-            .AddItem("Paste Shoutcast URL", MSG_PASTE_URL)
-            .AddItem("Check Station", MSG_CHECK)
-            .AddItem("Remove", MSG_REMOVE, B_DELETE)
+        .AddMenu(B_TRANSLATE("Edit"))
+        	.AddItem(menuParallelPlayback)
+            .AddItem(B_TRANSLATE("Paste Shoutcast URL"), MSG_PASTE_URL)
+            .AddItem(B_TRANSLATE("Check station"), MSG_CHECK)
+            .AddItem(B_TRANSLATE("Remove"), MSG_REMOVE, 'R')
         .End()
-        .AddItem("Search", MSG_SEARCH, 's')
+        .AddItem(B_TRANSLATE("Search"), MSG_SEARCH, 'S')
     .End();
     AddChild(fMainMenu);
     fStationList = new StationListView(true);
@@ -58,13 +73,12 @@ MainWindow::MainWindow()
  	fStationPanel = new StationPanel(this);
 	fExpander = new Expander("expStationPanel", fStationPanel);			
 
-    BGroupLayout* layout = (BGroupLayout *)BLayoutBuilder::Group<>(this, B_VERTICAL, 0)
+    BGroupLayout* layout = (BGroupLayout*)BLayoutBuilder::Group<>(this, B_VERTICAL, 0)
         .SetExplicitAlignment(BAlignment(B_ALIGN_USE_FULL_WIDTH, B_ALIGN_USE_FULL_HEIGHT))
         .Add(stationScroll, 1.0f)
 		.Add(fExpander, 0.0f)
 		.Add(fStationPanel, 0.0f)
-        .Add(fStatusBar = new BStringView("status", ""), 0.0f)            
-    .End();
+        .Add(fStatusBar = new BStringView("status", ""), 0.0f);            
 	
     fStationList->Sync(fSettings->Stations);
     fStationList->SetInvocationMessage(new BMessage(MSG_INVOKE_STATION));
@@ -111,10 +125,10 @@ void MainWindow::MessageReceived(BMessage* message) {
 					} else {
 						stationItem = new StationListViewItem(station);
 						fStationList->AddItem(stationItem);
-						result.SetToFormat("Added station %s to list", station->Name()->String());
+						result.SetToFormat(B_TRANSLATE("Added station %s to list"), station->Name()->String());
 					}
 				} else {
-					result.SetToFormat("File %s could not be loaded as a station");
+					result.SetToFormat(B_TRANSLATE("File %s could not be loaded as a station"));
 				}
 				fStatusBar->SetText(result.String());
             }
@@ -135,16 +149,22 @@ void MainWindow::MessageReceived(BMessage* message) {
             be_clipboard->Unlock();
             char* url;
             ssize_t numBytes;
-            if (data->FindData("text/plain", B_MIME_TYPE, 
-					(const void**)&url, &numBytes) == B_OK) {
+            if (data->FindData("text/plain", B_MIME_TYPE, (const void**)&url, &numBytes) == B_OK) {
                 url[numBytes]=0;
                 BString sUrl(url);
                 Station* station = Station::LoadIndirectUrl(sUrl);
-                if (station) 
-                    if (fSettings->Stations->AddItem(station) == B_OK) {
-                        fStationList->Sync(fSettings->Stations);
-                        fSettings->Stations->Save();
-                    }
+                if (station) {
+                	status_t probeStatus = station->Probe();
+                	if (probeStatus == B_OK) {
+                		fSettings->Stations->AddItem(station);
+                    	fStationList->Sync(fSettings->Stations);
+                    	fSettings->Stations->Save();
+                	} else {
+						BString msg;
+						msg.SetToFormat(B_TRANSLATE("Station %s did not respond correctly and could not be added"), station->Name()->String());
+						(new BAlert(B_TRANSLATE("Add station failed"), msg, B_TRANSLATE("OK")))->Go();
+				   	}
+                }
             }
             break;
         }
@@ -154,13 +174,14 @@ void MainWindow::MessageReceived(BMessage* message) {
             Station* station = fStationList->StationAt(fStationList->CurrentSelection(0));
             if (stationItem) {
 				Station* station = stationItem->GetStation();
-                BString statusText("Probing station %s %s");
                 status_t stationStatus = station->Probe();
+                BString statusText;
                 if (stationStatus == B_OK) {
-                    statusText.SetToFormat(statusText, station->Name()->String(), "successful");
+                	statusText = B_TRANSLATE("Probing station %station% successful");
                 } else {
-                    statusText.SetToFormat(statusText, station->Name()->String(), "failed");
-                }
+                	statusText = B_TRANSLATE("Probing station %station% failed");
+                }           
+                statusText.ReplaceFirst("%station%", station->Name()->String());
                 fStatusBar->SetText(statusText);
                 fStationList->Invalidate();
 				fStationPanel->SetStation(stationItem);
@@ -205,8 +226,22 @@ void MainWindow::MessageReceived(BMessage* message) {
 		case MSG_INVOKE_STATION : {
             int32 stationIndex = message->GetInt32("index", -1);
             StationListViewItem* stationItem = fStationList->ItemAt(stationIndex);
-            if (stationItem)
-				TogglePlay(stationItem);
+            if (allowParallelPlayback == false) {
+ 	        	if (activeStations.HasItem(stationItem)) {
+ 	        		while (!activeStations.IsEmpty()) {
+            			TogglePlay(activeStations.LastItem());
+ 	        		}
+ 	        	} else {
+ 	           		while (!activeStations.IsEmpty()) {
+            			TogglePlay(activeStations.LastItem());
+ 	        		}
+ 	        		TogglePlay(stationItem);
+            	}
+ 	        } else {
+            	if (stationItem) {
+					TogglePlay(stationItem);
+            	}
+ 	        }
             break;
         }
         
@@ -251,11 +286,23 @@ void MainWindow::MessageReceived(BMessage* message) {
         }
 		
 		case MSG_META_CHANGE : {
-			BString meta;
-			meta.SetToFormat("%s now plays %s", 
-					message->GetString("station", "Unknown station"),
-					message->GetString("streamtitle", "unknown title"));
+			BString meta = B_TRANSLATE("%station% now plays %title%");
+			meta.ReplaceFirst("%station%", message->GetString("station", B_TRANSLATE("Unknown station")));
+			meta.ReplaceFirst("%title%", message->GetString("streamtitle", B_TRANSLATE("unknown title")));
 			fStatusBar->SetText(meta.String());
+			break;
+		}
+		
+		case MSG_HELP : {
+			BUrl userguide = BUrl("https://github.com/HaikuArchives/Haiku-Radio/blob/master/docs/userguide.md");
+			userguide.OpenWithPreferredApplication(true);
+			break;
+		}
+		
+		case MSG_PARALLEL_PLAYBACK : {
+			allowParallelPlayback = !allowParallelPlayback;
+			fSettings->SetAllowParallelPlayback(allowParallelPlayback);
+			menuParallelPlayback->SetMarked(allowParallelPlayback);
 			break;
 		}
 		
@@ -294,15 +341,16 @@ MainWindow::TogglePlay(StationListViewItem* stationItem) {
 				stationItem->SetPlayer(player);
 				stationItem->StateChanged(StreamPlayer::Playing);
 				BString success;
-				success.SetToFormat("Now playing %s", 
+				success.SetToFormat(B_TRANSLATE("Now playing %s"), 
 				stationItem->GetStation()->Name()->String());
 				fStatusBar->SetText(success);
 				fStatusBar->Invalidate();
+				activeStations.AddItem(stationItem);
 			} else {
 				delete player;
 				player = NULL;
 				BString error;
-				error.SetToFormat("Failed playing station %s: %s",
+				error.SetToFormat(B_TRANSLATE("Failed playing station %s: %s"),
 						stationItem->GetStation()->Name()->String(),
 						strerror(status));
 				fStatusBar->SetText(error);
@@ -317,6 +365,7 @@ MainWindow::TogglePlay(StationListViewItem* stationItem) {
 
 			stationItem->StateChanged(StreamPlayer::Stopped);
 			fStatusBar->SetText(NULL);
+			activeStations.RemoveItem(stationItem);
 			break;
 		}
 	}

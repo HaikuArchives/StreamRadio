@@ -96,13 +96,12 @@ private:
  */
 status_t
 HttpUtils::CheckPort(BUrl url, BUrl* newUrl, uint32 flags) {
-	
 	uint16 port;
 	if (url.HasPort())
 		port = url.Port();
 	else
 		port = 80;
-	  
+	
     BReference<const BNetworkAddressResolver> resolver = BNetworkAddressResolver::Resolve(url.Host(), port, flags);
     if (resolver.Get() == NULL)
     	return B_NO_MEMORY;
@@ -127,8 +126,9 @@ HttpUtils::CheckPort(BUrl url, BUrl* newUrl, uint32 flags) {
     	portStatus = socket->Connect(ipAddress);
     	delete socket;
     }
-    
-	newUrlString = ipAddress.ToString().Prepend("http://");
+    // If port number is 80, do not add it to the final URL
+    // Then, prepend the appropiate protocol
+	newUrlString = ipAddress.ToString(ipAddress.Port() != 80).Prepend("://").Prepend(url.Protocol());
     if (url.HasPath())
     	newUrlString.Append(url.Path());	
     newUrl->SetUrlString(newUrlString.String());

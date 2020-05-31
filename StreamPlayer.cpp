@@ -5,6 +5,7 @@
  * Created on January 25, 2016, 6:49 PM
  */
 
+#include <Catalog.h>
 #include <MediaDecoder.h>
 #include <MediaFile.h>
 #include <MediaTrack.h>
@@ -15,6 +16,9 @@
 
 #define milliseconds * 1000
 #define seconds * 1000 milliseconds
+
+#undef B_TRANSLATION_CONTEXT
+#define B_TRANSLATION_CONTEXT "StreamPlayer"
 
 StreamPlayer::StreamPlayer(Station* station, BLooper* Notify) 
   : BLocker(),

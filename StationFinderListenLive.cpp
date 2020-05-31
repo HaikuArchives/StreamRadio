@@ -25,7 +25,11 @@
 #include "StationFinderListenLive.h"
 #define __USE_GNU
 #include <regex.h>
+#include <Catalog.h>
 #include "Debug.h"
+
+#undef B_TRANSLATION_CONTEXT
+#define B_TRANSLATION_CONTEXT "StationFinderListenLive"
 
 
 const char* genreList =
@@ -101,7 +105,7 @@ StationFinderListenLive::StationFinderListenLive()
 	fLookupThread(0),
     fPlsLookupList()
 {
-    serviceName.SetTo("listenlive.eu [experimental]");
+    serviceName.SetTo(B_TRANSLATE("listenlive.eu [experimental]"));
     serviceHomePage.SetUrlString("http://www.listenlive.eu/");
 	BString tmp(countryList);
 	tmp.Split("\r", true, countryKeywordAndPath);

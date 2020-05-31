@@ -34,12 +34,14 @@
 #include "StationPanel.h"
 #include "Expander.h"
 
-#define MSG_REFS_RECEIVED   'REFS'
-#define MSG_PASTE_URL       'PURL'
-#define MSG_SEARCH          'mSRC'
-#define MSG_CHECK           'mCKS'           
-#define MSG_REMOVE          'mRMS'
-#define MSG_INVOKE_STATION  'mIST'
+#define MSG_REFS_RECEIVED   	'REFS'
+#define MSG_PASTE_URL       	'PURL'
+#define MSG_SEARCH          	'mSRC'
+#define MSG_CHECK           	'mCKS'           
+#define MSG_REMOVE          	'mRMS'
+#define MSG_INVOKE_STATION  	'mIST'
+#define MSG_HELP				'HELP'
+#define MSG_PARALLEL_PLAYBACK	'mPAR'
 
 /** \brief The mainwindow.
 *
@@ -60,13 +62,16 @@ class MainWindow : public BWindow
     virtual void					SetVisible(bool visible);
 
   private:
-    RadioSettings*					fSettings;
-    BMenuBar*						fMainMenu;
-    StationListView*				fStationList;
-    StationFinderWindow*			fStationFinder;
-	StationPanel*					fStationPanel;
-    BStringView*					fStatusBar;
-	Expander*						fExpander;
+    RadioSettings*											fSettings;
+    BMenuBar*												fMainMenu;
+    StationListView*										fStationList;
+    StationFinderWindow*									fStationFinder;
+	StationPanel*											fStationPanel;
+    BStringView*											fStatusBar;
+	Expander*												fExpander;
+	BObjectList<StationListViewItem>						activeStations;
+	bool													allowParallelPlayback;
+	BMenuItem*												menuParallelPlayback;
 	
 	void							TogglePlay(StationListViewItem* stationItem);
 	

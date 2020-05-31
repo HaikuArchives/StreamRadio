@@ -30,10 +30,13 @@
 #include <TranslationUtils.h>
 #include <MediaFile.h>
 #include <MediaTrack.h>
+#include <Catalog.h>
 #include "Station.h"
 #include "HttpUtils.h"
 #include "Debug.h"
 
+#undef B_TRANSLATION_CONTEXT
+#define B_TRANSLATION_CONTEXT "Station"
 
 const char* SubDirStations = "Stations";    
 const char* MimePls = "audio/x-scpls";
@@ -171,29 +174,49 @@ status_t Station::RetrieveStreamUrl() {
     BMallocIO* plsData = HttpUtils::GetAll(fSource, NULL, 100000, &contentType, 2000);
     if (plsData) {
         status = parseUrlReference((const char*)plsData->Buffer(), contentType);
-		if (status != B_OK && contentType.StartsWith(("audio/")))
+		delete plsData;
+		if (status != B_OK && contentType.StartsWith("audio/")) {
 			SetStreamUrl(fSource);
-        delete plsData;
+			return B_OK;
+		}
     }
     return status;
 }
 
 status_t Station::Probe() {
     BHttpHeaders headers;
+    BMallocIO* buffer;
     BUrl* resolvedUrl = new BUrl();
 	BString contentType("audio/*");
 	
 	// If source URL is a playlist, retrieve the actual stream URL
-	if (fSource.Path().EndsWith(".pls") || 
-						fSource.Path().EndsWith(".m3u") || 
-						fSource.Path().EndsWith(".m3u8"))
-                    RetrieveStreamUrl();
+	//if (fSource.Path().EndsWith(".pls") || 
+	//					fSource.Path().EndsWith(".m3u") || 
+	//					fSource.Path().EndsWith(".m3u8"))
+	RetrieveStreamUrl();
 	
-	status_t resolveStatus = HttpUtils::CheckPort(fStreamUrl, resolvedUrl);
-	if (resolveStatus != B_OK)
-		return B_ERROR;
-    BMallocIO* buffer = HttpUtils::GetAll(*resolvedUrl, &headers, 2 * 1000 * 1000, &contentType, 4096);
-    delete resolvedUrl;
+	// FIXME: UGLY HACK!
+	// Currently Haiku's HttpRequest is not able to check for connection on a specified IP address/port pair
+	// before actually resolving the hostname to that pair. That means, if the first server in the DNS
+	// response is down or has its port closed for some reason, the request will simply fail.
+	//
+	// Creating a socket and trying to connect to the specified IP/port pair is enough for our purposes. That
+	// way, if a server is down we can use the next DNS record, and craft a new URL like http://192.168.0.1/path/to/stream
+	// 
+	// On HTTPS, unfortunately, this isn't possible, as the certificate is associated to the hostname, and so we have to
+	// make the request using it. The solution to this would be to fix the BHttpRequest class, but, for the moment,
+	// we'll just use the hostname directly if HTTPS is used. The number of streams using HTTPS and load balancing between
+	// two or more different IP's should be small, anyway.
+	
+	if (fStreamUrl.Protocol() == "https")
+		buffer = HttpUtils::GetAll(fStreamUrl, &headers, 2 * 1000 * 1000, &contentType, 4096);
+	else {
+		status_t resolveStatus = HttpUtils::CheckPort(fStreamUrl, resolvedUrl);
+		if (resolveStatus != B_OK)
+			return B_ERROR;
+    	buffer = HttpUtils::GetAll(*resolvedUrl, &headers, 2 * 1000 * 1000, &contentType, 4096);
+    	delete resolvedUrl;
+	}
 #ifdef DEBUGGING
     for (int i=0; i < headers.CountHeaders(); i++) {
         TRACE("Header: %s\r\n", headers.HeaderAt(i).Header());
@@ -201,18 +224,19 @@ status_t Station::Probe() {
 #endif
     if (buffer == NULL) {
 		fFlags &= !STATION_URI_VALID;
-		MSG("Buffer NULL\n");
 		return B_ERROR;
 	}
 	if (headers.CountHeaders() == 0) {
 		fFlags &= !STATION_URI_VALID;
-		MSG("No headers\n");
 		return B_TIMED_OUT;
 	}
 
     int index;
     if ((index = headers.HasHeader("content-type")) >= 0)
         fMime.SetTo(headers.HeaderValue("content-type"));
+    // If the station has no name, try to use the Icy-Name header
+    if ((index = headers.HasHeader("Icy-Name")) >= 0 && fName.IsEmpty())
+    	SetName(headers.HeaderValue("Icy-Name"));
     if ((index = headers.HasHeader("Icy-Br")) >= 0) 
         fBitRate = atoi(headers[index].Value()) * 1000;
     if ((index = headers.HasHeader("Icy-Genre")) >= 0) {
@@ -287,7 +311,7 @@ Station::parseUrlReference(const char* body, const char* mime) {
     const char* patterns[4]={ "^file[0-9]+=([^\r\n]*)[\r\n$]+",		// ShoutcastUrl
                              "^(http://[^\r\n]*)[\r\n]+$",       // Mpeg Url;
                              "^([^#]+[^\r\n]*)[\r\n]+$",				// Mpeg Url;
-                             "^title[0-9]+=([^\r\n]*)[\r\n]+$" };	// Shoutcast alternativ;
+                             "^title[0-9]+=([^\r\n]*)[\r\n$]+" };	// Shoutcast alternativ;
 
     for (int i = 0; i < 3; i++) {
         char* match = regFind(body, patterns[i]);
@@ -420,12 +444,13 @@ Station::LoadIndirectUrl(BString& sUrl) {
     int32 pos = contentType.FindFirst(';');
     if (pos >= 0) 
         contentType.Truncate(pos);
-    
     status = station->parseUrlReference(body, contentType.String());
+    if (status != B_OK && contentType.StartsWith(("audio/")))
+		station->SetStreamUrl(url);
     station->fSource.SetUrlString(sUrl);      
     delete dataIO;
 
-    if (status != B_OK || !station->fStreamUrl.IsValid()) {
+    if (!station->fStreamUrl.IsValid()) {
         delete station;
         return NULL;
     }
@@ -434,8 +459,8 @@ Station::LoadIndirectUrl(BString& sUrl) {
      *  Check for name and logo on same server by calling main page
      */
     
-    /*
-	BUrl finalUrl = station->fUri;
+    
+	BUrl finalUrl = station->fStationUrl;
     if ((!finalUrl.HasPort() || finalUrl.Port()==80) && 
             (!finalUrl.HasPath() || finalUrl.Path().IsEmpty() || finalUrl.Path() == "/")) {
         if (station->fName.IsEmpty()) station->SetName("New Station");
@@ -458,19 +483,21 @@ Station::LoadIndirectUrl(BString& sUrl) {
             char* icon = regFind(body, patternIcon);
             if (icon) {
                 finalUrl.SetPath(BString(icon));
+                
+                contentType = "image/*";
 
-                BMallocIO* iconIO = HttpUtils::GetAll(finalUrl, "image/*", &contentType);
-
+                BMallocIO* iconIO = HttpUtils::GetAll(finalUrl, NULL, 10000, &contentType, 2000);
                 if (iconIO) {
                     iconIO->Seek(0, SEEK_SET);
                     station->fLogo = BTranslationUtils::GetBitmap(iconIO);
                     delete iconIO;
                 }
             }
+            
             delete dataIO;
         }
     }
-	*/
+	
     return station;
 }
 
@@ -542,11 +569,11 @@ BDirectory* Station::StationDirectory() {
     } else {
         fStationsDirectory = new BDirectory();
         configDir.CreateDirectory(SubDirStations, fStationsDirectory);
-        BAlert* alert = new BAlert("Stations directory created",
-                "A directory for saving stations has been created in your "
+        BAlert* alert = new BAlert(B_TRANSLATE("Stations directory created"),
+                B_TRANSLATE("A directory for saving stations has been created in your "
                 "settings folder. Link this directory to your deskbar menu "
-                "to play stations directly.",
-                "Ok");
+                "to play stations directly."),
+                B_TRANSLATE("OK"));
         alert->Go();
     }
 	

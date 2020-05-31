@@ -67,7 +67,7 @@ void StationListViewItem::DrawItem(BView* owner, BRect frame, bool complete) {
     owner->SetFontSize(SLV_SMALL_FONT_SIZE);
     owner->GetFontHeight(&fontHeight);
     baseline += fontHeight.ascent + fontHeight.descent + fontHeight.leading;
-    owner->DrawString(fStation->StreamUrl().UrlString(), frame.LeftTop() + BPoint(SLV_HEIGHT - SLV_INSET + SLV_PADDING, baseline));
+    owner->DrawString(fStation->Source().UrlString(), frame.LeftTop() + BPoint(SLV_HEIGHT - SLV_INSET + SLV_PADDING, baseline));
     baseline += fontHeight.ascent + fontHeight.descent + fontHeight.leading;
 
     owner->DrawString(BString("") << fStation->BitRate()/1000.0 << " kbps " << fStation->Mime()->Type(), frame.LeftTop() + BPoint(SLV_HEIGHT - SLV_INSET + SLV_PADDING, baseline));

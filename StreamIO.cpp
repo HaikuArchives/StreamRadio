@@ -30,8 +30,12 @@
 #define __USE_GNU
 #include <regex.h>
 #include <NetworkAddressResolver.h>
+#include <Catalog.h>
 
 #define HTTP_TIMEOUT 30000000
+
+#undef B_TRANSLATION_CONTEXT
+#define B_TRANSLATION_CONTEXT "StreamIO"
 
 StreamIO::StreamIO(Station* station, BLooper* MetaListener)
   : BAdapterIO(B_MEDIA_STREAMING | B_MEDIA_SEEKABLE, HTTP_TIMEOUT),
@@ -51,13 +55,31 @@ StreamIO::StreamIO(Station* station, BLooper* MetaListener)
 	
 {
 	BUrl url = station->StreamUrl();
-	BUrl* newUrl = new BUrl();
-    status_t portStatus = HttpUtils::CheckPort(url, newUrl);
-	if (portStatus != B_OK)
-    	return;
-    
-    fReq = dynamic_cast<BHttpRequest*>(BUrlProtocolRoster::MakeRequest(newUrl->UrlString().String(), this));
-    
+	
+	// FIXME: UGLY HACK!
+	// Currently Haiku's HttpRequest is not able to check for connection on a specified IP address/port pair
+	// before actually resolving the hostname to that pair. That means, if the first server in the DNS
+	// response is down or has its port closed for some reason, the request will simply fail.
+	//
+	// Creating a socket and trying to connect to the specified IP/port pair is enough for our purposes. That
+	// way, if a server is down we can use the next DNS record, and craft a new URL like http://192.168.0.1/path/to/stream
+	// 
+	// On HTTPS, unfortunately, this isn't possible, as the certificate is associated to the hostname, and so we have to
+	// make the request using it. The solution to this would be to fix the BHttpRequest class, but, for the moment,
+	// we'll just use the hostname directly if HTTPS is used. The number of streams using HTTPS and load balancing between
+	// two or more different IP's should be small, anyway.
+	
+	if (url.Protocol() == "https")
+		fReq = dynamic_cast<BHttpRequest*>(BUrlProtocolRoster::MakeRequest(url.UrlString().String(), this));
+	else {
+		BUrl* newUrl = new BUrl();
+    	status_t portStatus = HttpUtils::CheckPort(url, newUrl);
+		if (portStatus != B_OK)
+    		return;
+        fReq = dynamic_cast<BHttpRequest*>(BUrlProtocolRoster::MakeRequest(newUrl->UrlString().String(), this));
+		delete newUrl;
+	}
+	
     BHttpHeaders* headers = new BHttpHeaders();
     headers->AddHeader("Icy-MetaData", 1);
     headers->AddHeader("Icy-Reset", 1);
@@ -73,7 +95,6 @@ StreamIO::StreamIO(Station* station, BLooper* MetaListener)
     } 
 	
     fDataFuncs.Add(&StreamIO::DataSyncedReceived);
-    delete newUrl;
 }
 
 StreamIO::~StreamIO() {

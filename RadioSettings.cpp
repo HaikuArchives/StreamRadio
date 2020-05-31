@@ -26,9 +26,10 @@ StationsList::~StationsList() {
 }
 
 bool    
-StationsList::AddItem(Station* station) { 
-    if (FindItem(station->Name())) return false;
-        return BObjectList<Station>::AddItem(station); 
+StationsList::AddItem(Station* station) {
+    if (FindItem(station->Name()))
+    	return false;
+    return BObjectList<Station>::AddItem(station); 
 }
 
 bool
@@ -100,6 +101,14 @@ RadioSettings::RadioSettings(const RadioSettings& orig) : BMessage(orig) {
 
 RadioSettings::~RadioSettings() {
     delete Stations;
+}
+
+bool RadioSettings::GetAllowParallelPlayback() {
+	return GetBool("allowParallelPlayback");
+}
+
+void RadioSettings::SetAllowParallelPlayback(bool set) {
+	SetBool("allowParallelPlayback", set);
 }
 
 const char*

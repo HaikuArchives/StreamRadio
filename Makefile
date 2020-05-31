@@ -10,9 +10,9 @@ ARCH = $(shell getarch)
 
 V_MAJOR = 0
 V_MIDDLE = 0
-V_MINOR = 3
+V_MINOR = 5
 V_VARIETY = B_APPV_DEVELOPMENT
-V_BUILD = 14
+V_BUILD = 1
 
 TARGET_DIR := ./dist
 PACKAGE = $(TARGET_DIR)/$(NAME)_$(VERSION)-$(ARCH).hpkg
@@ -79,7 +79,7 @@ RSRCS =
 #	- 	if your library does not follow the standard library naming scheme,
 #		you need to specify the path to the library and it's name.
 #		(e.g. for mylib.a, specify "mylib.a" or "path/mylib.a")
-LIBS = $(STDCPPLIBS) be translation bnetapi media xml2
+LIBS = $(STDCPPLIBS) be translation bnetapi media xml2 localestub
 
 #	Specify additional paths to directories following the standard libXXX.so
 #	or libXXX.a naming scheme. You can specify full paths or paths relative
@@ -111,7 +111,7 @@ OPTIMIZE = FULL
 # 	will recreate only the "locales/en.catkeys" file. Use it as a template
 # 	for creating catkeys for other languages. All localization files must be
 # 	placed in the "locales" subdirectory.
-LOCALES = 
+LOCALES = en es
 
 #	Specify all the preprocessor symbols to be defined. The symbols will not
 #	have their values set automatically; you must supply the value (if any) to
