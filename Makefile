@@ -10,7 +10,7 @@ ARCH = $(shell getarch)
 
 V_MAJOR = 0
 V_MIDDLE = 0
-V_MINOR = 5
+V_MINOR = 4
 V_VARIETY = B_APPV_DEVELOPMENT
 V_BUILD = 1
 
@@ -57,7 +57,7 @@ SRCS := About.cpp \
 
 #	Specify the resource definition files to use. Full or relative paths can be
 #	used.
-RDEFS = Radio.rdef
+RDEFS = StreamRadio.rdef
 
 #	Specify the resource files to use. Full or relative paths can be used.
 #	Both RDEFS and RSRCS can be utilized in the same Makefile.
@@ -176,8 +176,8 @@ $(PACKAGE): $(TARGET_DIR)/$(NAME) $(ARCH_PACKAGE_INFO)
 	cp $(TARGET_DIR)/$(NAME) $(PACKAGE_DIR)/apps/
 	-ln -s ../../../../apps/$(NAME) $(PACKAGE_DIR)/data/deskbar/menu/Applications/$(NAME)
 	package create -C $(PACKAGE_DIR)/ -i $(OBJ_DIR)/PackageInfo_$(ARCH) $(PACKAGE)
-	copyattr -n BEOS:ICON $(TARGET_DIR)/$(NAME) $(PACKAGE)
-	
+	mimeset $(PACKAGE)
+
 package: $(PACKAGE)
 
 clean: rdefclean distclean
@@ -192,13 +192,10 @@ $(VERSION_RDEF): Makefile
 	echo "resource app_signature \"$(APP_MIME_SIG)\";" > $(VERSION_RDEF)
 	echo "resource app_version {" >> $(VERSION_RDEF)
 	echo "     major = $(V_MAJOR), middle = $(V_MIDDLE), minor = $(V_MINOR)," >> $(VERSION_RDEF)
-	echo "     variety = B_APPV_ALPHA, internal = $(V_BUILD)," >> $(VERSION_RDEF)
-	echo "     short_info=\"$(NAME)\"," >> $(VERSION_RDEF)
-	echo "	   long_info=\"$(NAME) v$(VERSION), ©Fishpond 2017\"" >> $(VERSION_RDEF)
+	echo "     variety = $(V_VARIETY), internal = $(V_BUILD)," >> $(VERSION_RDEF)
+	echo "     short_info=\"A player for online radio\"," >> $(VERSION_RDEF)
+	echo "	   long_info=\"Find and stream online radio stations\"" >> $(VERSION_RDEF)
 	echo "};" >> $(VERSION_RDEF)
 
 install:: package
 	pkgman install $(PACKAGE)
-	
-
-

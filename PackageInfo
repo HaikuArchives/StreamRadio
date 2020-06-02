@@ -1,11 +1,11 @@
-name        Radio
+name        StreamRadio
 version     $VERSION
 summary     "Find and play internet radio stations"
 description "Start the application. Run a search for a radio station name. If you found one you like, add it to the main list. There you can play it, visit its homepage or change the station information.
 Searches use Radio Network, a service that offers a network API to its database (http://www.radio-browser.info). 
 Stations including all their attributes are saved as Shoutcast playlist files in ~/settings/Stations so they are available for other apps. 
 
-Please report back any bugs at https://github.com/fishpond-haiku/Haiku-Radio/issues.
+Please report back any bugs at https://github.com/HaikuArchives/StreamRadio/issues.
 
 Last Updates:
 - 0.0.3-14 Terminate worker threads in listenlive station finder
@@ -21,24 +21,21 @@ Last Updates:
 Known bugs:
 - Some stations will return a 'No handler' error message. In most cases these stations simply do net respond."
 vendor      "Fishpond"
-packager    "Fishpond"
+packager    "HaikuArchives"
 architecture    $ARCH
 copyrights { 
             "2017, Fishpond" 
 }
 urls { 
-            "mailto:fishpond@esmio.de"
-            "http://www.esmio.de/haiku"
-            "http://www.esmio.de/haiku_x86"
-            "http://www.esmio.de/haiku_x86_64"
+            "https://github.com/HaikuArchives/StreamRadio"
 }
 licenses {
     "MIT"
 }
 provides {
-    Radio = $VERSION
+    StreamRadio = $VERSION
 }
 requires { 
-    haiku>=r1~alpha4_pm-1
+    haiku
     lib:libxml2
 }

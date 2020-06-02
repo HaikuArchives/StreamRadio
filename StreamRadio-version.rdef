@@ -1,7 +1,7 @@
 resource app_signature "application/x-vnd.Fishpond-Radio";
 resource app_version {
-     major = 0, middle = 0, minor = 5,
-     variety = B_APPV_ALPHA, internal = 1,
-     short_info="StreamRadio",
-	   long_info="StreamRadio v0.0.5-1, ©Fishpond 2017"
+     major = 0, middle = 0, minor = 4,
+     variety = B_APPV_DEVELOPMENT, internal = 1,
+     short_info="A player for online radio",
+	   long_info="Find and stream online radio stations"
 };
