@@ -1,0 +1,43 @@
+1	English (British)	application/x-vnd.Fishpond-Radio	702939342
+A directory for saving stations has been created in your settings folder. Link this directory to your deskbar menu to play stations directly.	Station		A directory for saving stations has been created in your settings folder. Link this directory to your deskbar menu to play stations directly.
+Stations directory created	Station		Stations directory created
+OK	Station		Alright
+Station %s did not respond correctly and could not be added	MainWindow		Station %s did not respond correctly and could not be added
+Allow parallel playback	MainWindow		Allow parallel playback
+About	MainWindow		About
+Added station %s to list	MainWindow		Added station %s to list
+OK	MainWindow		Alright
+Check station	MainWindow		Check station
+%station% now plays %title%	MainWindow		%station% now plays %title%
+Unknown station	MainWindow		Unknown station
+Quit	MainWindow		Quit
+File %s could not be loaded as a station	MainWindow		File %s could not be loaded as a station
+Now playing %s	MainWindow		Now playing %s
+Failed playing station %s: %s	MainWindow		Failed playing station %s: %s
+Add station failed	MainWindow		Add station failed
+Search	MainWindow		Search
+Probing station %station% failed	MainWindow		Probing station %station% failed
+Help…	MainWindow		Help…
+App	MainWindow		App
+Edit	MainWindow		Edit
+Paste Shoutcast URL	MainWindow		Paste Shoutcast URL
+Remove	MainWindow		Remove
+Probing station %station% successful	MainWindow		Probing station %station% successful
+unknown title	MainWindow		unknown title
+OK	StationFinder		Alright
+Service	StationFinder		Service
+Add station failed	StationFinder		Add station failed
+Find stations	StationFinder		Find stations
+Search for	StationFinder		Search for
+Station %s did not respond correctly and could not be added	StationFinder		Station %s did not respond correctly and could not be added
+Add	StationFinder		Add
+Search by	StationFinder		Search by
+listenlive.eu [experimental]	StationFinderListenLive		listenlive.eu [experimental]
+StreamRadio	System name		StreamRadio
+Station URL	StationPanel		Station URL
+Genre	StationPanel		Genre
+Stream URL	StationPanel		Stream URL
+Name	StationPanel		Name
+Usage: StreamRadio <filename>\n<filename> should be a Shoutcast playlist file.\nIf the station already exists, it is made to play otherwise it is added.\n	RadioApp		Usage: StreamRadio <filename>\n<filename> should be a Shoutcast playlist file.\nIf the station already exists, it is made to play otherwise it is added.\n
+Community Radio Browser	StationFinderRadioNetwork		Community Radio Browser
+About	About		About

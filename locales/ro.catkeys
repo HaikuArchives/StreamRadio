@@ -1,0 +1,43 @@
+1	Romanian	application/x-vnd.Fishpond-Radio	702939342
+A directory for saving stations has been created in your settings folder. Link this directory to your deskbar menu to play stations directly.	Station		Un director pentru salvarea stațiilor a fost creat în dosarul de configurări. Legați acest director de meniul deskbar-ului pentru a reda stații direct.
+Stations directory created	Station		Director de stații creat
+OK	Station		OK
+Station %s did not respond correctly and could not be added	MainWindow		Stația %s nu a răspuns corect și nu a putut fi adăugată
+Allow parallel playback	MainWindow		Permite redarea paralelă
+About	MainWindow		Despre
+Added station %s to list	MainWindow		S-a adăugat stația %s la listă
+OK	MainWindow		OK
+Check station	MainWindow		Verifică stația
+%station% now plays %title%	MainWindow		%station% redează acum %title%
+Unknown station	MainWindow		Stație necunoscută
+Quit	MainWindow		Ieșire
+File %s could not be loaded as a station	MainWindow		Fișierul %s nu a putut fi încărcat ca o stație
+Now playing %s	MainWindow		Se redă acum %s
+Failed playing station %s: %s	MainWindow		Nu s-a putut reda stația %s: %s
+Add station failed	MainWindow		Adăugarea stației a eșuat
+Search	MainWindow		Caută
+Probing station %station% failed	MainWindow		Testarea stației %station% a eșuat
+Help…	MainWindow		Ajutor…
+App	MainWindow		Aplicație
+Edit	MainWindow		Editează
+Paste Shoutcast URL	MainWindow		Lipește URL-ul Shoutcast
+Remove	MainWindow		Elimină
+Probing station %station% successful	MainWindow		Testarea stației %station% a reușit
+unknown title	MainWindow		titlu necunoscut
+OK	StationFinder		OK
+Service	StationFinder		Serviciu
+Add station failed	StationFinder		Adăugarea stației a eșuat
+Find stations	StationFinder		Caută stații
+Search for	StationFinder		Caută pentru
+Station %s did not respond correctly and could not be added	StationFinder		Stația %s nu a răspuns corect și nu a putut fi adăugată
+Add	StationFinder		Adaugă
+Search by	StationFinder		Caută după
+listenlive.eu [experimental]	StationFinderListenLive		listenlive.eu [experimental]
+StreamRadio	System name		StreamRadio
+Station URL	StationPanel		URL stație
+Genre	StationPanel		Gen
+Stream URL	StationPanel		URL flux
+Name	StationPanel		Nume
+Usage: StreamRadio <filename>\n<filename> should be a Shoutcast playlist file.\nIf the station already exists, it is made to play otherwise it is added.\n	RadioApp		Utilizare: StreamRadio <filename>\n<filename> ar trebui să fie un fișier listă de redare Shoutcast.\nDacă stația deja există, este redată, altfel este adăugată.\n
+Community Radio Browser	StationFinderRadioNetwork		Navigator radio al comunității
+About	About		Despre
