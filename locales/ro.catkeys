@@ -1,43 +1,44 @@
-1	Romanian	application/x-vnd.Fishpond-Radio	702939342
+1	English	application/x-vnd.Fishpond-Radio	2625353478
 A directory for saving stations has been created in your settings folder. Link this directory to your deskbar menu to play stations directly.	Station		Un director pentru salvarea stațiilor a fost creat în dosarul de configurări. Legați acest director de meniul deskbar-ului pentru a reda stații direct.
-Stations directory created	Station		Director de stații creat
-OK	Station		OK
 Station %s did not respond correctly and could not be added	MainWindow		Stația %s nu a răspuns corect și nu a putut fi adăugată
+OK	StationFinder		OK
+Service	StationFinder		Serviciu
+Stations directory created	Station		Director de stații creat
 Allow parallel playback	MainWindow		Permite redarea paralelă
 About	MainWindow		Despre
 Added station %s to list	MainWindow		S-a adăugat stația %s la listă
 OK	MainWindow		OK
+Remove station	MainWindow		Remove station
 Check station	MainWindow		Verifică stația
+Add station failed	StationFinder		Adăugarea stației a eșuat
 %station% now plays %title%	MainWindow		%station% redează acum %title%
 Unknown station	MainWindow		Stație necunoscută
+Station	MainWindow		Station
+Find stations	StationFinder		Caută stații
 Quit	MainWindow		Ieșire
 File %s could not be loaded as a station	MainWindow		Fișierul %s nu a putut fi încărcat ca o stație
 Now playing %s	MainWindow		Se redă acum %s
 Failed playing station %s: %s	MainWindow		Nu s-a putut reda stația %s: %s
-Add station failed	MainWindow		Adăugarea stației a eșuat
-Search	MainWindow		Caută
-Probing station %station% failed	MainWindow		Testarea stației %station% a eșuat
-Help…	MainWindow		Ajutor…
-App	MainWindow		Aplicație
-Edit	MainWindow		Editează
-Paste Shoutcast URL	MainWindow		Lipește URL-ul Shoutcast
-Remove	MainWindow		Elimină
-Probing station %station% successful	MainWindow		Testarea stației %station% a reușit
-unknown title	MainWindow		titlu necunoscut
-OK	StationFinder		OK
-Service	StationFinder		Serviciu
-Add station failed	StationFinder		Adăugarea stației a eșuat
-Find stations	StationFinder		Caută stații
 Search for	StationFinder		Caută pentru
 Station %s did not respond correctly and could not be added	StationFinder		Stația %s nu a răspuns corect și nu a putut fi adăugată
-Add	StationFinder		Adaugă
-Search by	StationFinder		Caută după
+Add station failed	MainWindow		Adăugarea stației a eșuat
 listenlive.eu [experimental]	StationFinderListenLive		listenlive.eu [experimental]
+Add	StationFinder		Adaugă
+Search	MainWindow		Caută
+OK	Station		OK
 StreamRadio	System name		StreamRadio
 Station URL	StationPanel		URL stație
+Search by	StationFinder		Caută după
+Probing station %station% failed	MainWindow		Testarea stației %station% a eșuat
+Help…	MainWindow		Ajutor…
 Genre	StationPanel		Gen
-Stream URL	StationPanel		URL flux
-Name	StationPanel		Nume
 Usage: StreamRadio <filename>\n<filename> should be a Shoutcast playlist file.\nIf the station already exists, it is made to play otherwise it is added.\n	RadioApp		Utilizare: StreamRadio <filename>\n<filename> ar trebui să fie un fișier listă de redare Shoutcast.\nDacă stația deja există, este redată, altfel este adăugată.\n
+Stream URL	StationPanel		URL flux
+App	MainWindow		Aplicație
 Community Radio Browser	StationFinderRadioNetwork		Navigator radio al comunității
+Paste Shoutcast URL	MainWindow		Lipește URL-ul Shoutcast
+Name	StationPanel		Nume
+Probing station %station% successful	MainWindow		Testarea stației %station% a reușit
 About	About		Despre
+Find stations…	MainWindow		Find stations…
+unknown title	MainWindow		titlu necunoscut

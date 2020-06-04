@@ -1,4 +1,4 @@
-1	English	application/x-vnd.Fishpond-Radio	702939342
+1	English	application/x-vnd.Fishpond-Radio	2625353478
 A directory for saving stations has been created in your settings folder. Link this directory to your deskbar menu to play stations directly.	Station		A directory for saving stations has been created in your settings folder. Link this directory to your deskbar menu to play stations directly.
 Station %s did not respond correctly and could not be added	MainWindow		Station %s did not respond correctly and could not be added
 OK	StationFinder		OK
@@ -8,10 +8,12 @@ Allow parallel playback	MainWindow		Allow parallel playback
 About	MainWindow		About
 Added station %s to list	MainWindow		Added station %s to list
 OK	MainWindow		OK
+Remove station	MainWindow		Remove station
 Check station	MainWindow		Check station
 Add station failed	StationFinder		Add station failed
 %station% now plays %title%	MainWindow		%station% now plays %title%
 Unknown station	MainWindow		Unknown station
+Station	MainWindow		Station
 Find stations	StationFinder		Find stations
 Quit	MainWindow		Quit
 File %s could not be loaded as a station	MainWindow		File %s could not be loaded as a station
@@ -33,11 +35,10 @@ Genre	StationPanel		Genre
 Usage: StreamRadio <filename>\n<filename> should be a Shoutcast playlist file.\nIf the station already exists, it is made to play otherwise it is added.\n	RadioApp		Usage: StreamRadio <filename>\n<filename> should be a Shoutcast playlist file.\nIf the station already exists, it is made to play otherwise it is added.\n
 Stream URL	StationPanel		Stream URL
 App	MainWindow		App
-Edit	MainWindow		Edit
 Community Radio Browser	StationFinderRadioNetwork		Community Radio Browser
 Paste Shoutcast URL	MainWindow		Paste Shoutcast URL
 Name	StationPanel		Name
-Remove	MainWindow		Remove
 Probing station %station% successful	MainWindow		Probing station %station% successful
 About	About		About
+Find stations…	MainWindow		Find stations…
 unknown title	MainWindow		unknown title
