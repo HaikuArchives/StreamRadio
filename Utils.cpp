@@ -15,25 +15,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* 
+/*
  * File:   Utils.cpp
  * Author: Kai Niessen <kai.niessen@online.de>
- * 
+ *
  * Created on April 16, 2017, 1:15 PM
  */
 
 #include "Utils.h"
-#include <Resources.h>
-#include <Message.h>
 #include <Bitmap.h>
+#include <Message.h>
+#include <Resources.h>
+
+
 BBitmap*
-Utils::ResourceBitmap(int32 id) {
+Utils::ResourceBitmap(int32 id)
+{
 	size_t size;
-	const char* data = (const char*)be_app->AppResources()->FindResource('BBMP', id, &size);
-    if (size && data) {
+	const char* data
+		= (const char*) be_app->AppResources()->FindResource('BBMP', id, &size);
+	if (size && data) {
 		BMessage msg;
 		status_t status = msg.Unflatten(data);
-		return (BBitmap*)BBitmap::Instantiate(&msg);
+		return (BBitmap*) BBitmap::Instantiate(&msg);
 	}
 	return NULL;
 }

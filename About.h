@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* 
+/*
  * File:   About.h
  * Author: Kai Niessen <kai.niessen@online.de>
  *
@@ -25,18 +25,19 @@
 #ifndef ABOUT_H
 #define ABOUT_H
 
-#include <Window.h>
 #include <String.h>
+#include <Window.h>
 
-#define BANNER					4
+#define BANNER 4
 
-class About : public BWindow {
+class About : public BWindow
+{
 public:
-								About();
-	virtual						~About();
+	About();
+	virtual ~About();
+
 private:
-	static BString				GetAppVersion();
+	static BString GetAppVersion();
 };
 
 #endif /* ABOUT_H */
-

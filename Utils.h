@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* 
+/*
  * File:   Utils.h
  * Author: Kai Niessen <kai.niessen@online.de>
  *
@@ -28,18 +28,18 @@
 #include <Application.h>
 #include <Bitmap.h>
 
-#define RES_BANNER					100
-#define RES_BN_SEARCH				10
-#define RES_BN_STOPPED				1
-#define RES_BN_SEARCH				10
-#define RES_BN_WEB					11
+#define RES_BANNER 100
+#define RES_BN_SEARCH 10
+#define RES_BN_STOPPED 1
+#define RES_BN_SEARCH 10
+#define RES_BN_WEB 11
 
-class Utils {
+class Utils
+{
 public:
-									Utils() {};
-	virtual							~Utils() {};
-	static BBitmap*					ResourceBitmap(int32 id);
+	Utils(){};
+	virtual ~Utils(){};
+	static BBitmap* ResourceBitmap(int32 id);
 };
 
 #endif /* UTILS_H */
-

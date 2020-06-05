@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   RadioApp.h
  * Author: Kai Niessen
  *
@@ -6,29 +6,31 @@
  */
 
 #ifndef MAIN_H
-#define	MAIN_H
+#define MAIN_H
 
-#include <Application.h>
-#include <Message.h>
 #include "MainWindow.h"
 #include "RadioSettings.h"
+#include <Application.h>
+#include <Message.h>
 
 #define appSignature "application/x-vnd.Fishpond-Radio"
 
 /**
  * Application class
  */
-class RadioApp : BApplication {
+class RadioApp : BApplication
+{
 public:
-								RadioApp(); 
-								~RadioApp();
-    virtual void				ReadyToRun();
-    virtual void				RefsReceived(BMessage* message);
-	virtual void				ArgvReceived(int32 argc, char** argv);
-	virtual void				AboutRequested();
-    MainWindow*					mainWindow;
-	RadioSettings				Settings;
+	RadioApp();
+	~RadioApp();
+	virtual void ReadyToRun();
+	virtual void RefsReceived(BMessage* message);
+	virtual void ArgvReceived(int32 argc, char** argv);
+	virtual void AboutRequested();
+	MainWindow* mainWindow;
+	RadioSettings Settings;
+
 private:
-	BMessage*					fArgvMessage;
+	BMessage* fArgvMessage;
 };
-#endif	/* MAIN_H */
+#endif /* MAIN_H */

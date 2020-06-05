@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* 
+/*
  * File:   StationFinderListenLive.h
  * Author: Kai Niessen <kai.niessen@online.de>
  *
@@ -28,26 +28,28 @@
 #include "StationFinder.h"
 #include <ObjectList.h>
 
-class StationFinderListenLive : public StationFinderService {
+class StationFinderListenLive : public StationFinderService
+{
 public:
-									StationFinderListenLive();
-    virtual							~StationFinderListenLive();
-	static void						RegisterSelf();
-	static StationFinderService*	Instantiate();
-    virtual BObjectList<Station>*	FindBy(int capabilityIndex, const char* searchFor, 
-											BLooper* resultUpdateTarget);
-	BObjectList<Station>*			ParseCountryReturn(BMallocIO* data, const char* country);
-	BObjectList<Station>*			ParseGenreReturn(BMallocIO* data, const char* genre);
+	StationFinderListenLive();
+	virtual ~StationFinderListenLive();
+	static void RegisterSelf();
+	static StationFinderService* Instantiate();
+	virtual BObjectList<Station>* FindBy(int capabilityIndex,
+		const char* searchFor, BLooper* resultUpdateTarget);
+	BObjectList<Station>* ParseCountryReturn(
+		BMallocIO* data, const char* country);
+	BObjectList<Station>* ParseGenreReturn(BMallocIO* data, const char* genre);
+
 private:
-    static const char*				baseUrl; 
-	thread_id						fLookupThread;
-	BObjectList<Station>			fPlsLookupList;
-	BLooper*						fLookupNotify;
-	
-	static int32					PlsLookupFunc(void* data);
-	BStringList						countryKeywordAndPath;
-	BStringList						genreKeywordAndPath;
+	static const char* baseUrl;
+	thread_id fLookupThread;
+	BObjectList<Station> fPlsLookupList;
+	BLooper* fLookupNotify;
+
+	static int32 PlsLookupFunc(void* data);
+	BStringList countryKeywordAndPath;
+	BStringList genreKeywordAndPath;
 };
 
 #endif /* STATIONFINDERLISTENLIVE_H */
-

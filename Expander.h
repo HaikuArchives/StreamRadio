@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* 
+/*
  * File:   Expander.h
  * Author: Kai Niessen <kai.niessen@online.de>
  *
@@ -27,21 +27,23 @@
 
 #include <Button.h>
 
-#define MSG_EXPAND					'eEXP'
+#define MSG_EXPAND 'eEXP'
 
-class Expander : public BButton {
+class Expander : public BButton
+{
 public:
-									Expander(const char* name, BView* target, orientation orientation = B_HORIZONTAL);
-	virtual							~Expander();
-	void							SetExpanded(bool expanded);
-	bool							Expanded() { return fExpanded; }
-	virtual status_t				Invoke(BMessage* msg);
-	virtual void					Draw(BRect updateRect);
+	Expander(const char* name, BView* target,
+		orientation orientation = B_HORIZONTAL);
+	virtual ~Expander();
+	void SetExpanded(bool expanded);
+	bool Expanded() { return fExpanded; }
+	virtual status_t Invoke(BMessage* msg);
+	virtual void Draw(BRect updateRect);
+
 private:
-	bool							fExpanded;
-	orientation						fOrientation;
-	BView*							fTarget;
+	bool fExpanded;
+	orientation fOrientation;
+	BView* fTarget;
 };
 
 #endif /* EXPANDER_H */
-

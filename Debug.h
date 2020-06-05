@@ -1,13 +1,13 @@
-/* 
+/*
  * File:   Debug.h
  * Author: Kai Niessen
  *
  * Created on January 16, 2016, 7:50 PM
- * 
+ *
  * Contains definitions for tracing, debugging, profiling and logging
- * 
- * To enable trace / debug / rpofiling messages, uncomment the associated 
- * defines or configure them in your IDE / make file. 
+ *
+ * To enable trace / debug / rpofiling messages, uncomment the associated
+ * defines or configure them in your IDE / make file.
  */
 
 #ifndef DEBUG_H
@@ -34,7 +34,9 @@
 #define MSG(x...) fprintf(stderr, __FILE__ " - " x)
 #ifdef PROFILING
 #define PROFILE_START bigtime_t timer = system_time()
-#define PROFILE_MEASURE(action) TRACE("%s took %2.6f seconds\r\n", action, (system_time() - timer) / 1000000.0f)
+#define PROFILE_MEASURE(action) \
+	TRACE("%s took %2.6f seconds\r\n", action, \
+		(system_time() - timer) / 1000000.0f)
 #else
 #define PROFILE_START
 #define PROFILE_MEASURE(action)
