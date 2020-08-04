@@ -138,8 +138,11 @@ StationFinderListenLive::Instantiate()
 void
 StationFinderListenLive::RegisterSelf()
 {
-	Register(
-		"listenlive.eu [experimental]", &StationFinderListenLive::Instantiate);
+	// FIXME: "listenlive.eu" no longer seems to exist, though it looks like
+	// "radiomap.eu" might be its successor? This plugin crashes after searching
+	// anyway...
+//	Register(
+//		"listenlive.eu [experimental]", &StationFinderListenLive::Instantiate);
 }
 
 
