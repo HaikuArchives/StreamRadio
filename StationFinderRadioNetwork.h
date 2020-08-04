@@ -1,6 +1,6 @@
 /*
  * File:   StationFinderRadioNetwork.h
- * Author: user
+ * Author: user, Jacob Secunda
  *
  * Created on 9. Oktober 2015, 22:51
  */
@@ -29,12 +29,15 @@ public:
 		const char* searchFor, BLooper* resultUpdateTarget);
 
 private:
-	static const char* baseUrl;
+	static const char* kBaseUrl;
+	static BString sCachedServerUrl;
+
 	thread_id fIconLookupThread;
 	BObjectList<IconLookup> fIconLookupList;
 	BLooper* fIconLookupNotify;
 
 	static int32 IconLookupFunc(void* data);
+	status_t _CheckServer();
 };
 
 #endif /* STATIONFINDERRADIONETWORK_H */

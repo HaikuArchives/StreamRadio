@@ -1,6 +1,6 @@
 /*
  * File:   Station.cpp
- * Author: Kai Niessen
+ * Author: Kai Niessen, Jacob Secunda
  *
  * Created on 26. Februar 2013, 04:08
  */
@@ -53,6 +53,7 @@ Station::Station(BString name, BString uri)
 	fRating(0),
 	fBitRate(0),
 	fSampleRate(0),
+	fUniqueIdentifier(B_EMPTY_STRING),
 	fMetaInterval(0),
 	fChannels(0),
 	fFlags(0)
@@ -75,6 +76,7 @@ Station::Station(const Station& orig)
 	fRating(orig.fRating),
 	fBitRate(orig.fBitRate),
 	fSampleRate(orig.fSampleRate),
+	fUniqueIdentifier(orig.fUniqueIdentifier),
 	fChannels(orig.fChannels),
 	fEncoding(orig.fEncoding),
 	fMetaInterval(orig.fMetaInterval)
@@ -155,6 +157,8 @@ Station::Save()
 	status = stationFile.WriteAttrString("META:mime", &mimeType);
 	status = stationFile.WriteAttr(
 		"META:encoding", B_INT32_TYPE, 0, &fEncoding, sizeof(fEncoding));
+	status = stationFile.WriteAttrString("META:uniqueidentifier",
+		&fUniqueIdentifier);
 	status = stationFile.Unlock();
 	BNodeInfo stationInfo;
 	stationInfo.SetTo(&stationFile);
@@ -414,6 +418,8 @@ Station::Load(BString Name, BEntry* entry)
 	station->fSource.SetUrlString(readString);
 	status = file.ReadAttrString("META:stationurl", &readString);
 	station->fStationUrl.SetUrlString(readString);
+	status = file.ReadAttrString("META:uniqueidentifier", &readString);
+	station->fUniqueIdentifier.SetTo(readString);
 
 	attr_info attrInfo;
 	status = file.GetAttrInfo("logo", &attrInfo);
@@ -623,6 +629,8 @@ Station::checkFlags()
 		fFlags |= STATION_HAS_FORMAT;
 	if (fMetaInterval != 0)
 		fFlags |= STATION_HAS_META;
+	if (!fUniqueIdentifier.IsEmpty())
+		fFlags |= STATION_HAS_IDENTIFIER;
 }
 
 BDirectory* Station::fStationsDirectory = NULL;

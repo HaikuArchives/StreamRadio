@@ -4,6 +4,7 @@
 #include "Utils.h"
 #include <Alert.h>
 #include <Catalog.h>
+#include <Cursor.h>
 #include <LayoutBuilder.h>
 #include <ScrollView.h>
 #include <StringView.h>
@@ -424,6 +425,8 @@ StationFinderWindow::DoSearch(const char* text)
 	if (!currentService)
 		return;
 
+	be_app->SetCursor(new BCursor(B_CURSOR_ID_PROGRESS));
+
 	BObjectList<Station>* result
 		= currentService->FindBy(ddSearchBy->Value(), text, this);
 	if (result) {
@@ -432,4 +435,6 @@ StationFinderWindow::DoSearch(const char* text)
 		result->MakeEmpty(false);
 		delete result;
 	}
+	
+	be_app->SetCursor(B_CURSOR_SYSTEM_DEFAULT);
 }

@@ -165,6 +165,7 @@ HttpUtils::GetAll(BUrl url, BHttpHeaders* responseHeaders, bigtime_t timeOut,
 	request.SetAutoReferrer(true);
 	request.SetFollowLocation(true);
 	request.SetTimeout(timeOut);
+	request.SetUserAgent("StreamRadio/0.0.4");
 	thread_id threadId = request.Run();
 	status_t status;
 	wait_for_thread(threadId, &status);
@@ -191,7 +192,7 @@ HttpUtils::GetStreamHeader(BUrl url, BHttpHeaders* responseHeaders)
 	request.SetFollowLocation(true);
 	request.SetTimeout(10000);
 	request.SetDiscardData(true);
-	request.SetUserAgent("WinampMPEG/5.55, Ultravox/2.1");
+	request.SetUserAgent("StreamRadio/0.0.4");
 	BHttpHeaders* requestHeaders = new BHttpHeaders();
 	requestHeaders->AddHeader("Icy-MetaData", 1);
 	request.AdoptHeaders(requestHeaders);

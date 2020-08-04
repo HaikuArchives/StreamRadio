@@ -1,6 +1,6 @@
 /*
  * File:   Station.h
- * Author: Kai Niessen
+ * Author: Kai Niessen, Jacob Secunda
  *
  * Created on 26. Februar 2013, 04:08
  */
@@ -25,6 +25,8 @@
 #define STATION_HAS_BITRATE 16
 #define STATION_HAS_FORMAT 32 // frame rate and channels
 #define STATION_HAS_META 64
+#define STATION_HAS_IDENTIFIER 128
+
 
 class StreamPlayer;
 
@@ -101,6 +103,12 @@ public:
 		fBitRate = bitrate;
 		unsaved = true;
 	}
+	inline BString UniqueIdentifier() { return fUniqueIdentifier; }
+	void SetUniqueIdentifier(BString uniqueIdentifier)
+	{
+		fUniqueIdentifier.SetTo(uniqueIdentifier);
+		unsaved = true;
+	}
 	inline int32 Channels() { return fChannels; }
 	inline int32 Encoding() { return fEncoding; }
 	inline size_t FrameSize() { return fFrameSize; }
@@ -125,6 +133,7 @@ protected:
 	BUrl fSource;
 	uint32 fBitRate;
 	uint32 fSampleRate;
+	BString fUniqueIdentifier;
 	uint32 fChannels;
 	size_t fFrameSize;
 	BMimeType fMime;
