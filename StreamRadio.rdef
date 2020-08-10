@@ -1,5 +1,5 @@
 
-resource app_signature "application/x-vnd.Fishpond-Radio";
+resource app_signature "application/x-vnd.Fishpond-StreamRadio";
 
 resource file_types message {
 	"types" = "audio/x-mpegurl",

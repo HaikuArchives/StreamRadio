@@ -1,9 +1,21 @@
 /*
- * File:   RadioSettings.cpp
- * Author: user
+ * Copyright (C) 2017 Kai Niessen <kai.niessen@online.de>
  *
- * Created on 26. Februar 2013, 04:01
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+
 #include <Directory.h>
 #include <File.h>
 #include <FindDirectory.h>
@@ -12,7 +24,8 @@
 #include "Debug.h"
 #include "RadioSettings.h"
 
-const char* SettingsFileName = "StreamRadio.settings";
+
+const char* kSettingsFileName = "StreamRadio.settings";
 
 
 StationsList::StationsList()
@@ -24,7 +37,7 @@ StationsList::StationsList()
 
 StationsList::~StationsList()
 {
-	for (int i = CountItems() - 1; i >= 0; i--)
+	for (int32 i = CountItems() - 1; i >= 0; i--)
 		BObjectList<Station>::RemoveItem(ItemAt(i), true);
 }
 
@@ -34,6 +47,7 @@ StationsList::AddItem(Station* station)
 {
 	if (FindItem(station->Name()))
 		return false;
+
 	return BObjectList<Station>::AddItem(station);
 }
 
@@ -41,9 +55,9 @@ StationsList::AddItem(Station* station)
 bool
 StationsList::RemoveItem(BString* stationName)
 {
-	Station* s = FindItem(stationName);
-	if (s)
-		return BObjectList<Station>::RemoveItem(s, true);
+	Station* station = FindItem(stationName);
+	if (station != NULL)
+		return BObjectList<Station>::RemoveItem(station, true);
 	else
 		return false;
 }
@@ -59,11 +73,12 @@ StationsList::RemoveItem(Station* station)
 Station*
 StationsList::FindItem(BString* stationName)
 {
-	for (int i = 0; i < CountItems(); i++) {
+	for (int32 i = 0; i < CountItems(); i++) {
 		Station* item = ItemAt(i);
 		if (stationName->Compare(item->Name()->String()) == 0)
 			return item;
 	}
+
 	return NULL;
 }
 
@@ -77,9 +92,10 @@ StationsList::Load()
 
 	while ((status = stationsDir->GetNextEntry(&stationEntry)) == B_OK) {
 		Station* station = Station::LoadFromPlsFile(stationEntry.Name());
-		if (station && FindItem(station->Name()) == NULL)
+		if (station != NULL && FindItem(station->Name()) == NULL)
 			AddItem(station);
 	}
+
 	return B_OK;
 }
 
@@ -96,6 +112,7 @@ StationsList::Save()
 
 	while ((status = stationsDir->GetNextEntry(&stationEntry)) == B_OK)
 		stationEntry.Remove();
+
 	EachListItemIgnoreResult<Station, status_t>(this, &Station::Save);
 }
 
@@ -105,7 +122,7 @@ RadioSettings::RadioSettings()
 	BMessage()
 {
 	Stations = new StationsList();
-	Load();
+	_Load();
 }
 
 
@@ -121,6 +138,27 @@ RadioSettings::RadioSettings(const RadioSettings& orig)
 RadioSettings::~RadioSettings()
 {
 	delete Stations;
+}
+
+
+status_t
+RadioSettings::Save()
+{
+	status_t status;
+	BPath configPath;
+	BDirectory configDir;
+	BFile configFile;
+	status = find_directory(B_USER_SETTINGS_DIRECTORY, &configPath);
+	if (status != B_OK)
+		return status;
+
+	configDir.SetTo(configPath.Path());
+	status = configDir.CreateFile(kSettingsFileName, &configFile);
+	Flatten(&configFile);
+
+	Stations->Save();
+
+	return B_OK;
 }
 
 
@@ -154,7 +192,7 @@ RadioSettings::SetStationFinderName(const char* name)
 
 
 status_t
-RadioSettings::Load()
+RadioSettings::_Load()
 {
 	status_t status;
 	BPath configPath;
@@ -166,28 +204,9 @@ RadioSettings::Load()
 		return status;
 
 	configDir.SetTo(configPath.Path());
-	status = configFile.SetTo(&configDir, SettingsFileName, B_READ_ONLY);
+	status = configFile.SetTo(&configDir, kSettingsFileName, B_READ_ONLY);
 	status = Unflatten(&configFile);
 	status = Stations->Load();
+
 	return status;
-}
-
-
-status_t
-RadioSettings::Save()
-{
-	status_t status;
-	BPath configPath;
-	BDirectory configDir;
-	BFile configFile;
-	status = find_directory(B_USER_SETTINGS_DIRECTORY, &configPath);
-	if (status != B_OK)
-		return status;
-
-	configDir.SetTo(configPath.Path());
-	status = configDir.CreateFile(SettingsFileName, &configFile);
-	Flatten(&configFile);
-
-	Stations->Save();
-	return B_OK;
 }

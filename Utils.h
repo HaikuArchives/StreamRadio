@@ -12,21 +12,15 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef _UTILS_H
+#define _UTILS_H
 
-/*
- * File:   Utils.h
- * Author: Kai Niessen <kai.niessen@online.de>
- *
- * Created on April 16, 2017, 1:15 PM
- */
-
-#ifndef UTILS_H
-#define UTILS_H
 
 #include <Application.h>
 #include <Bitmap.h>
+
 
 #define RES_BANNER 100
 #define RES_BN_SEARCH 10
@@ -34,12 +28,14 @@
 #define RES_BN_SEARCH 10
 #define RES_BN_WEB 11
 
-class Utils
-{
+
+class Utils {
 public:
-	Utils(){};
-	virtual ~Utils(){};
-	static BBitmap* ResourceBitmap(int32 id);
+								Utils() {};
+	virtual						~Utils() {};
+
+	static	BBitmap*			ResourceBitmap(int32 id);
 };
 
-#endif /* UTILS_H */
+
+#endif // _UTILS_H

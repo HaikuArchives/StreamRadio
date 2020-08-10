@@ -11,39 +11,45 @@
 #include <TranslationUtils.h>
 #include <View.h>
 
+
 #undef B_TRANSLATION_CONTEXT
 #define B_TRANSLATION_CONTEXT "StationFinder"
 
 
+std::vector<std::pair<char*, InstantiateFunc> >
+	StationFinderServices::sServices;
+
+
 StationFinderServices::~StationFinderServices()
 {
-	fServices.clear();
+	sServices.clear();
 }
 
 
 void
 StationFinderServices::Register(char* serviceName, InstantiateFunc instantiate)
 {
-	pair<char*, InstantiateFunc> service(serviceName, instantiate);
-	fServices.push_back(service);
+	std::pair<char*, InstantiateFunc> service(serviceName, instantiate);
+	sServices.push_back(service);
 }
 
 
-int
+int32
 StationFinderServices::CountItems()
 {
-	return fServices.size();
+	return sServices.size();
 }
 
 
 StationFinderService*
 StationFinderServices::Instantiate(char* name)
 {
-	for (int i = 0; i < fServices.size(); i++) {
-		pair<char*, InstantiateFunc> service = fServices[i];
+	for (uint32 i = 0; i < sServices.size(); i++) {
+		std::pair<char*, InstantiateFunc> service = sServices[i];
 		if (!strcmp(service.first, name))
 			return service.second();
 	}
+
 	return NULL;
 }
 
@@ -51,10 +57,8 @@ StationFinderServices::Instantiate(char* name)
 char*
 StationFinderServices::Name(int i)
 {
-	return fServices[i].first;
+	return sServices[i].first;
 }
-
-vector<pair<char*, InstantiateFunc> > StationFinderServices::fServices;
 
 
 FindByCapability::FindByCapability(char* name)
@@ -65,12 +69,12 @@ FindByCapability::FindByCapability(char* name)
 }
 
 
-FindByCapability::FindByCapability(char* name, char* KeyWords, char* delimiter)
+FindByCapability::FindByCapability(char* name, char* keyWords, char* delimiter)
 	:
 	fName(name),
 	fKeywords()
 {
-	SetKeyWords(KeyWords, delimiter);
+	SetKeyWords(keyWords, delimiter);
 }
 
 
@@ -102,9 +106,9 @@ FindByCapability::Name()
 
 
 void
-FindByCapability::SetKeyWords(char* KeyWords, char* delimiter)
+FindByCapability::SetKeyWords(char* keyWords, char* delimiter)
 {
-	BString tmp(KeyWords);
+	BString tmp(keyWords);
 	tmp.Split(delimiter, true, fKeywords);
 }
 
@@ -121,8 +125,7 @@ StationFinderService::StationFinderService()
 
 StationFinderService::~StationFinderService()
 {
-	if (serviceLogo)
-		delete serviceLogo;
+	delete serviceLogo;
 	findByCapabilities.MakeEmpty(true);
 }
 
@@ -135,19 +138,20 @@ StationFinderService::Register(char* name, InstantiateFunc instantiate)
 
 
 BBitmap*
-StationFinderService::logo(BUrl url)
+StationFinderService::RetrieveLogo(BUrl url)
 {
 	BBitmap* bm = NULL;
 	BString contentType("image/*");
+
 	BMallocIO* bmData = HttpUtils::GetAll(url, NULL, 3000, &contentType);
-
-	if (bmData) {
-
+	if (bmData != NULL) {
 		bm = BTranslationUtils::GetBitmap(bmData);
-		if (bm == NULL || bm->InitCheck() != B_OK)
-			bm == NULL;
+		if (bm != NULL && bm->InitCheck() != B_OK)
+			bm = NULL;
+
 		delete bmData;
 	}
+
 	return bm;
 }
 
@@ -157,6 +161,7 @@ StationFinderService::RegisterSearchCapability(char* name)
 {
 	FindByCapability* newCapability = new FindByCapability(name);
 	findByCapabilities.AddItem(newCapability);
+
 	return newCapability;
 }
 
@@ -168,6 +173,7 @@ StationFinderService::RegisterSearchCapability(
 	FindByCapability* newCapability
 		= new FindByCapability(name, keywords, delimiter);
 	findByCapabilities.AddItem(newCapability);
+
 	return newCapability;
 }
 
@@ -176,95 +182,105 @@ StationFinderWindow::StationFinderWindow(BWindow* parent)
 	:
 	BWindow(BRect(0, 0, 300, 150), B_TRANSLATE("Find stations"),
 		B_TITLED_WINDOW, B_CLOSE_ON_ESCAPE),
-	currentService(NULL)
+	fCurrentService(NULL)
 {
-	messenger = new BMessenger(parent);
+	fMessenger = new BMessenger(parent);
 
 	CenterIn(parent->Frame());
 
-	txSearch = new BTextControl(NULL, NULL, new BMessage(MSG_TXSEARCH));
-	kwSearch = new BOptionPopUp("kwSearch", NULL, new BMessage(MSG_KWSEARCH));
-	bnSearch = new BButton("bnSearch", NULL, new BMessage(MSG_BNSEARCH));
-	bnSearch->SetIcon(Utils::ResourceBitmap(RES_BN_SEARCH));
+	fTxSearch = new BTextControl(NULL, NULL, new BMessage(MSG_TXSEARCH));
 
+	fKwSearch = new BOptionPopUp("fKwSearch", NULL, new BMessage(MSG_KWSEARCH));
 
-	ddServices = new BOptionPopUp(
-		"ddServices", NULL, new BMessage(MSG_SELECT_SERVICE));
+	fBnSearch = new BButton("fBnSearch", NULL, new BMessage(MSG_BNSEARCH));
+	fBnSearch->SetIcon(Utils::ResourceBitmap(RES_BN_SEARCH));
+
+	fDdServices = new BOptionPopUp(
+		"fDdServices", NULL, new BMessage(MSG_SELECT_SERVICE));
 	int currentServiceIndex = 0;
 	const char* settingsServiceName
-		= ((RadioApp*) be_app)->Settings.StationFinderName();
-	for (int i = 0; i < StationFinderServices::CountItems(); i++) {
+		= ((RadioApp*)be_app)->Settings.StationFinderName();
+	for (int32 i = 0; i < StationFinderServices::CountItems(); i++) {
 		const char* serviceName = StationFinderServices::Name(i);
 		if (settingsServiceName && !strcmp(serviceName, settingsServiceName))
 			currentServiceIndex = i;
-		ddServices->AddOption(serviceName, i);
+		fDdServices->AddOption(serviceName, i);
 	}
-	bnVisit = new BButton("bnVisit", "", new BMessage(MSG_VISIT_SERVICE));
-	bnVisit->SetIcon(Utils::ResourceBitmap(RES_BN_WEB));
 
-	ddSearchBy
-		= new BOptionPopUp("ddSearchBy", NULL, new BMessage(MSG_SEARCH_BY));
-	resultView = new StationListView();
-	resultView->SetExplicitAlignment(
+	fBnVisit = new BButton("fBnVisit", "", new BMessage(MSG_VISIT_SERVICE));
+	fBnVisit->SetIcon(Utils::ResourceBitmap(RES_BN_WEB));
+
+	fDdSearchBy
+		= new BOptionPopUp("fDdSearchBy", NULL, new BMessage(MSG_SEARCH_BY));
+
+	fResultView = new StationListView();
+	fResultView->SetExplicitAlignment(
 		BAlignment(B_ALIGN_USE_FULL_WIDTH, B_ALIGN_USE_FULL_HEIGHT));
-	bnAdd = new BButton(
-		"bnAdd", B_TRANSLATE("Add"), new BMessage(MSG_ADD_STATION));
+
+	fBnAdd = new BButton(
+		"fBnAdd", B_TRANSLATE("Add"), new BMessage(MSG_ADD_STATION));
+
 	BLayoutBuilder::Group<>(this, B_VERTICAL, 0)
 		.AddGrid(3, 3, 0.0)
-		.SetInsets(B_USE_WINDOW_INSETS)
-		.Add(new BStringView("lbServices", B_TRANSLATE("Service")), 0, 0)
-		.Add(ddServices, 1, 0)
-		.Add(bnVisit, 2, 0)
+			.SetInsets(B_USE_WINDOW_INSETS)
+			.Add(new BStringView("lbServices", B_TRANSLATE("Service")), 0, 0)
+			.Add(fDdServices, 1, 0)
+			.Add(fBnVisit, 2, 0)
 
-		.Add(new BStringView("lbSearchBy", B_TRANSLATE("Search by")), 0, 1)
-		.Add(ddSearchBy, 1, 1)
+			.Add(new BStringView("lbSearchBy", B_TRANSLATE("Search by")), 0, 1)
+			.Add(fDdSearchBy, 1, 1)
 
-		.Add(new BStringView("lbSearchFor", B_TRANSLATE("Search for")), 0, 2)
-		.Add(txSearch, 1, 2)
-		.Add(kwSearch, 1, 2)
-		.Add(bnSearch, 2, 2)
-		.GetLayout(&searchGrid)
+			.Add(new BStringView(
+				"lbSearchFor", B_TRANSLATE("Search for")), 0, 2)
+			.Add(fTxSearch, 1, 2)
+			.Add(fKwSearch, 1, 2)
+			.Add(fBnSearch, 2, 2)
+			.GetLayout(&fSearchGrid)
 		.End()
 
-		.Add(new BScrollView(
-				 "srollResult", resultView, 0, B_FOLLOW_ALL_SIDES, false, true),
-			0.9)
+		.Add(new BScrollView("srollResult", fResultView, 0, false, true), 0.9)
+
 		.AddGrid(3, 1, 0.0)
-		.SetInsets(B_USE_WINDOW_INSETS)
-		.Add(bnAdd, 2, 0)
-		.SetExplicitAlignment(BAlignment(B_ALIGN_RIGHT, B_ALIGN_VERTICAL_UNSET))
+			.SetInsets(B_USE_WINDOW_INSETS)
+			.Add(fBnAdd, 2, 0)
+			.SetExplicitAlignment(
+				BAlignment(B_ALIGN_RIGHT, B_ALIGN_VERTICAL_UNSET))
 		.End()
-		.End();
+	.End();
 
-	bnAdd->SetEnabled(false);
-	resultView->SetInvocationMessage(new BMessage(MSG_ADD_STATION));
-	resultView->SetSelectionMessage(new BMessage(MSG_SELECT_STATION));
+	fBnAdd->SetEnabled(false);
+
+	fResultView->SetInvocationMessage(new BMessage(MSG_ADD_STATION));
+	fResultView->SetSelectionMessage(new BMessage(MSG_SELECT_STATION));
+
 	Layout(true);
 	ResizeToPreferred();
 	ResizeBy(100, 0);
 
-	txSearch->MakeFocus(true);
-	bnSearch->MakeDefault(true);
-	txSearch->StartWatchingAll(this);
+	fTxSearch->MakeFocus(true);
+	fBnSearch->MakeDefault(true);
+	fTxSearch->StartWatchingAll(this);
+
 	SelectService(currentServiceIndex);
-	ddServices->SetValue(currentServiceIndex);
+	fDdServices->SetValue(currentServiceIndex);
 }
 
 
 StationFinderWindow::~StationFinderWindow()
 {
-	if (currentService)
-		delete currentService;
-	resultView->MakeEmpty();
-	txSearch->StopWatchingAll(this);
-	delete messenger;
+	delete fCurrentService;
+
+	fResultView->MakeEmpty();
+	fTxSearch->StopWatchingAll(this);
+
+	delete fMessenger;
 }
 
 
 bool
 StationFinderWindow::QuitRequested()
 {
-	messenger->SendMessage(new BMessage(MSG_SEARCH_CLOSE));
+	fMessenger->SendMessage(new BMessage(MSG_SEARCH_CLOSE));
 	return true;
 }
 
@@ -272,88 +288,100 @@ StationFinderWindow::QuitRequested()
 void
 StationFinderWindow::MessageReceived(BMessage* msg)
 {
+
 	switch (msg->what) {
 		case MSG_BNSEARCH:
 		{
-			if (txSearch->IsEnabled()) {
-				if (txSearch->Text()[0]) {
-					DoSearch(txSearch->Text());
-					resultView->MakeFocus(true);
+			if (fTxSearch->IsEnabled()) {
+				if (fTxSearch->Text()[0]) {
+					DoSearch(fTxSearch->Text());
+					fResultView->MakeFocus(true);
 				}
-			} else if (kwSearch->Value() >= 0)
-				DoSearch(currentService->Capability(ddSearchBy->Value())
-							 ->KeyWords()
-							 ->StringAt(kwSearch->Value()));
+			} else if (fKwSearch->Value() >= 0) {
+				DoSearch(fCurrentService->Capability(fDdSearchBy->Value())
+							->KeyWords()->StringAt(fKwSearch->Value()));
+			}
+
 			break;
 		}
+
 		case MSG_ADD_STATION:
 		{
 			int32 index = msg->GetInt32("index", -1);
 			if (index < 0)
-				index = resultView->CurrentSelection(0);
+				index = fResultView->CurrentSelection(0);
+
 			if (index >= 0) {
-				Station* station = resultView->StationAt(index);
+				Station* station = fResultView->StationAt(index);
+
 				status_t probeStatus = station->Probe();
 				if (probeStatus == B_OK) {
 					BMessage* dispatch = new BMessage(msg->what);
 					dispatch->AddPointer("station", station);
-					if (messenger->SendMessage(dispatch) == B_OK)
-						resultView->RemoveItem(index);
+
+					if (fMessenger->SendMessage(dispatch) == B_OK)
+						fResultView->RemoveItem(index);
 				} else {
 					BString msg;
 					msg.SetToFormat(
 						B_TRANSLATE("Station %s did not respond correctly and "
 									"could not be added"),
 						station->Name()->String());
+
 					(new BAlert(B_TRANSLATE("Add station failed"), msg,
 						 B_TRANSLATE("OK")))
 						->Go();
 				}
 			}
+
 			break;
 		}
 
 		case MSG_UPDATE_STATION:
 		{
 			Station* st = NULL;
-			status_t status = msg->FindPointer("station", (void**) &st);
-			if (status == B_OK)
-				resultView->InvalidateItem(
-					resultView->IndexOf(resultView->Item(st)));
+			if (msg->FindPointer("station", (void**)&st) == B_OK) {
+				fResultView->InvalidateItem(
+					fResultView->IndexOf(fResultView->Item(st)));
+			}
+
 			break;
 		}
 
 		case MSG_SELECT_STATION:
 		{
 			bool inResults = (msg->GetInt32("index", -1) >= 0);
-			bnAdd->SetEnabled(inResults);
-			bnAdd->MakeDefault(inResults);
+			fBnAdd->SetEnabled(inResults);
+			fBnAdd->MakeDefault(inResults);
+
 			break;
 		}
 
 		case MSG_SELECT_SERVICE:
-			SelectService(ddServices->Value());
+			SelectService(fDdServices->Value());
 			break;
 
 		case MSG_SEARCH_BY:
-			SelectCapability(ddSearchBy->Value());
+			SelectCapability(fDdSearchBy->Value());
 			break;
 
 		case MSG_VISIT_SERVICE:
 		{
-			if (currentService && currentService->serviceHomePage
-				&& currentService->serviceHomePage.IsValid())
-				currentService->serviceHomePage.OpenWithPreferredApplication(
+			if (fCurrentService != NULL
+				&& fCurrentService->serviceHomePage != NULL
+				&& fCurrentService->serviceHomePage.IsValid())
+				fCurrentService->serviceHomePage.OpenWithPreferredApplication(
 					true);
 			break;
 		}
+
 		case B_OBSERVER_NOTICE_CHANGE:
-			bnSearch->MakeDefault(true);
+			fBnSearch->MakeDefault(true);
 			break;
 
 		case MSG_TXSEARCH:
-			bnAdd->MakeDefault(false);
-			bnSearch->MakeDefault(true);
+			fBnAdd->MakeDefault(false);
+			fBnSearch->MakeDefault(true);
 			break;
 
 		default:
@@ -365,24 +393,31 @@ StationFinderWindow::MessageReceived(BMessage* msg)
 void
 StationFinderWindow::SelectService(int index)
 {
-	if (currentService) {
-		delete currentService;
-		currentService = NULL;
-	}
-
 	char* serviceName = StationFinderServices::Name(index);
-	if (!serviceName)
+	if (serviceName == NULL)
 		return;
 
-	currentService = StationFinderServices::Instantiate(serviceName);
-	((RadioApp*) be_app)->Settings.SetStationFinderName(serviceName);
-	while (ddSearchBy->CountOptions())
-		ddSearchBy->RemoveOptionAt(0);
+	StationFinderService* selectedService = StationFinderServices::Instantiate(
+		serviceName);
+	if (selectedService == NULL)
+		return;
 
-	for (int i = 0; i < currentService->CountCapabilities(); i++)
-		ddSearchBy->AddOption(currentService->Capability(i)->Name(), i);
+	if (fCurrentService != NULL) {
+		delete fCurrentService;
+		fCurrentService = NULL;
+	}
 
-	if (ddSearchBy->CountOptions())
+	fCurrentService = selectedService;
+
+	((RadioApp*)be_app)->Settings.SetStationFinderName(serviceName);
+
+	while (fDdSearchBy->CountOptions() > 0)
+		fDdSearchBy->RemoveOptionAt(0);
+
+	for (int32 i = 0; i < fCurrentService->CountCapabilities(); i++)
+		fDdSearchBy->AddOption(fCurrentService->Capability(i)->Name(), i);
+
+	if (fDdSearchBy->CountOptions() != 0)
 		SelectCapability(0);
 }
 
@@ -390,29 +425,34 @@ StationFinderWindow::SelectService(int index)
 void
 StationFinderWindow::SelectCapability(int index)
 {
-	if (!currentService)
+	if (fCurrentService == NULL)
 		return;
 
-	FindByCapability* capability = currentService->Capability(index);
-	if (!capability)
+	FindByCapability* capability = fCurrentService->Capability(index);
+	if (capability == NULL)
 		return;
 
 	if (capability->HasKeyWords()) {
-		while (kwSearch->CountOptions())
-			kwSearch->RemoveOptionAt(0);
-		for (int i = 0; i < capability->KeyWords()->CountStrings(); i++)
-			kwSearch->AddOption(capability->KeyWords()->StringAt(i), i);
+		while (fKwSearch->CountOptions() > 0)
+			fKwSearch->RemoveOptionAt(0);
 
-		searchGrid->RemoveView(txSearch);
-		searchGrid->AddView(kwSearch, 1, 2);
-		kwSearch->SetEnabled(true);
-		txSearch->SetEnabled(false);
+		for (int32 i = 0; i < capability->KeyWords()->CountStrings(); i++)
+			fKwSearch->AddOption(capability->KeyWords()->StringAt(i), i);
+
+		fSearchGrid->RemoveView(fTxSearch);
+		fSearchGrid->AddView(fKwSearch, 1, 2);
+
+		fKwSearch->SetEnabled(true);
+		fTxSearch->SetEnabled(false);
+
 		Layout(true);
 	} else {
-		searchGrid->RemoveView(kwSearch);
-		searchGrid->AddView(txSearch, 1, 2);
-		kwSearch->SetEnabled(false);
-		txSearch->SetEnabled(true);
+		fSearchGrid->RemoveView(fKwSearch);
+		fSearchGrid->AddView(fTxSearch, 1, 2);
+
+		fKwSearch->SetEnabled(false);
+		fTxSearch->SetEnabled(true);
+
 		Layout(true);
 	}
 }
@@ -421,20 +461,21 @@ StationFinderWindow::SelectCapability(int index)
 void
 StationFinderWindow::DoSearch(const char* text)
 {
-	resultView->MakeEmpty();
-	if (!currentService)
+	fResultView->MakeEmpty();
+	if (fCurrentService == NULL)
 		return;
 
 	be_app->SetCursor(new BCursor(B_CURSOR_ID_PROGRESS));
 
 	BObjectList<Station>* result
-		= currentService->FindBy(ddSearchBy->Value(), text, this);
-	if (result) {
-		for (unsigned i = 0; i < result->CountItems(); i++)
-			resultView->AddItem(new StationListViewItem(result->ItemAt(i)));
+		= fCurrentService->FindBy(fDdSearchBy->Value(), text, this);
+	if (result != NULL) {
+		for (int32 i = 0; i < result->CountItems(); i++)
+			fResultView->AddItem(new StationListViewItem(result->ItemAt(i)));
+
 		result->MakeEmpty(false);
 		delete result;
 	}
-	
+
 	be_app->SetCursor(B_CURSOR_SYSTEM_DEFAULT);
 }

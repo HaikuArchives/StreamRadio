@@ -1,4 +1,4 @@
-## Haiku Generic Makefile v2.6 ## 
+## Haiku Generic Makefile v2.6 ##
 
 ## Fill in this file to specify the project being created, and the referenced
 ## Makefile-Engine will do all of the hard work for you. This handles any
@@ -14,7 +14,7 @@ V_MINOR = 4
 V_VARIETY = B_APPV_DEVELOPMENT
 V_BUILD = 1
 
-TARGET_DIR := ./dist
+TARGET_DIR := dist
 PACKAGE = $(TARGET_DIR)/$(NAME)_$(VERSION)-$(ARCH).hpkg
 
 # The type of binary, must be one of:
@@ -25,35 +25,34 @@ PACKAGE = $(TARGET_DIR)/$(NAME)_$(VERSION)-$(ARCH).hpkg
 TYPE = APP
 
 # 	If you plan to use localization, specify the application's MIME signature.
-APP_MIME_SIG = application/x-vnd.Fishpond-Radio
+APP_MIME_SIG = application/x-vnd.Fishpond-StreamRadio
 
 #	The following lines tell Pe and Eddie where the SRCS, RDEFS, and RSRCS are
 #	so that Pe and Eddie can fill them in for you.
 #%{
-# @src->@ 
+# @src->@
 
-#	Specify the source files to use. Full paths or paths relative to the 
+#	Specify the source files to use. Full paths or paths relative to the
 #	Makefile can be included. All files, regardless of directory, will have
 #	their object files created in the common object directory. Note that this
 #	means this Makefile will not work correctly if two source files with the
 #	same name (source.c or source.cpp) are included from different directories.
 #	Also note that spaces in folder names do not work well with this Makefile.
 SRCS := About.cpp \
-	Expander.cpp \
-	HttpUtils.cpp \
-	MainWindow.cpp \
-	RadioApp.cpp \
-	RadioSettings.cpp \
-	Station.cpp \
-	StationFinder.cpp \
-	StationFinderListenLive.cpp \
-	StationFinderRadioNetwork.cpp \
-	StationListView.cpp \
-	StationPanel.cpp \
-	StreamIO.cpp \
-	StreamPlayer.cpp \
-    Utils.cpp
-	
+		Expander.cpp \
+		HttpUtils.cpp \
+		MainWindow.cpp \
+		RadioApp.cpp \
+		RadioSettings.cpp \
+		Station.cpp \
+		StationFinder.cpp \
+		StationFinderListenLive.cpp \
+		StationFinderRadioNetwork.cpp \
+		StationListView.cpp \
+		StationPanel.cpp \
+		StreamIO.cpp \
+		StreamPlayer.cpp \
+		Utils.cpp
 
 #	Specify the resource definition files to use. Full or relative paths can be
 #	used.
@@ -61,10 +60,10 @@ RDEFS = StreamRadio.rdef
 
 #	Specify the resource files to use. Full or relative paths can be used.
 #	Both RDEFS and RSRCS can be utilized in the same Makefile.
-RSRCS = 
+RSRCS =
 
 # End Pe/Eddie support.
-# @<-src@ 
+# @<-src@
 #%}
 
 #	Specify libraries to link against.
@@ -86,20 +85,19 @@ LIBS = $(STDCPPLIBS) be translation bnetapi media localestub shared
 #	to the Makefile. The paths included are not parsed recursively, so
 #	include all of the paths where libraries must be found. Directories where
 #	source files were specified are	automatically included.
-LIBPATHS = 
+LIBPATHS =
 
 #	Additional paths to look for system headers. These use the form
 #	"#include <header>". Directories that contain the files in SRCS are
 #	NOT auto-included here.
 SYSTEM_INCLUDE_PATHS = /boot/system/develop/headers/private/media \
-        /boot/system/develop/headers/os/codec \
-        /boot/system/develop/headers/private/media/experimental \
-        /boot/system/develop/headers/private/shared
+					   /boot/system/develop/headers/private/media/experimental \
+					   /boot/system/develop/headers/private/shared
 
 #	Additional paths paths to look for local headers. These use the form
 #	#include "header". Directories that contain the files in SRCS are
 #	automatically included.
-LOCAL_INCLUDE_PATHS = 
+LOCAL_INCLUDE_PATHS =
 
 #	Specify the level of optimization that you want. Specify either NONE (O0),
 #	SOME (O1), FULL (O2), or leave blank (for the default optimization level).
@@ -117,25 +115,25 @@ LOCALES = ca de en_GB en es ro
 #	use. For example, setting DEFINES to "DEBUG=1" will cause the compiler
 #	option "-DDEBUG=1" to be used. Setting DEFINES to "DEBUG" would pass
 #	"-DDEBUG" on the compiler's command line.
-DEFINES = HAIKU_TARGET_PLATFORM_HAIKU
+DEFINES =
 
 #	Specify the warning level. Either NONE (suppress all warnings),
 #	ALL (enable all warnings), or leave blank (enable default warnings).
-WARNINGS = 
+WARNINGS = ALL
 
 #	With image symbols, stack crawls in the debugger are meaningful.
 #	If set to "TRUE", symbols will be created.
-SYMBOLS := 
+SYMBOLS :=
 
 #	Includes debug information, which allows the binary to be debugged easily.
 #	If set to "TRUE", debug info will be created.
-DEBUGGER := 
+DEBUGGER :=
 
 #	Specify any additional compiler flags to be used.
-COMPILER_FLAGS = 
+COMPILER_FLAGS =
 
 #	Specify any additional linker flags to be used.
-LINKER_FLAGS = 
+LINKER_FLAGS =
 
 #	Specify the version of this binary. Example:
 #		-app 3 4 0 d 0 -short 340 -long "340 "`echo -n -e '\302\251'`"1999 GNU GPL"
@@ -149,11 +147,11 @@ APP_VERSION := -app $(V_MAJOR) $(V_MIDDLE) $(V_MINOR) $(V_VARIETY) $(V_BUILD) -s
 #	will instruct the "driverinstall" rule to place a symlink to your driver's
 #	binary in ~/add-ons/kernel/drivers/dev/video/usb, so that your driver will
 #	appear at /dev/video/usb when loaded. The default is "misc".
-DRIVER_PATH = 
+DRIVER_PATH =
 
 VERSION_RDEF = $(NAME)-version.rdef
 RDEFS += $(VERSION_RDEF)
-	
+
 ## Include the Makefile-Engine
 DEVEL_DIRECTORY = \
 	$(shell findpaths -e B_FIND_PATH_DEVELOP_DIRECTORY etc/makefile-engine)
@@ -168,7 +166,7 @@ ARCH_PACKAGE_INFO = $(OBJ_DIR)/PackageInfo_$(ARCH)
 
 $(ARCH_PACKAGE_INFO): Makefile
 	cat ./PackageInfo | sed 's/$$VERSION/$(VERSION)/' | sed 's/$$ARCH/$(ARCH)/' > $(ARCH_PACKAGE_INFO)
-	
+
 $(PACKAGE): $(TARGET_DIR)/$(NAME) $(ARCH_PACKAGE_INFO)
 	mkdir -p $(PACKAGE_DIR)/apps
 	mkdir -p $(PACKAGE_DIR)/data/deskbar/menu/Applications
@@ -183,7 +181,7 @@ clean: rdefclean distclean
 
 rdefclean:
 	-rm $(VERSION_RDEF)
-	
+
 distclean:
 	-rm $(TARGET_DIR)/$(NAME)
 

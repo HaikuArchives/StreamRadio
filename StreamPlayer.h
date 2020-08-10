@@ -1,21 +1,31 @@
 /*
- * File:   HttpPlayer.h
- * Author: Kai Niessen
+ * Copyright (C) 2017 Kai Niessen <kai.niessen@online.de>
  *
- * Created on January 25, 2016, 6:49 PM
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef _STREAM_PLAYER_H
+#define _STREAM_PLAYER_H
 
-#ifndef STREAMPLAYER_H
-#define STREAMPLAYER_H
-//#include <MediaExtractor.h>
-//#include <DecoderPlugin.h>
 
+#include <MediaFile.h>
+#include <SoundPlayer.h>
+
+#include <MediaIO.h>
 
 #include "Station.h"
 #include "StreamIO.h"
-#include <MediaFile.h>
-#include <MediaIO.h>
-#include <SoundPlayer.h>
+
 
 // Notification Messages
 #define MSG_PLAYER_STATE_CHANGED \
@@ -23,41 +33,50 @@
 #define MSG_PLAYER_BUFFER_LEVEL \
 	'mPBL' // "player" = StreamPlayer*, "level" = float percent buffer filled
 
+
 class Station;
 
-class StreamPlayer : BLocker
-{
+
+class StreamPlayer : private BLocker {
 public:
-	StreamPlayer(Station* station, BLooper* Notify = NULL);
-	virtual ~StreamPlayer();
-	inline status_t InitCheck() { return this->fInitStatus; }
-	inline Station* GetStation() { return this->fStation; }
-	status_t Play();
-	status_t Stop();
-	float Volume();
-	void SetVolume(float volume);
-	enum PlayState { InActive = -1, Stopped, Playing, Buffering };
-	inline PlayState State() { return fState; }
+								StreamPlayer(Station* station,
+									BLooper* notify = NULL);
+	virtual						~StreamPlayer();
+
+	inline	status_t			InitCheck() { return fInitStatus; }
+	inline	Station*			GetStation() { return fStation; }
+			status_t			Play();
+			status_t			Stop();
+			float				Volume();
+			void				SetVolume(float volume);
+
+	enum	PlayState 			{ InActive = -1, Stopped, Playing, Buffering };
+	inline	PlayState 			State() { return fState; }
 
 private:
-	PlayState fState;
-	void setState(PlayState state);
-	status_t fStatus, fInitStatus;
-	BLooper* fNotify;
-	int fNoNotifyCount;
-	Station* fStation;
-	StreamIO* fStream;
-	BMediaFile* fMediaFile;
-	BSoundPlayer* fPlayer;
-	media_codec_info fCodecInfo;
-	media_format fDecodedFormat;
-	media_header fHeader;
-	media_decode_info fInfo;
-	BLocker fLock;
-	bool fStopRequested;
-	static status_t StartPlayThreadFunc(StreamPlayer* _this);
-	static void GetDecodedChunk(void* cookie, void* buffer, size_t size,
-		const media_raw_audio_format& format);
+			void				_SetState(PlayState state);
+
+	static	status_t			_StartPlayThreadFunc(StreamPlayer* _this);
+	static	void				_GetDecodedChunk(void* cookie, void* buffer,
+									size_t size,
+									const media_raw_audio_format& format);
+
+private:
+			Station*			fStation;
+			BLooper*			fNotify;
+			BMediaFile*			fMediaFile;
+			StreamIO*			fStream;
+			BSoundPlayer*		fPlayer;
+			PlayState			fState;
+
+			status_t			fInitStatus;
+			bool				fStopRequested;
+
+			media_codec_info	fCodecInfo;
+			media_format		fDecodedFormat;
+			media_header		fHeader;
+			media_decode_info	fInfo;
 };
 
-#endif /* STREAMPLAYER_H */
+
+#endif // _STREAM_PLAYER_H

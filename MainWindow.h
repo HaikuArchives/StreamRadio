@@ -15,11 +15,18 @@
 	GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
-	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+#ifndef _MAIN_WINDOW_H
+#define _MAIN_WINDOW_H
 
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+
+#include <Menu.h>
+#include <MenuBar.h>
+#include <Message.h>
+#include <ObjectList.h>
+#include <StringView.h>
+#include <Window.h>
 
 #include "Expander.h"
 #include "RadioSettings.h"
@@ -27,12 +34,7 @@
 #include "StationListView.h"
 #include "StationPanel.h"
 #include "StreamPlayer.h"
-#include <Menu.h>
-#include <MenuBar.h>
-#include <Message.h>
-#include <ObjectList.h>
-#include <StringView.h>
-#include <Window.h>
+
 
 #define MSG_REFS_RECEIVED 'REFS'
 #define MSG_PASTE_URL 'PURL'
@@ -43,58 +45,32 @@
 #define MSG_HELP 'HELP'
 #define MSG_PARALLEL_PLAYBACK 'mPAR'
 
-/** \brief The mainwindow.
- *
- * This class provides the mainwindow and handels the actions, session
- * management, the global setting dialog, the <i>Tip of the day</i> and so on.
- *
- * \note The desctructor of this function will not necesarily be called, so also
- * the children objects will not necesarrily be destroyed. So don't relay on the
- * desctructor of children objects to save data, the application state and so
- * on! */
-class MainWindow : public BWindow
-{
-public:
-	MainWindow();
-	virtual ~MainWindow();
 
-	virtual void MessageReceived(BMessage* message);
-	virtual bool QuitRequested();
-	virtual void SetVisible(bool visible);
+class MainWindow : public BWindow {
+public:
+								MainWindow();
+	virtual						~MainWindow();
+
+	virtual	void				MessageReceived(BMessage* message);
+	virtual	bool				QuitRequested();
+
+	virtual	void				SetVisible(bool visible);
 
 private:
-	RadioSettings* fSettings;
-	BMenuBar* fMainMenu;
-	StationListView* fStationList;
-	StationFinderWindow* fStationFinder;
-	StationPanel* fStationPanel;
-	BStringView* fStatusBar;
-	Expander* fExpander;
-	BObjectList<StationListViewItem> activeStations;
-	bool allowParallelPlayback;
-	BMenuItem* menuParallelPlayback;
+			void				_TogglePlay(StationListViewItem* stationItem);
 
-	void TogglePlay(StationListViewItem* stationItem);
-
-	/** Actualizes the status in the status bar and in the tooltip of the system
-	 * tray icon. */
-	void AskForKradioripperImport();
-	/** Displays the settings_general_dialog. */
-	void DisplaySettings();
-	/** Displays the tip of the day (independently from if the user
-	 *   has disabled them or not). */
-	void DisplayTipOfDay();
-	/** Sets the visibility of the streamdirectory and saves this value also in
-	 * the config file.
-	 * @param visible Choose \e true to show the streamdirectory and \e false to
-	 * hide it. \note If #MainWindow is not visible, the streamdirectory will be
-	 * hidden indepentendly of the parameter. */
-
-	/** Sets up the actions that are supported by this class. */
-	void SetupActions();
-	/** Sets up the dock widget with the stream directory. */
-	void SetupStreamDirectory();
-	void SaveSettings();
+private:
+			RadioSettings*		fSettings;
+			BMenuBar*			fMainMenu;
+			StationListView*	fStationList;
+			StationFinderWindow*	fStationFinder;
+			StationPanel*		fStationPanel;
+			BStringView*		fStatusBar;
+			Expander*			fExpander;
+			BObjectList<StationListViewItem>	fActiveStations;
+			bool				fAllowParallelPlayback;
+			BMenuItem*			fMenuParallelPlayback;
 };
 
-#endif
+
+#endif // _MAIN_WINDOW_H

@@ -12,19 +12,12 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*
- * File:   About.cpp
- * Author: Kai Niessen <kai.niessen@online.de>
- *
- * Created on March 20, 2017, 4:11 PM
- */
 
 #include "About.h"
-#include "RadioApp.h"
-#include "Utils.h"
+
 #include <AppFileInfo.h>
 #include <Application.h>
 #include <Archivable.h>
@@ -34,6 +27,10 @@
 #include <Roster.h>
 #include <StringView.h>
 #include <TranslationUtils.h>
+
+#include "RadioApp.h"
+#include "Utils.h"
+
 
 #undef B_TRANSLATION_CONTEXT
 #define B_TRANSLATION_CONTEXT "About"
@@ -52,16 +49,19 @@ About::About()
 	versionView->SetViewColor(238, 238, 235, 255);
 	versionView->SetHighColor(134, 135, 138, 255);
 	versionView->SetLowColor(134, 135, 138, 0);
+
 	BBitmap* banner = Utils::ResourceBitmap(RES_BANNER);
-	if (banner) {
+	if (banner != NULL) {
 		bounds = banner->Bounds();
 		ResizeTo(bounds.Width(),
 			bounds.Height() + versionView->PreferredSize().height);
+
 		versionView->SetFontSize(11);
 		versionView->SetAlignment(B_ALIGN_RIGHT);
 		versionView->ResizeTo(
 			bounds.Width(), versionView->PreferredSize().height + 2);
 		versionView->MoveTo(0, bounds.Height());
+
 		BView* bannerView = new BView(bounds, "bannerView",
 			B_FOLLOW_LEFT_RIGHT | B_FOLLOW_TOP, B_WILL_DRAW);
 		AddChild(bannerView, versionView);
@@ -69,9 +69,11 @@ About::About()
 	} else {
 		versionView->SetFontSize(40);
 		versionView->SetAlignment(B_ALIGN_CENTER);
+
 		BSize preferredSize = versionView->PreferredSize();
 		ResizeTo(preferredSize.width + 10, preferredSize.height);
 	}
+
 	CenterOnScreen();
 }
 
@@ -97,5 +99,6 @@ About::GetAppVersion()
 		versionString.SetTo(versionInfo.long_info);
 	else
 		versionString = "©Fishpond 2012-2017";
+
 	return versionString;
 }
