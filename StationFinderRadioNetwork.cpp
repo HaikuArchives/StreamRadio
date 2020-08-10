@@ -1,18 +1,31 @@
 /*
- * File:   StationFinderRadioNetwork.cpp
- * Author: user, Jacob Secunda
+ * Copyright (C) 2017 Kai Niessen <kai.niessen@online.de>
+ * Copyright (C) 2020 Jacob Secunda
  *
- * Created on 9. Oktober 2015, 22:51
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 #include "StationFinderRadioNetwork.h"
-#include "Debug.h"
-#include "HttpUtils.h"
-#include "StationFinderListenLive.h"
+
 #include <Catalog.h>
 #include <Country.h>
 
 #include <Json.h>
+
+#include "Debug.h"
+#include "HttpUtils.h"
 
 
 #undef B_TRANSLATION_CONTEXT
@@ -36,7 +49,7 @@ IconLookup::IconLookup(Station* station, BUrl iconUrl)
 StationFinderRadioNetwork::StationFinderRadioNetwork()
 	:
 	StationFinderService(),
-	fIconLookupThread(0),
+	fIconLookupThread(-1),
 	fIconLookupList()
 {
 	serviceName.SetTo(B_TRANSLATE("Community Radio Browser"));
@@ -74,8 +87,8 @@ StationFinderRadioNetwork::RegisterSelf()
 
 
 BObjectList<Station>*
-StationFinderRadioNetwork::FindBy(
-	int capabilityIndex, const char* searchFor, BLooper* resultUpdateTarget)
+StationFinderRadioNetwork::FindBy(int capabilityIndex, const char* searchFor,
+	BLooper* resultUpdateTarget)
 {
 	if (fIconLookupThread)
 		suspend_thread(fIconLookupThread);
@@ -90,7 +103,7 @@ StationFinderRadioNetwork::FindBy(
 	if (_CheckServer() != B_OK)
 		return result;
 
-	printf("Connected to server: %s \n", sCachedServerUrl.String());
+	printf("Connected to server: %s\n", sCachedServerUrl.String());
 
 	BString urlString(sCachedServerUrl);
 
@@ -101,24 +114,31 @@ StationFinderRadioNetwork::FindBy(
 		case 0: // Name search
 			urlString.Append("byname/");
 			break;
+
 		case 1: // Tag search
 			urlString.Append("bytag/");
 			break;
+
 		case 2: // Language search
 			urlString.Append("bylanguage/");
 			break;
+
 		case 3: // Country search
 			urlString.Append("bycountry/");
 			break;
+
 		case 4: // Country code search
 			urlString.Append("bycountrycodeexact/");
 			break;
+
 		case 5: // State/Region search
 			urlString.Append("bystate/");
 			break;
+
 		case 6: // Unique identifier search
 			urlString.Append("byuuid/");
 			break;
+
 		default: // A very bad kind of search? Just do a name search...
 			urlString.Append("byname/");
 			break;
@@ -194,9 +214,9 @@ StationFinderRadioNetwork::FindBy(
 		}
 
 		if (!fIconLookupList.IsEmpty()) {
-			if (!fIconLookupThread) {
+			if (fIconLookupThread < 0) {
 				fIconLookupThread = spawn_thread(
-					&IconLookupFunc, "iconlookup", B_LOW_PRIORITY, this);
+					&_IconLookupFunc, "iconlookup", B_LOW_PRIORITY, this);
 			}
 			resume_thread(fIconLookupThread);
 		}
@@ -210,14 +230,15 @@ StationFinderRadioNetwork::FindBy(
 
 
 int32
-StationFinderRadioNetwork::IconLookupFunc(void* data)
+StationFinderRadioNetwork::_IconLookupFunc(void* data)
 {
 	StationFinderRadioNetwork* _this = (StationFinderRadioNetwork*)data;
 	while (!_this->fIconLookupList.IsEmpty()) {
 		IconLookup* item = _this->fIconLookupList.FirstItem();
-		BBitmap* logo = _this->logo(item->fIconUrl);
-		if (logo)
+		BBitmap* logo = _this->RetrieveLogo(item->fIconUrl);
+		if (logo != NULL)
 			item->fStation->SetLogo(logo);
+
 		BMessage* notification = new BMessage(MSG_UPDATE_STATION);
 		notification->AddPointer("station", item->fStation);
 		if (_this->fIconLookupNotify->LockLooper()) {
@@ -227,7 +248,8 @@ StationFinderRadioNetwork::IconLookupFunc(void* data)
 		_this->fIconLookupList.RemoveItem(item, true);
 	}
 
-	_this->fIconLookupThread = 0;
+	_this->fIconLookupThread = -1;
+
 	return B_OK;
 }
 

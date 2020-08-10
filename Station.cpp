@@ -1,17 +1,36 @@
 /*
- * File:   Station.cpp
- * Author: Kai Niessen, Jacob Secunda
+ * Copyright (C) 2017 Kai Niessen <kai.niessen@online.de>
+ * Copyright (C) 2020 Jacob Secunda
  *
- * Created on 26. Februar 2013, 04:08
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+
 #include "Station.h"
-#include "Debug.h"
-#include "HttpUtils.h"
+
+#include <exception>
+#include <regex.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include <Alert.h>
 #include <BitmapStream.h>
 #include <Catalog.h>
 #include <Directory.h>
 #include <Entry.h>
+#include <fs_attr.h>
 #include <File.h>
 #include <FindDirectory.h>
 #include <HttpRequest.h>
@@ -26,18 +45,17 @@
 #include <TranslationUtils.h>
 #include <TranslatorRoster.h>
 #include <UrlSynchronousRequest.h>
-#include <exception>
-#include <fs_attr.h>
-#include <regex.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+
+#include "Debug.h"
+#include "HttpUtils.h"
+
 
 #undef B_TRANSLATION_CONTEXT
 #define B_TRANSLATION_CONTEXT "Station"
 
-const char* SubDirStations = "Stations";
-const char* MimePls = "audio/x-scpls";
+
+const char* kSubDirStations = "Stations";
+const char* kMimePls = "audio/x-scpls";
 
 
 Station::Station(BString name, BString uri)
@@ -46,6 +64,8 @@ Station::Station(BString name, BString uri)
 	fStreamUrl(uri),
 	fStationUrl(B_EMPTY_STRING),
 	fGenre(B_EMPTY_STRING),
+	fCountry(B_EMPTY_STRING),
+	fLanguage(B_EMPTY_STRING),
 	fSource(B_EMPTY_STRING),
 	fMime(B_EMPTY_STRING),
 	fEncoding(0),
@@ -58,7 +78,7 @@ Station::Station(BString name, BString uri)
 	fChannels(0),
 	fFlags(0)
 {
-	checkFlags();
+	CheckFlags();
 	if (Flags(STATION_URI_VALID) && !Flags(STATION_HAS_FORMAT))
 		Probe();
 }
@@ -73,17 +93,17 @@ Station::Station(const Station& orig)
 	fCountry(orig.fCountry),
 	fLanguage(orig.fLanguage),
 	fSource(B_EMPTY_STRING),
+	fEncoding(orig.fEncoding),
 	fRating(orig.fRating),
 	fBitRate(orig.fBitRate),
 	fSampleRate(orig.fSampleRate),
 	fUniqueIdentifier(orig.fUniqueIdentifier),
-	fChannels(orig.fChannels),
-	fEncoding(orig.fEncoding),
-	fMetaInterval(orig.fMetaInterval)
+	fMetaInterval(orig.fMetaInterval),
+	fChannels(orig.fChannels)
 {
 	fMime.SetTo(orig.fMime.Type());
 	fLogo = (orig.fLogo) ? new BBitmap(orig.fLogo) : NULL;
-	unsaved = true;
+	fUnsaved = true;
 }
 
 
@@ -106,9 +126,11 @@ Station::LoadFromPlsFile(BString Name)
 {
 	BEntry stationEntry;
 	stationEntry.SetTo(StationDirectory(), Name);
+
 	Station* station = Load(Name, &stationEntry);
-	if (station)
-		station->unsaved = false;
+	if (station != NULL)
+		station->fUnsaved = false;
+
 	return station;
 }
 
@@ -119,22 +141,24 @@ Station::Save()
 	status_t status;
 	BFile stationFile;
 	BDirectory* stationDir = StationDirectory();
-
-	if (!stationDir)
-		return B_ERROR;
+	if (stationDir == NULL)
+		return B_NO_MEMORY;
 
 	status = stationDir->CreateFile(fName, &stationFile, false);
 	if (status != B_OK)
 		return status;
+
 	BString content;
 	content << "[playlist]\nNumberOfEntries=1\nFile1=" << fStreamUrl << "\n";
 	stationFile.Write(
 		content.LockBuffer(-1), content.CountBytes(0, content.CountChars()));
 	content.UnlockBuffer();
+
 	status = stationFile.Lock();
+
 	status = stationFile.WriteAttrString("META:url", &fStreamUrl.UrlString());
 	status = stationFile.WriteAttr(
-		"BEOS:TYPE", B_MIME_TYPE, 0, MimePls, strlen(MimePls));
+		"BEOS:TYPE", B_MIME_TYPE, 0, kMimePls, strlen(kMimePls));
 	status = stationFile.WriteAttr(
 		"META:bitrate", B_INT32_TYPE, 0, &fBitRate, sizeof(fBitRate));
 	status = stationFile.WriteAttr(
@@ -160,13 +184,14 @@ Station::Save()
 	status = stationFile.WriteAttrString("META:uniqueidentifier",
 		&fUniqueIdentifier);
 	status = stationFile.Unlock();
+
 	BNodeInfo stationInfo;
 	stationInfo.SetTo(&stationFile);
-	if (fLogo) {
+	if (fLogo != NULL) {
 		BMessage archive;
 		fLogo->Archive(&archive);
 		ssize_t archiveSize = archive.FlattenedSize();
-		char* archiveBuffer = (char*) malloc(archiveSize);
+		char* archiveBuffer = (char*)malloc(archiveSize);
 		archive.Flatten(archiveBuffer, archiveSize);
 		stationFile.WriteAttr("logo", 'BBMP', 0LL, archiveBuffer, archiveSize);
 		free(archiveBuffer);
@@ -174,12 +199,14 @@ Station::Save()
 		BBitmap* icon = new BBitmap(
 			BRect(0, 0, B_LARGE_ICON - 1, B_LARGE_ICON - 1), B_RGB32, true);
 		BView* canvas = new BView(icon->Bounds(), "canvas", B_FOLLOW_NONE, 0);
+
 		icon->AddChild(canvas);
 		canvas->LockLooper();
 		canvas->DrawBitmap(fLogo, fLogo->Bounds(), icon->Bounds());
 		canvas->UnlockLooper();
 		icon->RemoveChild(canvas);
 		stationInfo.SetIcon(icon, B_LARGE_ICON);
+
 		delete icon;
 
 		icon = new BBitmap(BRect(0, 0, 15, 15), B_RGB32, true);
@@ -191,11 +218,14 @@ Station::Save()
 		canvas->UnlockLooper();
 		icon->RemoveChild(canvas);
 		stationInfo.SetIcon(icon, B_MINI_ICON);
+
 		delete icon;
 		delete canvas;
 	}
-	stationInfo.SetType(MimePls);
+
+	stationInfo.SetType(kMimePls);
 	stationFile.Unset();
+
 	return status;
 }
 
@@ -208,16 +238,20 @@ Station::RetrieveStreamUrl()
 
 	status_t status = B_ERROR;
 	BString contentType("*/*");
-	BMallocIO* plsData
-		= HttpUtils::GetAll(fSource, NULL, 100000, &contentType, 2000);
-	if (plsData)
-		status
-			= parseUrlReference((const char*) plsData->Buffer(), contentType);
-	delete plsData;
+
+	BMallocIO* plsData = HttpUtils::GetAll(fSource, NULL, 100000, &contentType,
+		2000);
+	if (plsData != NULL) {
+		status = ParseUrlReference((const char*) plsData->Buffer(),
+					contentType);
+		delete plsData;
+	}
+
 	if (status != B_OK && contentType.StartsWith("audio/")) {
 		SetStreamUrl(fSource);
 		return B_OK;
 	}
+
 	return status;
 }
 
@@ -254,57 +288,69 @@ Station::Probe()
 	// of streams using HTTPS and load balancing between two or more different
 	// IP's should be small, anyway.
 
-	if (fStreamUrl.Protocol() == "https")
-		buffer = HttpUtils::GetAll(
-			fStreamUrl, &headers, 2 * 1000 * 1000, &contentType, 4096);
-	else {
+	if (fStreamUrl.Protocol() == "https") {
+		buffer = HttpUtils::GetAll(fStreamUrl, &headers, 2 * 1000 * 1000,
+			&contentType, 4096);
+	} else {
 		status_t resolveStatus = HttpUtils::CheckPort(fStreamUrl, resolvedUrl);
 		if (resolveStatus != B_OK)
 			return B_ERROR;
+
 		buffer = HttpUtils::GetAll(
 			*resolvedUrl, &headers, 2 * 1000 * 1000, &contentType, 4096);
 		delete resolvedUrl;
 	}
+
 #ifdef DEBUGGING
-	for (int i = 0; i < headers.CountHeaders(); i++)
+	for (int32 i = 0; i < headers.CountHeaders(); i++)
 		TRACE("Header: %s\r\n", headers.HeaderAt(i).Header());
 #endif
+
 	if (buffer == NULL) {
 		fFlags &= !STATION_URI_VALID;
 		return B_ERROR;
 	}
+
 	if (headers.CountHeaders() == 0) {
 		fFlags &= !STATION_URI_VALID;
 		return B_TIMED_OUT;
 	}
 
-	int index;
+	int32 index;
 	if ((index = headers.HasHeader("content-type")) >= 0)
 		fMime.SetTo(headers.HeaderValue("content-type"));
+
 	// If the station has no name, try to use the Icy-Name header
 	if ((index = headers.HasHeader("Icy-Name")) >= 0 && fName.IsEmpty())
 		SetName(headers.HeaderValue("Icy-Name"));
+
 	if ((index = headers.HasHeader("Icy-Br")) >= 0)
 		fBitRate = atoi(headers[index].Value()) * 1000;
+
 	if ((index = headers.HasHeader("Icy-Genre")) >= 0)
 		fGenre = headers[index].Value();
+
 	if ((index = headers.HasHeader("Icy-Url")) >= 0
 		&& strlen(headers[index].Value()) > 0)
 		fStationUrl.SetUrlString(headers[index].Value());
+
 	if ((index = headers.HasHeader("Ice-Audio-Info")) >= 0) {
 		BString audioInfo(headers[index].Value());
 		BStringList audioInfoList;
 		if (audioInfo.Split(";", false, audioInfoList)) {
 			for (int32 i = 0; i < audioInfoList.CountStrings(); i++) {
 				BString audioInfoItem = audioInfoList.StringAt(i);
+
 				if (audioInfoItem.StartsWith("ice-samplerate=")) {
 					audioInfoItem.Remove(0, 15);
 					fSampleRate = atoi(audioInfoItem.String());
 				}
+
 				if (audioInfoItem.StartsWith("ice-bitrate=")) {
 					audioInfoItem.Remove(0, 12);
 					fBitRate = atoi(audioInfoItem.String()) * 1000;
 				}
+
 				if (audioInfoItem.StartsWith("ice-channels=")) {
 					audioInfoItem.Remove(0, 13);
 					fChannels = atoi(audioInfoItem.String());
@@ -312,13 +358,15 @@ Station::Probe()
 			}
 		}
 	}
+
 	if ((index = headers.HasHeader("Icy-metaint")) >= 0)
 		fMetaInterval = atoi(headers[index].Value());
 
-	checkFlags();
-	unsaved = true;
+	CheckFlags();
+	fUnsaved = true;
 	ProbeBuffer(buffer);
 	delete buffer;
+
 	return B_OK;
 }
 
@@ -328,7 +376,9 @@ Station::ProbeBuffer(BPositionIO* buffer)
 {
 	status_t status = B_OK;
 	BMediaFile mediaFile(buffer);
-	if ((status = mediaFile.InitCheck()) != B_OK)
+
+	status = mediaFile.InitCheck();
+	if (status != B_OK)
 		return status;
 
 	if (mediaFile.CountTracks() < 1)
@@ -336,8 +386,8 @@ Station::ProbeBuffer(BPositionIO* buffer)
 
 	BMediaTrack* mediaTrack = mediaFile.TrackAt(0);
 
-	media_format encodedFormat, decodedFormat;
-	media_codec_info codecInfo;
+	media_format encodedFormat;
+	media_format decodedFormat;
 
 	status = mediaTrack->EncodedFormat(&encodedFormat);
 	if (status != B_OK)
@@ -350,74 +400,97 @@ Station::ProbeBuffer(BPositionIO* buffer)
 	fFrameSize = encodedFormat.u.encoded_audio.frame_size;
 
 	status = mediaTrack->DecodedFormat(&decodedFormat);
-	checkFlags();
+	CheckFlags();
+
 	return status;
 }
 
 
 status_t
-Station::parseUrlReference(const char* body, const char* mime)
+Station::ParseUrlReference(const char* body, const char* mime)
 {
-
 	const char* patterns[4] = {"^file[0-9]+=([^\r\n]*)[\r\n$]+", // ShoutcastUrl
 		"^(http://[^\r\n]*)[\r\n]+$", // Mpeg Url;
 		"^([^#]+[^\r\n]*)[\r\n]+$", // Mpeg Url;
 		"^title[0-9]+=([^\r\n]*)[\r\n$]+"}; // Shoutcast alternativ;
 
-	for (int i = 0; i < 3; i++) {
-		char* match = regFind(body, patterns[i]);
-		if (match) {
+	for (int32 i = 0; i < 3; i++) {
+		char* match = RegFind(body, patterns[i]);
+		if (match != NULL) {
 			fStreamUrl.SetUrlString(match);
 			free(match);
-			match = regFind(body, patterns[3]);
-			if (match) {
+
+			match = RegFind(body, patterns[3]);
+			if (match != NULL) {
 				SetName(match);
 				free(match);
 			}
+
 			return B_OK;
 		}
 	}
+
 	return B_ERROR;
 }
 
 
 Station*
-Station::Load(BString Name, BEntry* entry)
+Station::Load(BString name, BEntry* entry)
 {
 	off_t size;
 	status_t status;
-	Station* station = new Station(Name);
+
+	Station* station = new Station(name);
+	if (station == NULL)
+		return station;
+
 	BFile file;
 	file.SetTo(entry, B_READ_ONLY);
 	BNodeInfo stationInfo;
 	stationInfo.SetTo(&file);
 
 	BString readString;
+
 	status = file.ReadAttrString("META:url", &readString);
+
 	station->fStreamUrl.SetUrlString(readString);
+
 	status = file.ReadAttrString("META:genre", &station->fGenre);
+
 	status = file.ReadAttrString("META:country", &station->fCountry);
+
 	status = file.ReadAttrString("META:language", &station->fLanguage);
+
 	status = file.ReadAttr("META:bitrate", B_INT32_TYPE, 0, &station->fBitRate,
 		sizeof(station->fBitRate));
+
 	status = file.ReadAttr("META:rating", B_INT32_TYPE, 0, &station->fRating,
 		sizeof(station->fRating));
+
 	status = file.ReadAttr("META:interval", B_INT32_TYPE, 0,
 		&station->fMetaInterval, sizeof(station->fMetaInterval));
+
 	status = file.ReadAttr("META:samplerate", B_INT32_TYPE, 0,
 		&station->fSampleRate, sizeof(station->fSampleRate));
+
 	status = file.ReadAttr("META:channels", B_INT32_TYPE, 0,
 		&station->fChannels, sizeof(station->fChannels));
+
 	status = file.ReadAttr("META:encoding", B_INT32_TYPE, 0,
 		&station->fEncoding, sizeof(station->fEncoding));
+
 	status = file.ReadAttr("META:framesize", B_INT32_TYPE, 0,
 		&station->fFrameSize, sizeof(station->fFrameSize));
+
 	status = file.ReadAttrString("META:mime", &readString);
 	station->fMime.SetTo(readString);
+
 	status = file.ReadAttrString("META:source", &readString);
 	station->fSource.SetUrlString(readString);
+
 	status = file.ReadAttrString("META:stationurl", &readString);
 	station->fStationUrl.SetUrlString(readString);
+
 	status = file.ReadAttrString("META:uniqueidentifier", &readString);
 	station->fUniqueIdentifier.SetTo(readString);
 
@@ -432,9 +505,11 @@ Station::Load(BString Name, BEntry* entry)
 		station->fLogo = (BBitmap*) BBitmap::Instantiate(&archive);
 	} else
 		station->fLogo = new BBitmap(BRect(0, 0, 32, 32), B_RGB32);
+
 	status = stationInfo.GetIcon(station->fLogo, B_LARGE_ICON);
 	if (status != B_OK)
 		delete station->fLogo;
+
 	station->fLogo = new BBitmap(BRect(0, 0, 16, 16), B_RGB32);
 	status = stationInfo.GetIcon(station->fLogo, B_MINI_ICON);
 	if (status != B_OK) {
@@ -452,70 +527,86 @@ Station::Load(BString Name, BEntry* entry)
 		status = file.GetSize(&size);
 		if (size > 10000)
 			return NULL;
-		char* buffer = (char*) malloc(size);
+
+		char* buffer = (char*)malloc(size);
 		file.Read(buffer, size);
+
 		char mime[64];
 		stationInfo.GetType(mime);
-		station->parseUrlReference(buffer, mime);
+		station->ParseUrlReference(buffer, mime);
+
 		free(buffer);
 	}
-	if (Name == B_EMPTY_STRING)
+
+	if (name == B_EMPTY_STRING)
 		station->fName.SetTo(entry->Name());
 
-	station->checkFlags();
+	station->CheckFlags();
 
 	if (station->InitCheck() != B_OK) {
 		delete station;
 		return NULL;
-	} else
-		return station;
+	}
+
+	return station;
 }
 
 
 char*
-Station::regFind(const char* Text, const char* Pattern)
+Station::RegFind(const char* text, const char* pattern)
 {
 	regex_t patternBuffer;
 	regmatch_t matchBuffer[20];
 	int result;
 	char* match = NULL;
+
 	memset(&patternBuffer, 0, sizeof(patternBuffer));
 	memset(matchBuffer, 0, sizeof(matchBuffer));
+
 	result = regcomp(
-		&patternBuffer, Pattern, REG_EXTENDED | REG_NEWLINE | REG_ICASE);
-	result = regexec(&patternBuffer, Text, 20, matchBuffer, 0);
-	if (result == 0 && matchBuffer[1].rm_eo > -1)
-		match = strndup(Text + matchBuffer[1].rm_so,
+		&patternBuffer, pattern, REG_EXTENDED | REG_NEWLINE | REG_ICASE);
+	result = regexec(&patternBuffer, text, 20, matchBuffer, 0);
+	if (result == 0 && matchBuffer[1].rm_eo > -1) {
+		match = strndup(text + matchBuffer[1].rm_so,
 			matchBuffer[1].rm_eo - matchBuffer[1].rm_so);
+	}
+
 	return match;
 }
 
 
 Station*
-Station::LoadIndirectUrl(BString& sUrl)
+Station::LoadIndirectUrl(BString& shoutCastUrl)
 {
 	status_t status;
 	const char* patternTitle = "<title[^>]*>(.*?)</title[^>]*>";
 	const char* patternIcon
 		= "<link\\s*rel=\"shortcut icon\"\\s*href=\"([^\"]*?)\".*?";
 
-	BUrl url(sUrl);
+	BUrl url(shoutCastUrl);
 	BString contentType("*/*");
-	BMallocIO* dataIO = HttpUtils::GetAll(url, NULL, 10000, &contentType, 2000);
 
+	BMallocIO* dataIO = HttpUtils::GetAll(url, NULL, 10000, &contentType, 2000);
 	if (dataIO == NULL)
 		return NULL;
 
 	Station* station = new Station(B_EMPTY_STRING, B_EMPTY_STRING);
+	if (station == NULL)
+		return station;
+
 	dataIO->Write("", 1);
-	const char* body = (char*) dataIO->Buffer();
+	const char* body = (char*)dataIO->Buffer();
+
 	int32 pos = contentType.FindFirst(';');
 	if (pos >= 0)
 		contentType.Truncate(pos);
-	status = station->parseUrlReference(body, contentType.String());
+
+	status = station->ParseUrlReference(body, contentType.String());
 	if (status != B_OK && contentType.StartsWith(("audio/")))
 		station->SetStreamUrl(url);
-	station->fSource.SetUrlString(sUrl);
+
+	station->fSource.SetUrlString(shoutCastUrl);
+
 	delete dataIO;
 
 	if (!station->fStreamUrl.IsValid()) {
@@ -527,7 +618,6 @@ Station::LoadIndirectUrl(BString& sUrl)
 	 *  Check for name and logo on same server by calling main page
 	 */
 
-
 	BUrl finalUrl = station->fStationUrl;
 	if ((!finalUrl.HasPort() || finalUrl.Port() == 80)
 		&& (!finalUrl.HasPath() || finalUrl.Path().IsEmpty()
@@ -536,32 +626,35 @@ Station::LoadIndirectUrl(BString& sUrl)
 			station->SetName("New Station");
 	} else
 		finalUrl.SetFragment(NULL);
+
 	finalUrl.SetRequest(NULL);
 	finalUrl.SetPath(NULL);
 	finalUrl.SetPort(80);
-	sUrl.SetTo(finalUrl.UrlString());
-	sUrl.RemoveCharsSet("#?");
-	finalUrl.SetUrlString(sUrl);
+
+	shoutCastUrl.SetTo(finalUrl.UrlString());
+	shoutCastUrl.RemoveCharsSet("#?");
+	finalUrl.SetUrlString(shoutCastUrl);
 
 	dataIO = HttpUtils::GetAll(finalUrl);
-	if (dataIO) {
+	if (dataIO != NULL) {
 		dataIO->Write(&"", 1);
 		body = (char*) dataIO->Buffer();
-		char* title = regFind(body, patternTitle);
-		if (title)
+		char* title = RegFind(body, patternTitle);
+		if (title != NULL)
 			station->fName.SetTo(title);
 
-		char* icon = regFind(body, patternIcon);
-		if (icon)
+		char* icon = RegFind(body, patternIcon);
+		if (icon != NULL)
 			finalUrl.SetPath(BString(icon));
 
 		contentType = "image/*";
 
 		BMallocIO* iconIO
 			= HttpUtils::GetAll(finalUrl, NULL, 10000, &contentType, 2000);
-		if (iconIO) {
+		if (iconIO != NULL) {
 			iconIO->Seek(0, SEEK_SET);
 			station->fLogo = BTranslationUtils::GetBitmap(iconIO);
+
 			delete iconIO;
 		}
 
@@ -585,74 +678,85 @@ Station::SetName(BString name)
 	}
 
 	fName.SetTo(name);
-	cleanName();
+	CleanName();
 	if (fName.IsEmpty())
 		fFlags &= !STATION_HAS_NAME;
 	else
 		fFlags |= STATION_HAS_NAME;
 
-	if (entry) {
+	if (entry != NULL) {
 		entry->Rename(fName);
 		delete entry;
 		Save();
 	} else
-		unsaved = true;
+		fUnsaved = true;
 }
 
 
 void
-Station::cleanName()
+Station::CleanName()
 {
-	if (fName.Compare("(#", 2) == 0)
-		if (0 <= fName.FindFirst(')') < fName.Length())
-			fName.Remove(0, fName.FindFirst(')') + 1).Trim();
+	if (fName.Compare("(#", 2) == 0
+		&& fName.FindFirst(')') >= 0
+		&& fName.FindFirst(')') < fName.Length())
+		fName.Remove(0, fName.FindFirst(')') + 1).Trim();
 
 	fName.RemoveCharsSet("\\/#?");
 }
 
 
 void
-Station::checkFlags()
+Station::CheckFlags()
 {
 	fFlags = 0;
+
 	if (!fName.IsEmpty())
 		fFlags |= STATION_HAS_NAME;
+
 	if (fStreamUrl.HasHost())
 		fFlags |= STATION_HAS_URI;
+
 	if (fStreamUrl.IsValid())
 		fFlags |= STATION_URI_VALID;
+
 	if (fBitRate != 0)
 		fFlags |= STATION_HAS_BITRATE;
+
 	if (fMime.IsValid() && fEncoding != 0)
 		fFlags |= STATION_HAS_ENCODING;
+
 	if (fChannels != 0 && fSampleRate != 0)
 		fFlags |= STATION_HAS_FORMAT;
+
 	if (fMetaInterval != 0)
 		fFlags |= STATION_HAS_META;
+
 	if (!fUniqueIdentifier.IsEmpty())
 		fFlags |= STATION_HAS_IDENTIFIER;
 }
 
-BDirectory* Station::fStationsDirectory = NULL;
 
+BDirectory* Station::sStationsDirectory = NULL;
 
 BDirectory*
 Station::StationDirectory()
 {
-	if (fStationsDirectory)
-		return fStationsDirectory;
+	if (sStationsDirectory != NULL)
+		return sStationsDirectory;
 
-	status_t status;
 	BPath configPath;
 	BDirectory configDir;
 
-	status = find_directory(B_USER_SETTINGS_DIRECTORY, &configPath);
+	if (find_directory(B_USER_SETTINGS_DIRECTORY, &configPath) != B_OK)
+		configPath.SetTo("/boot/home/config/settings");
+
 	configDir.SetTo(configPath.Path());
-	if (configDir.Contains(SubDirStations, B_DIRECTORY_NODE))
-		fStationsDirectory = new BDirectory(&configDir, SubDirStations);
+	if (configDir.Contains(kSubDirStations, B_DIRECTORY_NODE))
+		sStationsDirectory = new BDirectory(&configDir, kSubDirStations);
 	else {
-		fStationsDirectory = new BDirectory();
-		configDir.CreateDirectory(SubDirStations, fStationsDirectory);
+		sStationsDirectory = new BDirectory();
+		configDir.CreateDirectory(kSubDirStations, sStationsDirectory);
+
 		BAlert* alert = new BAlert(B_TRANSLATE("Stations directory created"),
 			B_TRANSLATE(
 				"A directory for saving stations has been created in your "
@@ -662,5 +766,5 @@ Station::StationDirectory()
 		alert->Go();
 	}
 
-	return fStationsDirectory;
+	return sStationsDirectory;
 }

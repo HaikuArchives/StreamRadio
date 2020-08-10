@@ -1,43 +1,60 @@
 /*
- * File:   StationFinderRadioNetwork.h
- * Author: user, Jacob Secunda
+ * Copyright (C) 2017 Kai Niessen <kai.niessen@online.de>
+ * Copyright (C) 2020 Jacob Secunda
  *
- * Created on 9. Oktober 2015, 22:51
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef _STATION_FINDER_RADIO_NETWORK_H
+#define _STATION_FINDER_RADIO_NETWORK_H
 
-#ifndef STATIONFINDERRADIONETWORK_H
-#define STATIONFINDERRADIONETWORK_H
 
 #include "StationFinder.h"
 
-class IconLookup
-{
+
+class IconLookup {
 public:
-	IconLookup(Station* station, BUrl iconUrl);
-	Station* fStation;
-	BUrl fIconUrl;
+								IconLookup(Station* station, BUrl iconUrl);
+
+			Station*			fStation;
+			BUrl				fIconUrl;
 };
 
-class StationFinderRadioNetwork : public StationFinderService
-{
+
+class StationFinderRadioNetwork : public StationFinderService {
 public:
-	StationFinderRadioNetwork();
-	virtual ~StationFinderRadioNetwork();
-	static void RegisterSelf();
-	static StationFinderService* Instantiate();
-	virtual BObjectList<Station>* FindBy(int capabilityIndex,
-		const char* searchFor, BLooper* resultUpdateTarget);
+								StationFinderRadioNetwork();
+	virtual						~StationFinderRadioNetwork();
+
+	static	void				RegisterSelf();
+	static	StationFinderService*	Instantiate();
+
+	virtual	BObjectList<Station>*	FindBy(int capabilityIndex,
+										const char* searchFor,
+										BLooper* resultUpdateTarget);
 
 private:
-	static const char* kBaseUrl;
-	static BString sCachedServerUrl;
+	static	int32				_IconLookupFunc(void* data);
+			status_t			_CheckServer();
 
-	thread_id fIconLookupThread;
-	BObjectList<IconLookup> fIconLookupList;
-	BLooper* fIconLookupNotify;
+private:
+	static	const char*			kBaseUrl;
+	static	BString				sCachedServerUrl;
 
-	static int32 IconLookupFunc(void* data);
-	status_t _CheckServer();
+			thread_id			fIconLookupThread;
+			BObjectList<IconLookup>	fIconLookupList;
+			BLooper*			fIconLookupNotify;
 };
 
-#endif /* STATIONFINDERRADIONETWORK_H */
+
+#endif // _STATION_FINDER_RADIO_NETWORK_H

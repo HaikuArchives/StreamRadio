@@ -12,17 +12,12 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*
- * File:   Utils.cpp
- * Author: Kai Niessen <kai.niessen@online.de>
- *
- * Created on April 16, 2017, 1:15 PM
- */
 
 #include "Utils.h"
+
 #include <Bitmap.h>
 #include <Message.h>
 #include <Resources.h>
@@ -33,11 +28,12 @@ Utils::ResourceBitmap(int32 id)
 {
 	size_t size;
 	const char* data
-		= (const char*) be_app->AppResources()->FindResource('BBMP', id, &size);
-	if (size && data) {
+		= (const char*)be_app->AppResources()->FindResource('BBMP', id, &size);
+	if (size != 0 && data != NULL) {
 		BMessage msg;
-		status_t status = msg.Unflatten(data);
-		return (BBitmap*) BBitmap::Instantiate(&msg);
+		if (msg.Unflatten(data) == B_OK)
+			return (BBitmap*)BBitmap::Instantiate(&msg);
 	}
+
 	return NULL;
 }

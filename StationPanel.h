@@ -12,25 +12,20 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef _STATION_PANEL_H
+#define _STATION_PANEL_H
 
-/*
- * File:   StationPanel.h
- * Author: Kai Niessen <kai.niessen@online.de>
- *
- * Created on April 13, 2017, 1:25 PM
- */
 
-#ifndef STATIONPANEL_H
-#define STATIONPANEL_H
-
-#include "Station.h"
-#include "StationListView.h"
 #include <Button.h>
 #include <Slider.h>
 #include <TextControl.h>
 #include <View.h>
+
+#include "Station.h"
+#include "StationListView.h"
+
 
 #define MSG_CHG_NAME 'cNAM'
 #define MSG_CHG_VOLUME 'cVOL'
@@ -39,28 +34,34 @@
 #define MSG_CHG_STATIONURL 'cSUR'
 #define MSG_VISIT_STATION 'vSUR'
 
+
 class MainWindow;
 
-class StationPanel : public BView
-{
+
+class StationPanel : public BView {
 public:
-	StationPanel(MainWindow* mainWindow, bool expanded = false);
-	virtual ~StationPanel();
-	virtual void AttachedToWindow();
-	virtual void MessageReceived(BMessage* msg);
-	void SetStation(StationListViewItem* stationItem);
-	void StateChanged(StreamPlayer::PlayState newState);
+								StationPanel(MainWindow* mainWindow,
+									bool expanded = false);
+	virtual						~StationPanel();
+
+	virtual void				AttachedToWindow();
+	virtual void				MessageReceived(BMessage* msg);
+
+			void				SetStation(StationListViewItem* stationItem);
+			void				StateChanged(StreamPlayer::PlayState newState);
 
 private:
-	StationListViewItem* fStationItem;
-	MainWindow* fMainWindow;
-	BView* fLogo;
-	BTextControl* fName;
-	BTextControl* fUrl;
-	BTextControl* fGenre;
-	BTextControl* fStationUrl;
-	BButton* fVisitStation;
-	BSlider* fVolume;
+			StationListViewItem*	fStationItem;
+			MainWindow* 		fMainWindow;
+
+			BView*				fLogo;
+			BTextControl*		fName;
+			BTextControl*		fUrl;
+			BTextControl*		fGenre;
+			BTextControl*		fStationUrl;
+			BButton*			fVisitStation;
+			BSlider*			fVolume;
 };
 
-#endif /* STATIONPANEL_H */
+
+#endif // _STATION_PANEL_H

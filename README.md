@@ -1,7 +1,7 @@
-# Haiku-Radio
+# StreamRadio
 
 ![Screenshot](screenshot.png)
 
-Haiku native application to search for an listen to internet radio stations.
+An application native to Haiku to search for and listen to internet radio stations.
 
 # [StreamRadio user guide](docs/userguide.md)

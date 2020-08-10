@@ -12,17 +12,12 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*
- * File:   Expander.cpp
- * Author: Kai Niessen <kai.niessen@online.de>
- *
- * Created on April 13, 2017, 4:50 PM
- */
 
 #include "Expander.h"
+
 #include <Layout.h>
 #include <Shape.h>
 #include <Window.h>
@@ -52,6 +47,7 @@ Expander::Draw(BRect updateRect)
 	StrokeShape(&shape);
 
 	shape.Clear();
+
 	r.InsetBy(r.Width() / 3, 2);
 	if (fExpanded) {
 		shape.MoveTo(r.LeftTop());
@@ -64,6 +60,7 @@ Expander::Draw(BRect updateRect)
 		shape.LineTo(r.LeftTop() + BPoint(r.Width() / 2, 0));
 		shape.Close();
 	}
+
 	SetHighColor(tint_color(ViewColor(), B_DARKEN_2_TINT));
 	FillShape(&shape);
 }
@@ -98,7 +95,9 @@ Expander::SetExpanded(bool expanded)
 		fTarget->Show();
 	else
 		fTarget->Hide();
+
 	Window()->Layout(true);
+
 	fExpanded = expanded;
 	Invalidate();
 }

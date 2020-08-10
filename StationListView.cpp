@@ -1,15 +1,30 @@
 /*
- * File:   StationListView.cpp
- * Author: user
+ * Copyright (C) 2017 Kai Niessen <kai.niessen@online.de>
  *
- * Created on 26.02.2013, 09:22
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+
 #include "StationListView.h"
-#include "StreamPlayer.h"
-#include "Utils.h"
+
 #include <Application.h>
 #include <Resources.h>
 #include <TranslationUtils.h>
+
+#include "StreamPlayer.h"
+#include "Utils.h"
+
 
 #define SLV_INSET 2
 #define SLV_PADDING 6
@@ -31,7 +46,7 @@ StationListViewItem::StationListViewItem(Station* station)
 
 StationListViewItem::~StationListViewItem()
 {
-	if (fPlayer) {
+	if (fPlayer != NULL) {
 		fPlayer->Stop();
 		delete fPlayer;
 	}
@@ -41,7 +56,7 @@ StationListViewItem::~StationListViewItem()
 StreamPlayer::PlayState
 StationListViewItem::State()
 {
-	return (fPlayer)
+	return (fPlayer != NULL)
 		? fPlayer->State()
 		: fStation->Flags(STATION_URI_VALID) ? StreamPlayer::Stopped
 											 : StreamPlayer::InActive;
@@ -51,8 +66,9 @@ StationListViewItem::State()
 void
 StationListViewItem::DrawItem(BView* owner, BRect frame, bool complete)
 {
-	int index = ((BListView*) owner)->IndexOf(this);
-	StationListView* ownerList = (StationListView*) owner;
+	int index = ((BListView*)owner)->IndexOf(this);
+
+	StationListView* ownerList = (StationListView*)owner;
 	ownerList->SetHighColor(
 		ui_color(IsSelected() ? B_MENU_SELECTION_BACKGROUND_COLOR
 							  : ((index % 2) ? B_MENU_BACKGROUND_COLOR
@@ -65,17 +81,22 @@ StationListViewItem::DrawItem(BView* owner, BRect frame, bool complete)
 		ui_color(IsSelected() ? B_MENU_SELECTION_BACKGROUND_COLOR
 							  : ((index % 2) ? B_MENU_BACKGROUND_COLOR
 											 : B_DOCUMENT_BACKGROUND_COLOR)));
-	if (BBitmap* logo = fStation->Logo()) {
+
+	if (fStation->Logo() != NULL) {
 		BRect target(SLV_INSET, SLV_INSET, SLV_HEIGHT - 2 * SLV_INSET,
 			SLV_HEIGHT - 2 * SLV_INSET);
 		target.OffsetBy(frame.LeftTop());
+
 		owner->DrawBitmap(
-			logo, logo->Bounds(), target, B_FILTER_BITMAP_BILINEAR);
+			fStation->Logo(), fStation->Logo()->Bounds(), target,
+			B_FILTER_BITMAP_BILINEAR);
 	}
+
 	owner->SetFontSize(SLV_MAIN_FONT_SIZE);
 	font_height fontHeight;
 	owner->GetFontHeight(&fontHeight);
 	float baseline = SLV_INSET + fontHeight.ascent + fontHeight.leading;
+
 	owner->DrawString(fStation->Name()->String(),
 		frame.LeftTop()
 			+ BPoint(
@@ -96,12 +117,11 @@ StationListViewItem::DrawItem(BView* owner, BRect frame, bool complete)
 
 	frame = ownerList->ItemFrame(ownerList->StationIndex(fStation));
 	if (ownerList->CanPlay() && fStation->Flags(STATION_URI_VALID)) {
-		BBitmap* bnBitmap = getButtonBitmap(State());
+		BBitmap* bnBitmap = _GetButtonBitmap(State());
 		if (bnBitmap != NULL) {
 			owner->SetDrawingMode(B_OP_ALPHA);
-			owner->DrawBitmap(bnBitmap,
-				frame.LeftTop()
-					+ BPoint(SLV_INSET, SLV_HEIGHT - SLV_INSET - SLV_BUTTON_SIZE));
+			owner->DrawBitmap(bnBitmap, frame.LeftTop()
+				+ BPoint(SLV_INSET, SLV_HEIGHT - SLV_INSET - SLV_BUTTON_SIZE));
 			owner->SetDrawingMode(B_OP_COPY);
 		}
 	}
@@ -117,10 +137,12 @@ StationListViewItem::DrawBufferFillBar(BView* owner, BRect frame)
 		frame.left = SLV_HEIGHT - SLV_INSET + SLV_PADDING;
 		frame.top = frame.bottom - 5;
 		frame.right -= SLV_PADDING;
+
 		owner->SetHighColor(
 			tint_color(ui_color(B_MENU_BACKGROUND_COLOR), B_LIGHTEN_2_TINT));
 		owner->FillRect(frame);
 		owner->SetHighColor(200, 30, 0);
+
 		frame.right = frame.left + frame.Width() * fFillRatio;
 		owner->FillRect(frame);
 	}
@@ -137,24 +159,26 @@ StationListViewItem::Update(BView* owner, const BFont* font)
 void
 StationListViewItem::StateChanged(StreamPlayer::PlayState newState)
 {
-	if (fList && fList->LockLooperWithTimeout(0) == B_OK) {
+	if (fList != NULL && fList->LockLooperWithTimeout(0) == B_OK) {
 		fList->InvalidateItem(fList->IndexOf(this));
 		fList->UnlockLooper();
 	}
 }
 
 
+BBitmap* StationListViewItem::sButtonBitmap[3] = {NULL, NULL, NULL};
+
 BBitmap*
-StationListViewItem::getButtonBitmap(StreamPlayer::PlayState state)
+StationListViewItem::_GetButtonBitmap(StreamPlayer::PlayState state)
 {
 	if (state < 0)
 		return NULL;
-	if (buttonBitmap[state] == NULL)
-		buttonBitmap[state] = Utils::ResourceBitmap(RES_BN_STOPPED + state);
-	return buttonBitmap[state];
-}
 
-BBitmap* StationListViewItem::buttonBitmap[3] = {NULL, NULL, NULL};
+	if (sButtonBitmap[state] == NULL)
+		sButtonBitmap[state] = Utils::ResourceBitmap(RES_BN_STOPPED + state);
+
+	return sButtonBitmap[state];
+}
 
 
 void
@@ -176,13 +200,13 @@ StationListView::StationListView(bool canPlay)
 {
 	SetResizingMode(B_FOLLOW_ALL_SIDES);
 	SetExplicitMinSize(BSize(300, 2 * SLV_HEIGHT));
-	playMsg = NULL;
+	fPlayMsg = NULL;
 }
 
 
 StationListView::~StationListView()
 {
-	delete playMsg;
+	delete fPlayMsg;
 }
 
 
@@ -204,9 +228,11 @@ StationListView::AddItem(Station* station)
 int32
 StationListView::StationIndex(Station* station)
 {
-	for (int32 i = 0; i < CountItems(); i++)
-		if (((StationListViewItem*) ItemAt(i))->GetStation() == station)
+	for (int32 i = 0; i < CountItems(); i++) {
+		if (((StationListViewItem*)ItemAt(i))->GetStation() == station)
 			return i;
+	}
+
 	return -1;
 }
 
@@ -214,7 +240,7 @@ StationListView::StationIndex(Station* station)
 StationListViewItem*
 StationListView::ItemAt(int32 index)
 {
-	return (StationListViewItem*) BListView::ItemAt(index);
+	return (StationListViewItem*)BListView::ItemAt(index);
 }
 
 
@@ -222,7 +248,7 @@ Station*
 StationListView::StationAt(int32 index)
 {
 	StationListViewItem* item = ItemAt(index);
-	return (item) ? item->GetStation() : NULL;
+	return (item != NULL) ? item->GetStation() : NULL;
 }
 
 
@@ -230,10 +256,11 @@ StationListViewItem*
 StationListView::Item(Station* station)
 {
 	for (int32 i = 0; i < CountItems(); i++) {
-		StationListViewItem* stationItem = (StationListViewItem*) ItemAt(i);
+		StationListViewItem* stationItem = (StationListViewItem*)ItemAt(i);
 		if (stationItem->GetStation() == station)
 			return stationItem;
 	}
+
 	return NULL;
 }
 
@@ -242,36 +269,39 @@ void
 StationListView::Sync(StationsList* stations)
 {
 	LockLooper();
+
 	for (int32 i = CountItems() - 1; i >= 0; i--) {
 		StationListViewItem* stationItem = (StationListViewItem*) ItemAt(i);
 		if (!stations->HasItem(stationItem->GetStation())) {
 			RemoveItem(i);
 			delete stationItem;
-	}
 		}
+	}
 
 	for (int32 i = 0; i < stations->CountItems(); i++) {
 		Station* station = stations->ItemAt(i);
 		if (Item(station) == NULL)
 			AddItem(station);
 	}
+
 	Invalidate();
+
 	UnlockLooper();
 }
 
 
 void
-StationListView::SetPlayMessage(BMessage* playMsg)
+StationListView::SetPlayMessage(BMessage* fPlayMsg)
 {
-	delete this->playMsg;
-	this->playMsg = playMsg;
+	delete this->fPlayMsg;
+	this->fPlayMsg = fPlayMsg;
 }
 
 
 void
 StationListView::MouseDown(BPoint where)
 {
-	whereDown = where;
+	fWhereDown = where;
 	BListView::MouseDown(where);
 }
 
@@ -279,18 +309,22 @@ StationListView::MouseDown(BPoint where)
 void
 StationListView::MouseUp(BPoint where)
 {
-	whereDown -= where;
-	if (whereDown.x * whereDown.x + whereDown.y * whereDown.y < 5 && playMsg) {
+	fWhereDown -= where;
+	if (fWhereDown.x * fWhereDown.x + fWhereDown.y * fWhereDown.y < 5
+		&& fPlayMsg != NULL) {
 		int stationIndex = IndexOf(where);
+
 		BRect playFrame = ItemFrame(stationIndex);
 		playFrame.InsetBy(SLV_INSET, SLV_INSET);
 		playFrame.right = playFrame.left + SLV_BUTTON_SIZE;
 		playFrame.top = playFrame.bottom - SLV_BUTTON_SIZE;
+
 		if (playFrame.Contains(where)) {
-			BMessage* clone = new BMessage(playMsg->what);
+			BMessage* clone = new BMessage(fPlayMsg->what);
 			clone->AddInt32("index", stationIndex);
 			InvokeNotify(clone);
 		}
 	}
-	whereDown = BPoint(-1, -1);
+
+	fWhereDown = BPoint(-1, -1);
 }

@@ -12,27 +12,25 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*
- * File:   StationFinderListenLive.cpp
- * Author: Kai Niessen <kai.niessen@online.de>
- *
- * Created on March 27, 2017, 12:16 AM
- */
 
 #include "StationFinderListenLive.h"
+
 #define __USE_GNU
-#include "Debug.h"
-#include <Catalog.h>
 #include <regex.h>
+
+#include <Catalog.h>
+
+#include "Debug.h"
+
 
 #undef B_TRANSLATION_CONTEXT
 #define B_TRANSLATION_CONTEXT "StationFinderListenLive"
 
 
-const char* genreList = "Top 40|top40\r\
+const char* kGenreList = "Top 40|top40\r\
 Hot Adult Contemporary|hotac\r\
 Adult Contemporary|ac\r\
 Oldies/80s/90s|oldies\r\
@@ -43,8 +41,7 @@ Rock/Classic Rock|rock\r\
 Alternative|alternative\r\
 Chillout/Lounge|chillout";
 
-
-const char* countryList = "Andorra|andorra\r\
+const char* kCountryList = "Andorra|andorra\r\
 Armenia|armenia\r\
 Austria|austria\r\
 Azerbaijan|azerbaijan\r\
@@ -96,32 +93,36 @@ Ukraine|ukraine\r\
 United Kingdom|uk\r\
 Vatican State|vatican";
 
+const char* StationFinderListenLive::kBaseUrl = "http://listenlive.eu/";
+
 
 StationFinderListenLive::StationFinderListenLive()
 	:
 	StationFinderService(),
-	countryKeywordAndPath(),
-	genreKeywordAndPath(),
-	fLookupThread(0),
+	fCountryKeywordAndPath(),
+	fGenreKeywordAndPath(),
+	fLookupThread(-1),
 	fPlsLookupList()
 {
 	serviceName.SetTo(B_TRANSLATE("listenlive.eu [experimental]"));
 	serviceHomePage.SetUrlString("http://www.listenlive.eu/");
-	BString tmp(countryList);
-	tmp.Split("\r", true, countryKeywordAndPath);
+
+	BString tmp(kCountryList);
+	tmp.Split("\r", true, fCountryKeywordAndPath);
 	FindByCapability* findByCountry = RegisterSearchCapability("Country");
-	BStringList* keywords = (BStringList*) findByCountry->KeyWords();
-	for (int i = 0; i < countryKeywordAndPath.CountStrings(); i++) {
-		BString keyword(countryKeywordAndPath.StringAt(i));
+	BStringList* keywords = (BStringList*)findByCountry->KeyWords();
+	for (int32 i = 0; i < fCountryKeywordAndPath.CountStrings(); i++) {
+		BString keyword(fCountryKeywordAndPath.StringAt(i));
 		keyword.Truncate(keyword.FindFirst('|'));
 		keywords->Add(keyword);
 	}
-	tmp.SetTo(genreList);
-	tmp.Split("\r", true, genreKeywordAndPath);
+
+	tmp.SetTo(kGenreList);
+	tmp.Split("\r", true, fGenreKeywordAndPath);
 	FindByCapability* findByGenre = RegisterSearchCapability("Genre");
-	keywords = (BStringList*) findByGenre->KeyWords();
-	for (int i = 0; i < genreKeywordAndPath.CountStrings(); i++) {
-		BString keyword(genreKeywordAndPath.StringAt(i));
+	keywords = (BStringList*)findByGenre->KeyWords();
+	for (int32 i = 0; i < fGenreKeywordAndPath.CountStrings(); i++) {
+		BString keyword(fGenreKeywordAndPath.StringAt(i));
 		keyword.Truncate(keyword.FindFirst('|'));
 		keywords->Add(keyword);
 	}
@@ -138,62 +139,64 @@ StationFinderListenLive::Instantiate()
 void
 StationFinderListenLive::RegisterSelf()
 {
-	// FIXME: "listenlive.eu" no longer seems to exist, though it looks like
-	// "radiomap.eu" might be its successor? This plugin crashes after searching
-	// anyway...
-//	Register(
-//		"listenlive.eu [experimental]", &StationFinderListenLive::Instantiate);
+	Register(
+		"listenlive.eu [experimental]", &StationFinderListenLive::Instantiate);
 }
 
 
 StationFinderListenLive::~StationFinderListenLive()
 {
 	fPlsLookupList.MakeEmpty(false);
-	status_t status;
-	if (fLookupThread)
-		wait_for_thread(fLookupThread, &status);
+	if (fLookupThread >= 0) {
+		status_t dummy;
+		wait_for_thread(fLookupThread, &dummy);
+	}
 }
 
 
 BObjectList<Station>*
-StationFinderListenLive::FindBy(
-	int capabilityIndex, const char* searchFor, BLooper* resultUpdateTarget)
+StationFinderListenLive::FindBy(int capabilityIndex, const char* searchFor,
+	BLooper* resultUpdateTarget)
 {
-	if (fLookupThread)
+	if (fLookupThread >= 0)
 		suspend_thread(fLookupThread);
+
 	fPlsLookupList.MakeEmpty(false);
 	fLookupNotify = resultUpdateTarget;
 
 	BObjectList<Station>* result = NULL;
 
-	BString urlString(baseUrl);
-	strlwr((char*) searchFor);
+	BString urlString(kBaseUrl);
+	strlwr((char*)searchFor);
 	int keywordIndex
 		= Capability(capabilityIndex)->KeyWords()->IndexOf(searchFor);
 	BStringList* keywordAndPaths
-		= capabilityIndex ? &genreKeywordAndPath : &countryKeywordAndPath;
+		= capabilityIndex ? &fGenreKeywordAndPath : &fCountryKeywordAndPath;
 	BString path(keywordAndPaths->StringAt(keywordIndex));
 	path.Remove(0, path.FindFirst('|') + 1);
 	urlString << path << ".html";
 	BUrl url(urlString);
-	BMallocIO* data = HttpUtils::GetAll(url);
 
-	if (data)
+	BMallocIO* data = HttpUtils::GetAll(url);
+	if (data != NULL) {
 		switch (capabilityIndex) {
 			case 0: // findByCountry
 				result = ParseCountryReturn(data, searchFor);
 				break;
+
 			case 1: // findByGenre
 				result = ParseGenreReturn(data, searchFor);
 				break;
 		}
+	}
 
 	data->Flush();
 	delete data;
+
 	if (!fPlsLookupList.IsEmpty()) {
-		if (!fLookupThread)
+		if (fLookupThread < 0)
 			fLookupThread = spawn_thread(
-				&PlsLookupFunc, "plslookup", B_NORMAL_PRIORITY, this);
+				&_PlsLookupFunc, "plslookup", B_NORMAL_PRIORITY, this);
 		resume_thread(fLookupThread);
 	}
 
@@ -206,6 +209,9 @@ StationFinderListenLive::ParseCountryReturn(
 	BMallocIO* data, const char* searchFor)
 {
 	BObjectList<Station>* result = new BObjectList<Station>(20, true);
+	if (result == NULL)
+		return result;
+
 	regmatch_t matches[10];
 	regex_t regex;
 
@@ -230,7 +236,7 @@ StationFinderListenLive::ParseCountryReturn(
 		RE_ICASE | RE_DOT_NEWLINE | RE_DOT_NOT_NULL | RE_NO_BK_PARENS
 			| RE_NO_BK_VBAR | RE_BACKSLASH_ESCAPE_IN_LISTS);
 
-	char* doc = (char*) data->Buffer();
+	char* doc = (char*)data->Buffer();
 	off_t size;
 	data->GetSize(&size);
 	doc[size] = 0;
@@ -248,6 +254,9 @@ StationFinderListenLive::ParseCountryReturn(
 			doc + matches[6].rm_so, doc + matches[8].rm_so);
 
 		Station* station = new Station(doc + matches[2].rm_so, NULL);
+		if (station == NULL)
+			continue;
+
 		result->AddItem(station);
 
 		BString source(doc + matches[5].rm_so);
@@ -257,22 +266,26 @@ StationFinderListenLive::ParseCountryReturn(
 		} else
 			station->SetStreamUrl(BUrl(source));
 
-		for (int i = matches[6].rm_so; i < matches[6].rm_eo; i++)
+		for (int32 i = matches[6].rm_so; i < matches[6].rm_eo; i++) {
 			if (!strchr("0123456789.", doc[i])) {
 				doc[i] = 0;
 				station->SetBitRate(atof(doc + matches[6].rm_so) * 1000);
 				break;
 			}
+		}
 
 		station->SetStation(doc + matches[1].rm_so);
 		station->SetGenre(doc + matches[8].rm_so);
+
 		BString country;
 		country.SetTo(searchFor);
 		country.Append(" - ");
 		country.Append(doc + matches[3].rm_so);
 		station->SetCountry(country);
+
 		doc += matches[0].rm_eo;
 	}
+
 	return result;
 }
 
@@ -282,6 +295,9 @@ StationFinderListenLive::ParseGenreReturn(
 	BMallocIO* data, const char* searchFor)
 {
 	BObjectList<Station>* result = new BObjectList<Station>(20, true);
+	if (result == NULL)
+		return result;
+
 	regmatch_t matches[9];
 	regex_t regex;
 
@@ -316,7 +332,7 @@ StationFinderListenLive::ParseGenreReturn(
 		RE_ICASE | RE_DOT_NEWLINE | RE_DOT_NOT_NULL | RE_NO_BK_PARENS
 			| RE_NO_BK_VBAR | RE_BACKSLASH_ESCAPE_IN_LISTS);
 
-	char* doc = (char*) data->Buffer();
+	char* doc = (char*)data->Buffer();
 	off_t size;
 	data->GetSize(&size);
 	doc[size] = 0;
@@ -335,7 +351,11 @@ StationFinderListenLive::ParseGenreReturn(
 			doc + matches[6].rm_so, doc + matches[7].rm_so, searchFor);
 
 		Station* station = new Station(doc + matches[2].rm_so, NULL);
+		if (station == NULL)
+			continue;
+
 		result->AddItem(station);
+
 		BString source(doc + matches[6].rm_so);
 		if (source.EndsWith(".pls") || source.EndsWith(".m3u")) {
 			station->SetSource(BUrl(source));
@@ -343,47 +363,53 @@ StationFinderListenLive::ParseGenreReturn(
 		} else
 			station->SetStreamUrl(BUrl(source));
 
-		for (int i = matches[7].rm_so; i < matches[7].rm_eo; i++)
+		for (int32 i = matches[7].rm_so; i < matches[7].rm_eo; i++) {
 			if (!strchr("0123456789.", doc[i])) {
 				doc[i] = 0;
 				station->SetBitRate(atof(doc + matches[7].rm_so) * 1000);
 				break;
 			}
+		}
 
 		station->SetStation(doc + matches[1].rm_so);
 		station->SetGenre(searchFor);
+
 		BString country(doc + matches[4].rm_so);
 		country.Append(" - ");
 		country.Append(doc + matches[5].rm_so);
 		station->SetCountry(country);
+
 		doc += matches[0].rm_eo;
 	}
+
 	return result;
 }
 
 
 int32
-StationFinderListenLive::PlsLookupFunc(void* data)
+StationFinderListenLive::_PlsLookupFunc(void* data)
 {
-	StationFinderListenLive* _this = (StationFinderListenLive*) data;
+	StationFinderListenLive* _this = (StationFinderListenLive*)data;
 	while (!_this->fPlsLookupList.IsEmpty()) {
 		Station* station = _this->fPlsLookupList.FirstItem();
 		TRACE("Looking up stream URL for station %s in %s\n",
 			station->Name()->String(), station->Source().UrlString().String());
+
 		Station* plsStation = Station::LoadIndirectUrl(
-			(BString&) station->Source().UrlString());
-		if (plsStation)
+			(BString&)station->Source().UrlString());
+		if (plsStation != NULL)
 			station->SetStreamUrl(plsStation->StreamUrl());
+
 		BMessage* notification = new BMessage(MSG_UPDATE_STATION);
 		notification->AddPointer("station", station);
 		if (_this->fLookupNotify->LockLooper()) {
 			_this->fLookupNotify->PostMessage(notification);
 			_this->fLookupNotify->UnlockLooper();
 		}
+
 		_this->fPlsLookupList.RemoveItem(station, false);
 	}
-	_this->fLookupThread = 0;
+
+	_this->fLookupThread = -1;
 	return B_OK;
 }
-
-const char* StationFinderListenLive::baseUrl = "http://listenlive.eu/";

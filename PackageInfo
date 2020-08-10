@@ -2,8 +2,8 @@ name        StreamRadio
 version     $VERSION
 summary     "Find and play internet radio stations"
 description "Start the application. Run a search for a radio station name. If you found one you like, add it to the main list. There you can play it, visit its homepage or change the station information.
-Searches use Radio Network, a service that offers a network API to its database (http://www.radio-browser.info). 
-Stations including all their attributes are saved as Shoutcast playlist files in ~/settings/Stations so they are available for other apps. 
+Searches use Radio Network, a service that offers a network API to its database (https://www.radio-browser.info/gui). 
+Stations including all their attributes are saved as Shoutcast playlist files in ~/config/settings/Stations so they are available for other apps. 
 
 Please report back any bugs at https://github.com/HaikuArchives/StreamRadio/issues.
 
@@ -37,5 +37,4 @@ provides {
 }
 requires { 
     haiku
-    lib:libxml2
 }

@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2008-2010  Lukas Sommer < SommerLuk at gmail dot com >
+	Copyright (C) 2008-2010 Lukas Sommer < SommerLuk at gmail dot com >
 
 	This program is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License as
@@ -15,18 +15,18 @@
 	GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
-	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+
 #include "MainWindow.h"
-#include "RadioApp.h"
+
 #include <Alert.h>
 #include <Application.h>
 #include <Autolock.h>
 #include <Catalog.h>
 #include <Clipboard.h>
 #include <Dragger.h>
-#include <GroupLayout.h>
 #include <LayoutBuilder.h>
 #include <MenuBar.h>
 #include <MenuItem.h>
@@ -35,6 +35,8 @@
 #include <View.h>
 
 #include "Debug.h"
+#include "RadioApp.h"
+
 
 #undef B_TRANSLATION_CONTEXT
 #define B_TRANSLATION_CONTEXT "MainWindow"
@@ -43,20 +45,20 @@
 MainWindow::MainWindow()
 	:
 	BWindow(BRect(0, 0, 400, 200), B_TRANSLATE_SYSTEM_NAME("StreamRadio"),
-		B_DOCUMENT_WINDOW, B_WILL_ACCEPT_FIRST_CLICK),
+		B_DOCUMENT_WINDOW, 0),
 	fStationFinder(NULL)
 {
-	fSettings = &((RadioApp*) be_app)->Settings;
+	fSettings = &((RadioApp*)be_app)->Settings;
 
-	allowParallelPlayback = fSettings->GetAllowParallelPlayback();
-	menuParallelPlayback = new BMenuItem(B_TRANSLATE("Allow parallel playback"),
+	fAllowParallelPlayback = fSettings->GetAllowParallelPlayback();
+	fMenuParallelPlayback = new BMenuItem(B_TRANSLATE("Allow parallel playback"),
 		new BMessage(MSG_PARALLEL_PLAYBACK));
-	menuParallelPlayback->SetMarked(allowParallelPlayback);
+	fMenuParallelPlayback->SetMarked(fAllowParallelPlayback);
 
-	// initialize central widget
-	BLayoutBuilder::Menu<>(fMainMenu = new BMenuBar(Bounds(), "MainMenu"))
+	fMainMenu = new BMenuBar(Bounds(), "MainMenu");
+	BLayoutBuilder::Menu<>(fMainMenu)
 		.AddMenu(B_TRANSLATE("App"))
-		.AddItem(menuParallelPlayback)
+		.AddItem(fMenuParallelPlayback)
 		.AddItem(B_TRANSLATE("Help" B_UTF8_ELLIPSIS), MSG_HELP)
 		.AddItem(B_TRANSLATE("About"), B_ABOUT_REQUESTED)
 		.AddSeparator()
@@ -70,31 +72,35 @@ MainWindow::MainWindow()
 		.AddMenu(B_TRANSLATE("Search"))
 		.AddItem(B_TRANSLATE("Find stations" B_UTF8_ELLIPSIS), MSG_SEARCH, 'S')
 		.End()
-		.End();
+	.End();
 	AddChild(fMainMenu);
+
 	fStationList = new StationListView(true);
 	BScrollView* stationScroll = new BScrollView(
 		"scrollStation", fStationList, B_FOLLOW_ALL_SIDES, 0, false, true);
 
 	fStationPanel = new StationPanel(this);
 	fExpander = new Expander("expStationPanel", fStationPanel);
+	fStatusBar = new BStringView("status", B_EMPTY_STRING);
 
-	BGroupLayout* layout
-		= (BGroupLayout*) BLayoutBuilder::Group<>(this, B_VERTICAL, 0)
-			  .SetExplicitAlignment(
-				  BAlignment(B_ALIGN_USE_FULL_WIDTH, B_ALIGN_USE_FULL_HEIGHT))
-			  .Add(stationScroll, 1.0f)
-			  .Add(fExpander, 0.0f)
-			  .Add(fStationPanel, 0.0f)
-			  .Add(fStatusBar = new BStringView("status", ""), 0.0f);
+	BLayoutBuilder::Group<>(this, B_VERTICAL, 0)
+		.SetExplicitAlignment(
+			BAlignment(B_ALIGN_USE_FULL_WIDTH, B_ALIGN_USE_FULL_HEIGHT))
+		.Add(stationScroll, 1.0f)
+		.Add(fExpander, 0.0f)
+		.Add(fStationPanel, 0.0f)
+		.Add(fStatusBar, 0.0f)
+	.End();
 
 	fStationList->Sync(fSettings->Stations);
 	fStationList->SetInvocationMessage(new BMessage(MSG_INVOKE_STATION));
 	fStationList->SetSelectionMessage(new BMessage(MSG_SELECT_STATION));
 	fStationList->SetPlayMessage(new BMessage(MSG_INVOKE_STATION));
+
 	fStatusBar->SetExplicitAlignment(
 		BAlignment(B_ALIGN_USE_FULL_WIDTH, B_ALIGN_VERTICAL_UNSET));
 	fStatusBar->SetExplicitMinSize(BSize(10, B_SIZE_UNSET));
+
 	Layout(true);
 
 	ResizeToPreferred();
@@ -106,10 +112,10 @@ MainWindow::MainWindow()
 
 MainWindow::~MainWindow()
 {
-	for (int i = 0; i < fStationList->CountItems(); i++) {
+	for (int32 i = 0; i < fStationList->CountItems(); i++) {
 		StationListViewItem* stationItem = fStationList->ItemAt(i);
 		StreamPlayer* player = stationItem->Player();
-		if (player)
+		if (player != NULL)
 			player->Stop();
 	}
 }
@@ -118,13 +124,11 @@ MainWindow::~MainWindow()
 void
 MainWindow::MessageReceived(BMessage* message)
 {
-	status_t status;
 	switch (message->what) {
 		case B_REFS_RECEIVED:
 		{
 			entry_ref ref;
 			int32 index = 0;
-			Station* station;
 			StationListViewItem* stationItem;
 			BString result;
 			while (message->FindRef("refs", index++, &ref) == B_OK) {
@@ -136,7 +140,7 @@ MainWindow::MessageReceived(BMessage* message)
 						delete station;
 						station = existingStation;
 						stationItem = fStationList->Item(station);
-						TogglePlay(stationItem);
+						_TogglePlay(stationItem);
 					} else {
 						stationItem = new StationListViewItem(station);
 						fStationList->AddItem(stationItem);
@@ -149,6 +153,7 @@ MainWindow::MessageReceived(BMessage* message)
 						"File %s could not be loaded as a station"));
 				fStatusBar->SetText(result.String());
 			}
+
 			break;
 		}
 
@@ -158,6 +163,7 @@ MainWindow::MessageReceived(BMessage* message)
 				fStationFinder = new StationFinderWindow(this);
 				fStationFinder->Show();
 			}
+
 			break;
 		}
 
@@ -166,15 +172,17 @@ MainWindow::MessageReceived(BMessage* message)
 			be_clipboard->Lock();
 			BMessage* data = be_clipboard->Data();
 			be_clipboard->Unlock();
+
 			char* url;
 			ssize_t numBytes;
 			if (data->FindData(
 					"text/plain", B_MIME_TYPE, (const void**) &url, &numBytes)
 				== B_OK)
 				url[numBytes] = 0;
+
 			BString sUrl(url);
 			Station* station = Station::LoadIndirectUrl(sUrl);
-			if (station) {
+			if (station != NULL) {
 				status_t probeStatus = station->Probe();
 				if (probeStatus == B_OK) {
 					fSettings->Stations->AddItem(station);
@@ -191,6 +199,7 @@ MainWindow::MessageReceived(BMessage* message)
 						->Go();
 				}
 			}
+
 			break;
 		}
 
@@ -198,24 +207,25 @@ MainWindow::MessageReceived(BMessage* message)
 		{
 			StationListViewItem* stationItem
 				= fStationList->ItemAt(fStationList->CurrentSelection(0));
-			Station* station
-				= fStationList->StationAt(fStationList->CurrentSelection(0));
-			if (stationItem) {
+			if (stationItem != NULL) {
 				Station* station = stationItem->GetStation();
 				status_t stationStatus = station->Probe();
+
 				BString statusText;
-				if (stationStatus == B_OK)
+				if (stationStatus == B_OK) {
 					statusText
 						= B_TRANSLATE("Probing station %station% successful");
-				else
+				} else {
 					statusText
 						= B_TRANSLATE("Probing station %station% failed");
+				}
 
 				statusText.ReplaceFirst("%station%", station->Name()->String());
 				fStatusBar->SetText(statusText);
 				fStationList->Invalidate();
 				fStationPanel->SetStation(stationItem);
 			}
+
 			break;
 		}
 
@@ -223,22 +233,24 @@ MainWindow::MessageReceived(BMessage* message)
 		{
 			Station* station
 				= fStationList->StationAt(fStationList->CurrentSelection(0));
-			if (station) {
+			if (station != NULL) {
 				fSettings->Stations->RemoveItem(station);
 				fStationList->Sync(fSettings->Stations);
 				fSettings->Stations->Save();
 			}
+
 			break;
 		}
 
 		case MSG_ADD_STATION:
 		{
 			Station* station = NULL;
-			if (B_OK == message->FindPointer("station", (void**) &station)) {
+			if (message->FindPointer("station", (void**) &station) == B_OK) {
 				fSettings->Stations->AddItem(station);
 				fStationList->Sync(fSettings->Stations);
 				fSettings->Stations->Save();
 			}
+
 			break;
 		}
 
@@ -254,6 +266,7 @@ MainWindow::MessageReceived(BMessage* message)
 				fStationPanel->SetStation(fStationList->ItemAt(index));
 				fStationPanel->UnlockLooper();
 			}
+
 			break;
 		}
 
@@ -262,30 +275,34 @@ MainWindow::MessageReceived(BMessage* message)
 			int32 stationIndex = message->GetInt32("index", -1);
 			StationListViewItem* stationItem
 				= fStationList->ItemAt(stationIndex);
-			if (allowParallelPlayback == false)
-				if (activeStations.HasItem(stationItem))
-					while (!activeStations.IsEmpty())
-						TogglePlay(activeStations.LastItem());
-				else {
-					while (!activeStations.IsEmpty())
-						TogglePlay(activeStations.LastItem());
-					TogglePlay(stationItem);
+
+			if (fAllowParallelPlayback == false) {
+				if (fActiveStations.HasItem(stationItem)) {
+					while (!fActiveStations.IsEmpty())
+						_TogglePlay(fActiveStations.LastItem());
+				} else {
+					while (!fActiveStations.IsEmpty())
+						_TogglePlay(fActiveStations.LastItem());
+
+					_TogglePlay(stationItem);
 				}
-			else if (stationItem)
-				TogglePlay(stationItem);
+			} else if (stationItem != NULL)
+				_TogglePlay(stationItem);
+
 			break;
 		}
 
 		case MSG_PLAYER_STATE_CHANGED:
 		{
 			StreamPlayer* player = NULL;
-			status_t status = message->FindPointer("player", (void**) &player);
+			status_t status = message->FindPointer("player", (void**)&player);
 
-			if (player && status == B_OK) {
+			if (player != NULL && status == B_OK) {
 				StreamPlayer::PlayState state;
 				status = message->FindInt32("state", (int32*) &state);
 
-				int stationIndex = fStationList->StationIndex(player->GetStation());
+				int stationIndex = fStationList->StationIndex(
+					player->GetStation());
 				if (stationIndex >= 0) {
 					StationListViewItem* stationItem
 						= fStationList->ItemAt(stationIndex);
@@ -311,12 +328,13 @@ MainWindow::MessageReceived(BMessage* message)
 			StreamPlayer* player = NULL;
 			status_t status = message->FindPointer("player", (void**) &player);
 			float level = message->GetFloat("level", 0.0f);
-			if (player && status == B_OK) {
+			if (player != NULL && status == B_OK) {
 				Station* station = player->GetStation();
 				StationListViewItem* stationItem = fStationList->Item(station);
-				if (stationItem)
+				if (stationItem != NULL)
 					stationItem->SetFillRatio(level);
 			}
+
 			break;
 		}
 
@@ -329,22 +347,25 @@ MainWindow::MessageReceived(BMessage* message)
 				message->GetString(
 					"streamtitle", B_TRANSLATE("unknown title")));
 			fStatusBar->SetText(meta.String());
+
 			break;
 		}
 
 		case MSG_HELP:
 		{
 			BUrl userguide = BUrl("https://github.com/HaikuArchives/"
-								  "Haiku-Radio/blob/master/docs/userguide.md");
+								  "StreamRadio/blob/master/docs/userguide.md");
 			userguide.OpenWithPreferredApplication(true);
+
 			break;
 		}
 
 		case MSG_PARALLEL_PLAYBACK:
 		{
-			allowParallelPlayback = !allowParallelPlayback;
-			fSettings->SetAllowParallelPlayback(allowParallelPlayback);
-			menuParallelPlayback->SetMarked(allowParallelPlayback);
+			fAllowParallelPlayback = !fAllowParallelPlayback;
+			fSettings->SetAllowParallelPlayback(fAllowParallelPlayback);
+			fMenuParallelPlayback->SetMarked(fAllowParallelPlayback);
+
 			break;
 		}
 
@@ -354,6 +375,7 @@ MainWindow::MessageReceived(BMessage* message)
 
 		default:
 			BWindow::MessageReceived(message);
+			break;
 	}
 }
 
@@ -363,6 +385,7 @@ MainWindow::QuitRequested()
 {
 	fSettings->Save();
 	be_app->PostMessage(B_QUIT_REQUESTED);
+
 	return true;
 }
 
@@ -378,16 +401,24 @@ MainWindow::SetVisible(bool visible)
 
 
 void
-MainWindow::TogglePlay(StationListViewItem* stationItem)
+MainWindow::_TogglePlay(StationListViewItem* stationItem)
 {
-	status_t status;
 	switch (stationItem->State()) {
 		case StreamPlayer::Stopped:
 		{
+			status_t status = B_ERROR;
+
 			StreamPlayer* player
 				= new StreamPlayer(stationItem->GetStation(), this);
-			status = player->InitCheck();
-			if ((status == B_OK) && (status = player->Play() == B_OK)) {
+			if (player != NULL) {
+				status = player->InitCheck();
+				if (status == B_OK)
+					status = player->Play();
+			} else {
+				status = B_NO_MEMORY;
+			}
+
+			if (status == B_OK) {
 				stationItem->SetPlayer(player);
 				stationItem->StateChanged(StreamPlayer::Playing);
 				BString success;
@@ -395,94 +426,37 @@ MainWindow::TogglePlay(StationListViewItem* stationItem)
 					stationItem->GetStation()->Name()->String());
 				fStatusBar->SetText(success);
 				fStatusBar->Invalidate();
-				activeStations.AddItem(stationItem);
+				fActiveStations.AddItem(stationItem);
 			} else {
 				delete player;
 				player = NULL;
+
 				BString error;
 				error.SetToFormat(B_TRANSLATE("Failed playing station %s: %s"),
 					stationItem->GetStation()->Name()->String(),
 					strerror(status));
 				fStatusBar->SetText(error);
 			}
+
 			break;
 		}
+
 		case StreamPlayer::Buffering:
 		case StreamPlayer::Playing:
 		{
 			StreamPlayer* player = stationItem->Player();
-			if (player)
+			if (player != NULL)
 				player->Stop();
 
 			stationItem->StateChanged(StreamPlayer::Stopped);
 			fStatusBar->SetText(NULL);
-			activeStations.RemoveItem(stationItem);
+			fActiveStations.RemoveItem(stationItem);
+
 			break;
 		}
+
+		case StreamPlayer::InActive:
+		default:
+			break;
 	}
-}
-
-
-void
-MainWindow::DisplaySettings()
-{
-	return;
-}
-
-
-void
-MainWindow::DisplayTipOfDay()
-{
-	return;
-}
-
-
-void
-MainWindow::SetupActions()
-{
-
-	/*  KStandardAction::preferences(this,
-	   SLOT(display_global_settings_dialog()), actionCollection());
-
-		KStandardAction::quit(kapp, SLOT(quit()), actionCollection());
-
-		showStreamdirectoryAction = new KToggleAction(this);
-		showStreamdirectoryAction->setText(m_streamDirectory->windowTitle());
-		QList<QKeySequence> showStreamdirectoryAction_tempShortcutList;
-		//showStreamdirectoryAction_tempShortcutList.append(Qt::Key_S);
-		//showStreamdirectoryAction_tempShortcutList.append(Qt::Key_MediaRecord);
-		//showStreamdirectoryAction_tempShortcutList.append(Qt::CTRL +
-	   Qt::Key_S);
-		//showStreamdirectoryAction_tempShortcutList.append(Qt::META +
-	   Qt::Key_V);
-		showStreamdirectoryAction->setShortcuts(showStreamdirectoryAction_tempShortcutList);
-		connect(showStreamdirectoryAction, SIGNAL(toggled(bool)),
-				this, SLOT(showStreamdirectory(bool)));
-		connect(m_streamDirectory,
-	   SIGNAL(willAcceptCloseEventFromWindowSystem(bool)),
-				showStreamdirectoryAction, SLOT(setChecked(bool)));
-		actionCollection()->addAction("showStreamdirectory",
-	   showStreamdirectoryAction);
-		showStreamdirectoryAction->setChecked(settings_general::showStreamdirectory());
-
-		KAction *importKradioripperSettingsAction = new KAction(this);
-		importKradioripperSettingsAction->setText(
-		  i18nc("@action:inmenu", "Import KRadioRipper settings"));
-		connect(importKradioripperSettingsAction, SIGNAL(triggered(bool)),
-				this, SLOT(askForKradioripperImport()));
-		actionCollection()->addAction("importKradioripperSettings",
-	   importKradioripperSettingsAction);
-
-		KStandardAction::tipOfDay(this, SLOT(displayTipOfDay()),
-	   actionCollection());
-	 */
-	return;
-}
-
-
-void
-MainWindow::AskForKradioripperImport()
-{
-	//  importKradioripperSettings::askForImport();
-	return;
 }
