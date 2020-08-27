@@ -68,16 +68,17 @@ StationPanel::StationPanel(MainWindow* mainWindow, bool expanded)
 		"volume", NULL, new BMessage(MSG_CHG_VOLUME), 0, 100, B_VERTICAL);
 	fVolume->SetModificationMessage(new BMessage(MSG_CHG_VOLUME));
 
-	BLayoutBuilder::Grid<>(this, 7, 3)
+	BLayoutBuilder::Grid<>(this, B_USE_SMALL_SPACING, B_USE_SMALL_SPACING)
 		.SetInsets(B_USE_SMALL_INSETS)
 		.SetSpacing(B_USE_ITEM_SPACING, B_USE_SMALL_SPACING)
-		.Add(fLogo, 0, 0, 1, 3)
+		.Add(fLogo, 0, 0, 1, 4)
 		.AddTextControl(fName, 1, 0, B_ALIGN_LEFT)
 		.AddTextControl(fGenre, 3, 0, B_ALIGN_RIGHT, 1, 2)
 		.AddTextControl(fUrl, 1, 1, B_ALIGN_LEFT, 1, 4)
 		.AddTextControl(fStationUrl, 1, 2, B_ALIGN_LEFT, 1, 3)
 		.Add(fVisitStation, 5, 2)
 		.Add(fVolume, 6, 0, 1, 3)
+		.AddGlue(1, 3, 5, 1)
 	.End();
 }
 

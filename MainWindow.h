@@ -28,7 +28,6 @@
 #include <StringView.h>
 #include <Window.h>
 
-#include "Expander.h"
 #include "RadioSettings.h"
 #include "StationFinder.h"
 #include "StationListView.h"
@@ -66,7 +65,6 @@ private:
 			StationFinderWindow*	fStationFinder;
 			StationPanel*		fStationPanel;
 			BStringView*		fStatusBar;
-			Expander*			fExpander;
 			BObjectList<StationListViewItem>	fActiveStations;
 			bool				fAllowParallelPlayback;
 			BMenuItem*			fMenuParallelPlayback;
