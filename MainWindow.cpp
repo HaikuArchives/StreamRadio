@@ -1,5 +1,7 @@
 /*
 	Copyright (C) 2008-2010 Lukas Sommer < SommerLuk at gmail dot com >
+	Copyright (C) 2017 Kai Niessen <kai.niessen@online.de>
+	Copyright (C) 2020 Jacob Secunda
 
 	This program is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License as
@@ -58,38 +60,43 @@ MainWindow::MainWindow()
 	fMainMenu = new BMenuBar(Bounds(), "MainMenu");
 	BLayoutBuilder::Menu<>(fMainMenu)
 		.AddMenu(B_TRANSLATE("App"))
-		.AddItem(fMenuParallelPlayback)
-		.AddItem(B_TRANSLATE("Help" B_UTF8_ELLIPSIS), MSG_HELP)
-		.AddItem(B_TRANSLATE("About"), B_ABOUT_REQUESTED)
-		.AddSeparator()
-		.AddItem(B_TRANSLATE("Quit"), B_QUIT_REQUESTED, 'Q')
+			.AddItem(fMenuParallelPlayback)
+			.AddItem(B_TRANSLATE("Help" B_UTF8_ELLIPSIS), MSG_HELP)
+			.AddItem(B_TRANSLATE("About"), B_ABOUT_REQUESTED)
+			.AddSeparator()
+			.AddItem(B_TRANSLATE("Quit"), B_QUIT_REQUESTED, 'Q')
 		.End()
 		.AddMenu(B_TRANSLATE("Station"))
-		.AddItem(B_TRANSLATE("Paste Shoutcast URL"), MSG_PASTE_URL, 'V')
-		.AddItem(B_TRANSLATE("Check station"), MSG_CHECK)
-		.AddItem(B_TRANSLATE("Remove station"), MSG_REMOVE, 'R')
+			.AddItem(B_TRANSLATE("Paste Shoutcast URL"), MSG_PASTE_URL, 'V')
+			.AddItem(B_TRANSLATE("Check station"), MSG_CHECK)
+			.AddItem(B_TRANSLATE("Remove station"), MSG_REMOVE, 'R')
 		.End()
 		.AddMenu(B_TRANSLATE("Search"))
-		.AddItem(B_TRANSLATE("Find stations" B_UTF8_ELLIPSIS), MSG_SEARCH, 'S')
+			.AddItem(B_TRANSLATE("Find stations" B_UTF8_ELLIPSIS), MSG_SEARCH,
+				'S')
 		.End()
 	.End();
-	AddChild(fMainMenu);
 
 	fStationList = new StationListView(true);
 	BScrollView* stationScroll = new BScrollView(
 		"scrollStation", fStationList, B_FOLLOW_ALL_SIDES, 0, false, true);
 
 	fStationPanel = new StationPanel(this);
-	fExpander = new Expander("expStationPanel", fStationPanel);
+
 	fStatusBar = new BStringView("status", B_EMPTY_STRING);
 
-	BLayoutBuilder::Group<>(this, B_VERTICAL, 0)
-		.SetExplicitAlignment(
-			BAlignment(B_ALIGN_USE_FULL_WIDTH, B_ALIGN_USE_FULL_HEIGHT))
-		.Add(stationScroll, 1.0f)
-		.Add(fExpander, 0.0f)
-		.Add(fStationPanel, 0.0f)
-		.Add(fStatusBar, 0.0f)
+	BLayoutBuilder::Group<>(this, B_VERTICAL)
+		.Add(fMainMenu)
+		.AddGroup(B_VERTICAL)
+			.SetInsets(B_USE_WINDOW_INSETS, 0, B_USE_WINDOW_INSETS,
+				B_USE_WINDOW_INSETS)
+			.AddSplit(B_VERTICAL, 2)
+				.Add(stationScroll)
+				.Add(fStationPanel)
+				.SetCollapsible(1, true)
+			.End()
+			.Add(fStatusBar)
+		.End()
 	.End();
 
 	fStationList->Sync(fSettings->Stations);
@@ -101,12 +108,8 @@ MainWindow::MainWindow()
 		BAlignment(B_ALIGN_USE_FULL_WIDTH, B_ALIGN_VERTICAL_UNSET));
 	fStatusBar->SetExplicitMinSize(BSize(10, B_SIZE_UNSET));
 
-	Layout(true);
-
 	ResizeToPreferred();
 	CenterOnScreen();
-
-	fExpander->SetExpanded(false);
 }
 
 
