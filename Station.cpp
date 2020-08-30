@@ -155,78 +155,119 @@ Station::Save()
 	content.UnlockBuffer();
 
 	status = stationFile.Lock();
+	if (status != B_OK)
+		return status;
 
+	// This is pretty critical to have...
 	status = stationFile.WriteAttrString("META:url", &fStreamUrl.UrlString());
+	if (status != B_OK) {
+		stationFile.Unlock();
+		return status;
+	}
+
 	status = stationFile.WriteAttr(
 		"BEOS:TYPE", B_MIME_TYPE, 0, kMimePls, strlen(kMimePls));
+
 	status = stationFile.WriteAttr(
 		"META:bitrate", B_INT32_TYPE, 0, &fBitRate, sizeof(fBitRate));
+
 	status = stationFile.WriteAttr(
 		"META:samplerate", B_INT32_TYPE, 0, &fSampleRate, sizeof(fSampleRate));
+
 	status = stationFile.WriteAttr(
 		"META:channels", B_INT32_TYPE, 0, &fChannels, sizeof(fChannels));
+
 	status = stationFile.WriteAttr(
 		"META:framesize", B_INT32_TYPE, 0, &fFrameSize, sizeof(fFrameSize));
+
 	status = stationFile.WriteAttr(
 		"META:rating", B_INT32_TYPE, 0, &fRating, sizeof(fRating));
+
 	status = stationFile.WriteAttr("META:interval", B_INT32_TYPE, 0,
 		&fMetaInterval, sizeof(fMetaInterval));
+
 	status = stationFile.WriteAttrString("META:genre", &fGenre);
+
 	status = stationFile.WriteAttrString("META:country", &fCountry);
+
 	status = stationFile.WriteAttrString("META:language", &fLanguage);
+
 	status = stationFile.WriteAttrString("META:source", &fSource.UrlString());
+
 	status = stationFile.WriteAttrString(
 		"META:stationurl", &fStationUrl.UrlString());
+
 	BString mimeType(fMime.Type());
 	status = stationFile.WriteAttrString("META:mime", &mimeType);
+
 	status = stationFile.WriteAttr(
 		"META:encoding", B_INT32_TYPE, 0, &fEncoding, sizeof(fEncoding));
+
 	status = stationFile.WriteAttrString("META:uniqueidentifier",
 		&fUniqueIdentifier);
+
 	status = stationFile.Unlock();
 
 	BNodeInfo stationInfo;
-	stationInfo.SetTo(&stationFile);
-	if (fLogo != NULL) {
-		BMessage archive;
-		fLogo->Archive(&archive);
-		ssize_t archiveSize = archive.FlattenedSize();
-		char* archiveBuffer = (char*)malloc(archiveSize);
-		archive.Flatten(archiveBuffer, archiveSize);
-		stationFile.WriteAttr("logo", 'BBMP', 0LL, archiveBuffer, archiveSize);
-		free(archiveBuffer);
+	status = stationInfo.SetTo(&stationFile);
+	if (status == B_OK) {
+		stationInfo.SetType(kMimePls);
 
-		BBitmap* icon = new BBitmap(
-			BRect(0, 0, B_LARGE_ICON - 1, B_LARGE_ICON - 1), B_RGB32, true);
-		BView* canvas = new BView(icon->Bounds(), "canvas", B_FOLLOW_NONE, 0);
+		if (fLogo != NULL) {
+			BMessage archive;
+			fLogo->Archive(&archive);
+			ssize_t archiveSize = archive.FlattenedSize();
+			char* archiveBuffer = (char*)malloc(archiveSize);
+			if (archiveBuffer != NULL) {
+				archive.Flatten(archiveBuffer, archiveSize);
+				stationFile.WriteAttr("logo", 'BBMP', 0, archiveBuffer,
+					archiveSize);
+				free(archiveBuffer);
+			}
 
-		icon->AddChild(canvas);
-		canvas->LockLooper();
-		canvas->DrawBitmap(fLogo, fLogo->Bounds(), icon->Bounds());
-		canvas->UnlockLooper();
-		icon->RemoveChild(canvas);
-		stationInfo.SetIcon(icon, B_LARGE_ICON);
+			BView* canvas = new BView(BRect(0, 0, 0, 0), "canvas",
+				B_FOLLOW_NONE, 0);
+			if (canvas == NULL) {
+				// I mean, this isn't ok, but not an error, so...
+				return B_NO_ERROR;
+			}
 
-		delete icon;
+			BBitmap* icon = new BBitmap(
+				BRect(0, 0, B_LARGE_ICON - 1, B_LARGE_ICON - 1), B_RGB32, true);
+			if (icon != NULL) {
+				canvas->ResizeTo(icon->Bounds().Width(),
+					icon->Bounds().Height());
+				icon->AddChild(canvas);
+				canvas->LockLooper();
+				canvas->DrawBitmap(fLogo, fLogo->Bounds(), icon->Bounds());
+				canvas->UnlockLooper();
+				icon->RemoveChild(canvas);
+				stationInfo.SetIcon(icon, B_LARGE_ICON);
 
-		icon = new BBitmap(BRect(0, 0, 15, 15), B_RGB32, true);
-		canvas->ResizeTo(16, 16);
-		icon->AddChild(canvas);
-		canvas->LockLooper();
-		canvas->DrawBitmap(
-			fLogo, fLogo->Bounds(), icon->Bounds(), B_FILTER_BITMAP_BILINEAR);
-		canvas->UnlockLooper();
-		icon->RemoveChild(canvas);
-		stationInfo.SetIcon(icon, B_MINI_ICON);
+				delete icon;
+			}
 
-		delete icon;
-		delete canvas;
+			icon = new BBitmap(BRect(0, 0, B_MINI_ICON - 1, B_MINI_ICON - 1),
+				B_RGB32, true);
+			if (icon != NULL) {
+				canvas->ResizeTo(icon->Bounds().Width(),
+					icon->Bounds().Height());
+				icon->AddChild(canvas);
+				canvas->LockLooper();
+				canvas->DrawBitmap(fLogo, fLogo->Bounds(), icon->Bounds(),
+					B_FILTER_BITMAP_BILINEAR);
+				canvas->UnlockLooper();
+				icon->RemoveChild(canvas);
+				stationInfo.SetIcon(icon, B_MINI_ICON);
+
+				delete icon;
+			}
+
+			delete canvas;
+		}
 	}
 
-	stationInfo.SetType(kMimePls);
-	stationFile.Unset();
-
-	return status;
+	return B_OK;
 }
 
 
@@ -412,7 +453,7 @@ Station::ParseUrlReference(const char* body, const char* mime)
 	const char* patterns[4] = {"^file[0-9]+=([^\r\n]*)[\r\n$]+", // ShoutcastUrl
 		"^(http://[^\r\n]*)[\r\n]+$", // Mpeg Url;
 		"^([^#]+[^\r\n]*)[\r\n]+$", // Mpeg Url;
-		"^title[0-9]+=([^\r\n]*)[\r\n$]+"}; // Shoutcast alternativ;
+		"^title[0-9]+=([^\r\n]*)[\r\n$]+"}; // Shoutcast alternative;
 
 	for (int32 i = 0; i < 3; i++) {
 		char* match = RegFind(body, patterns[i]);
@@ -438,104 +479,43 @@ Station*
 Station::Load(BString name, BEntry* entry)
 {
 	off_t size;
-	status_t status;
 
 	Station* station = new Station(name);
 	if (station == NULL)
-		return station;
+		return NULL;
 
 	BFile file;
-	file.SetTo(entry, B_READ_ONLY);
+	if (file.SetTo(entry, B_READ_ONLY) != B_OK)
+		return NULL;
+
 	BNodeInfo stationInfo;
-	stationInfo.SetTo(&file);
+	if (stationInfo.SetTo(&file) != B_OK)
+		return NULL;
 
 	BString readString;
 
-	status = file.ReadAttrString("META:url", &readString);
-
-	station->fStreamUrl.SetUrlString(readString);
-
-	status = file.ReadAttrString("META:genre", &station->fGenre);
-
-	status = file.ReadAttrString("META:country", &station->fCountry);
-
-	status = file.ReadAttrString("META:language", &station->fLanguage);
-
-	status = file.ReadAttr("META:bitrate", B_INT32_TYPE, 0, &station->fBitRate,
-		sizeof(station->fBitRate));
-
-	status = file.ReadAttr("META:rating", B_INT32_TYPE, 0, &station->fRating,
-		sizeof(station->fRating));
-
-	status = file.ReadAttr("META:interval", B_INT32_TYPE, 0,
-		&station->fMetaInterval, sizeof(station->fMetaInterval));
-
-	status = file.ReadAttr("META:samplerate", B_INT32_TYPE, 0,
-		&station->fSampleRate, sizeof(station->fSampleRate));
-
-	status = file.ReadAttr("META:channels", B_INT32_TYPE, 0,
-		&station->fChannels, sizeof(station->fChannels));
-
-	status = file.ReadAttr("META:encoding", B_INT32_TYPE, 0,
-		&station->fEncoding, sizeof(station->fEncoding));
-
-	status = file.ReadAttr("META:framesize", B_INT32_TYPE, 0,
-		&station->fFrameSize, sizeof(station->fFrameSize));
-
-	status = file.ReadAttrString("META:mime", &readString);
-	station->fMime.SetTo(readString);
-
-	status = file.ReadAttrString("META:source", &readString);
-	station->fSource.SetUrlString(readString);
-
-	status = file.ReadAttrString("META:stationurl", &readString);
-	station->fStationUrl.SetUrlString(readString);
-
-	status = file.ReadAttrString("META:uniqueidentifier", &readString);
-	station->fUniqueIdentifier.SetTo(readString);
-
-	attr_info attrInfo;
-	status = file.GetAttrInfo("logo", &attrInfo);
-	if (status == B_OK) {
-		char* archiveBuffer = (char*) malloc(attrInfo.size);
-		file.ReadAttr("logo", attrInfo.type, 0LL, archiveBuffer, attrInfo.size);
-		BMessage archive;
-		archive.Unflatten(archiveBuffer);
-		free(archiveBuffer);
-		station->fLogo = (BBitmap*) BBitmap::Instantiate(&archive);
-	} else
-		station->fLogo = new BBitmap(BRect(0, 0, 32, 32), B_RGB32);
-
-	status = stationInfo.GetIcon(station->fLogo, B_LARGE_ICON);
-	if (status != B_OK)
-		delete station->fLogo;
-
-	station->fLogo = new BBitmap(BRect(0, 0, 16, 16), B_RGB32);
-	status = stationInfo.GetIcon(station->fLogo, B_MINI_ICON);
-	if (status != B_OK) {
-		delete station->fLogo;
-		station->fLogo = NULL;
-	}
-
-	if (!station->fSource.IsValid()) {
-		BPath path(entry);
-		station->fSource.SetUrlString(BString("file://") << path.Path());
-	}
-
+	if (file.ReadAttrString("META:url", &readString) == B_OK)
+		station->fStreamUrl.SetUrlString(readString);
 
 	if (!station->fStreamUrl.IsValid()) {
-		status = file.GetSize(&size);
-		if (size > 10000)
+		if (file.GetSize(&size) != B_OK || size > 10000) {
+			delete station;
 			return NULL;
+		}
 
 		char* buffer = (char*)malloc(size);
-		file.Read(buffer, size);
+		if (buffer != NULL) {
+			if (file.Read(buffer, size) == B_OK) {
+				char mime[B_MIME_TYPE_LENGTH];
+				stationInfo.GetType(mime);
+				station->ParseUrlReference(buffer, mime);
+			}
 
-		char mime[64];
-		stationInfo.GetType(mime);
-		station->ParseUrlReference(buffer, mime);
-
-		free(buffer);
+			free(buffer);
+		} else {
+			delete station;
+			return NULL;
+		}
 	}
 
 	if (name == B_EMPTY_STRING)
@@ -546,6 +526,85 @@ Station::Load(BString name, BEntry* entry)
 	if (station->InitCheck() != B_OK) {
 		delete station;
 		return NULL;
+	}
+
+	if (file.ReadAttrString("META:genre", &station->fGenre) != B_OK)
+		station->fGenre = B_EMPTY_STRING;
+
+	if (file.ReadAttrString("META:country", &station->fCountry) != B_OK)
+		station->fCountry = B_EMPTY_STRING;
+
+	if (file.ReadAttrString("META:language", &station->fLanguage) != B_OK)
+		station->fLanguage = B_EMPTY_STRING;
+
+	if (file.ReadAttr("META:bitrate", B_INT32_TYPE, 0, &station->fBitRate,
+		sizeof(station->fBitRate)) < B_NO_ERROR)
+		station->fBitRate = 0;
+
+	if (file.ReadAttr("META:rating", B_INT32_TYPE, 0, &station->fRating,
+		sizeof(station->fRating)) < B_NO_ERROR)
+		station->fRating = 0;
+
+	if (file.ReadAttr("META:interval", B_INT32_TYPE, 0, &station->fMetaInterval,
+		sizeof(station->fMetaInterval)) < B_NO_ERROR)
+		station->fMetaInterval = 0;
+
+	if (file.ReadAttr("META:samplerate", B_INT32_TYPE, 0,
+		&station->fSampleRate, sizeof(station->fSampleRate)) < B_NO_ERROR)
+		station->fSampleRate = 0;
+
+	if (file.ReadAttr("META:channels", B_INT32_TYPE, 0,
+		&station->fChannels, sizeof(station->fChannels)) < B_NO_ERROR)
+		station->fChannels = 0;
+
+	if (file.ReadAttr("META:encoding", B_INT32_TYPE, 0,
+		&station->fEncoding, sizeof(station->fEncoding)) < B_NO_ERROR)
+		station->fEncoding = 0;
+
+	if (file.ReadAttr("META:framesize", B_INT32_TYPE, 0,
+		&station->fFrameSize, sizeof(station->fFrameSize)) < B_NO_ERROR)
+		station->fFrameSize = 0;
+
+	if (file.ReadAttrString("META:mime", &readString) == B_OK)
+		station->fMime.SetTo(readString);
+
+	if (file.ReadAttrString("META:source", &readString) == B_OK)
+		station->fSource.SetUrlString(readString);
+
+	if (file.ReadAttrString("META:stationurl", &readString) == B_OK)
+		station->fStationUrl.SetUrlString(readString);
+
+	if (file.ReadAttrString("META:uniqueidentifier", &readString) == B_OK)
+		station->fUniqueIdentifier.SetTo(readString);
+
+	attr_info attrInfo;
+	if (file.GetAttrInfo("logo", &attrInfo) == B_OK) {
+		char* archiveBuffer = (char*)malloc(attrInfo.size);
+		if (archiveBuffer != NULL
+			&& file.ReadAttr("logo", attrInfo.type, 0, archiveBuffer,
+			attrInfo.size) == B_OK) {
+			BMessage archive;
+			archive.Unflatten(archiveBuffer);
+			free(archiveBuffer);
+			station->fLogo = (BBitmap*)BBitmap::Instantiate(&archive);
+		}
+	}
+
+	if (station->fLogo == NULL)
+		station->fLogo = new BBitmap(BRect(0, 0, 32, 32), B_RGB32);
+
+	if (stationInfo.GetIcon(station->fLogo, B_LARGE_ICON) != B_OK)
+		delete station->fLogo;
+
+	station->fLogo = new BBitmap(BRect(0, 0, 15, 15), B_RGB32);
+	if (stationInfo.GetIcon(station->fLogo, B_MINI_ICON) != B_OK) {
+		delete station->fLogo;
+		station->fLogo = NULL;
+	}
+
+	if (!station->fSource.IsValid()) {
+		BPath path(entry);
+		station->fSource.SetUrlString(BString("file://") << path.Path());
 	}
 
 	return station;

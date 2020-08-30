@@ -27,7 +27,7 @@
 
 class About : public BWindow {
 public:
-									About();
+								About();
 	virtual						~About();
 
 private:

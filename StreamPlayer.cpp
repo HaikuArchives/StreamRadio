@@ -98,22 +98,22 @@ StreamPlayer::Stop()
 
 		case StreamPlayer::Playing:
 		{
-			Lock();
+			if (Lock()) {
+				if (fPlayer != NULL) {
+					fPlayer->Stop(false, true);
+					delete fPlayer;
+					fPlayer = NULL;
+				}
 
-			if (fPlayer) {
-				fPlayer->Stop(false, true);
-				delete fPlayer;
-				fPlayer = NULL;
+				if (fMediaFile != NULL) {
+					fMediaFile->CloseFile();
+					delete fMediaFile;
+					fMediaFile = NULL;
+				}
+
+				Unlock();
+				_SetState(StreamPlayer::Stopped);
 			}
-
-			if (fMediaFile) {
-				fMediaFile->CloseFile();
-				delete fMediaFile;
-				fMediaFile = NULL;
-			}
-
-			Unlock();
-			_SetState(StreamPlayer::Stopped);
 
 			break;
 		}
@@ -122,6 +122,7 @@ StreamPlayer::Stop()
 		case StreamPlayer::InActive:
 			break;
 	}
+
 	return B_OK;
 }
 
@@ -187,7 +188,11 @@ StreamPlayer::_GetDecodedChunk(void* cookie, void* buffer, size_t size,
 status_t
 StreamPlayer::_StartPlayThreadFunc(StreamPlayer* _this)
 {
-	_this->Lock();
+	if (!_this->Lock()) {
+		MSG("Error when attempting to lock the StreamPlayer for %s\n",
+			_this->fStation->StreamUrl().UrlString().String());
+		return B_ERROR;
+	}
 
 	_this->_SetState(StreamPlayer::Buffering);
 	_this->fStopRequested = false;

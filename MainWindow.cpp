@@ -47,7 +47,7 @@
 MainWindow::MainWindow()
 	:
 	BWindow(BRect(0, 0, 400, 200), B_TRANSLATE_SYSTEM_NAME("StreamRadio"),
-		B_DOCUMENT_WINDOW, 0),
+		B_DOCUMENT_WINDOW, B_AUTO_UPDATE_SIZE_LIMITS),
 	fStationFinder(NULL)
 {
 	fSettings = &((RadioApp*)be_app)->Settings;
@@ -107,6 +107,7 @@ MainWindow::MainWindow()
 	fStatusBar->SetExplicitAlignment(
 		BAlignment(B_ALIGN_USE_FULL_WIDTH, B_ALIGN_VERTICAL_UNSET));
 	fStatusBar->SetExplicitMinSize(BSize(10, B_SIZE_UNSET));
+	fStatusBar->SetExplicitMaxSize(BSize(B_SIZE_UNLIMITED, B_SIZE_UNSET));
 
 	ResizeToPreferred();
 	CenterOnScreen();
@@ -128,6 +129,7 @@ void
 MainWindow::MessageReceived(BMessage* message)
 {
 	switch (message->what) {
+		case B_SIMPLE_DATA:
 		case B_REFS_RECEIVED:
 		{
 			entry_ref ref;
@@ -136,10 +138,10 @@ MainWindow::MessageReceived(BMessage* message)
 			BString result;
 			while (message->FindRef("refs", index++, &ref) == B_OK) {
 				Station* station = Station::Load(ref.name, new BEntry(&ref));
-				if ((station = Station::Load(ref.name, new BEntry(&ref)))) {
+				if (station != NULL) {
 					Station* existingStation
 						= fSettings->Stations->FindItem(station->Name());
-					if (existingStation) {
+					if (existingStation != NULL) {
 						delete station;
 						station = existingStation;
 						stationItem = fStationList->Item(station);
@@ -154,6 +156,7 @@ MainWindow::MessageReceived(BMessage* message)
 				} else
 					result.SetToFormat(B_TRANSLATE(
 						"File %s could not be loaded as a station"));
+
 				fStatusBar->SetText(result.String());
 			}
 
@@ -179,7 +182,7 @@ MainWindow::MessageReceived(BMessage* message)
 			char* url;
 			ssize_t numBytes;
 			if (data->FindData(
-					"text/plain", B_MIME_TYPE, (const void**) &url, &numBytes)
+					"text/plain", B_MIME_TYPE, (const void**)&url, &numBytes)
 				== B_OK)
 				url[numBytes] = 0;
 
@@ -248,7 +251,7 @@ MainWindow::MessageReceived(BMessage* message)
 		case MSG_ADD_STATION:
 		{
 			Station* station = NULL;
-			if (message->FindPointer("station", (void**) &station) == B_OK) {
+			if (message->FindPointer("station", (void**)&station) == B_OK) {
 				fSettings->Stations->AddItem(station);
 				fStationList->Sync(fSettings->Stations);
 				fSettings->Stations->Save();
@@ -265,9 +268,10 @@ MainWindow::MessageReceived(BMessage* message)
 		{
 			int index = fStationList->CurrentSelection();
 			if (index >= 0) {
-				fStationPanel->LockLooper();
-				fStationPanel->SetStation(fStationList->ItemAt(index));
-				fStationPanel->UnlockLooper();
+				if (fStationPanel->LockLooper()) {
+					fStationPanel->SetStation(fStationList->ItemAt(index));
+					fStationPanel->UnlockLooper();
+				}
 			}
 
 			break;
@@ -276,21 +280,23 @@ MainWindow::MessageReceived(BMessage* message)
 		case MSG_INVOKE_STATION:
 		{
 			int32 stationIndex = message->GetInt32("index", -1);
+
 			StationListViewItem* stationItem
 				= fStationList->ItemAt(stationIndex);
+			if (stationItem != NULL) {
+				if (fAllowParallelPlayback == false) {
+					if (fActiveStations.HasItem(stationItem)) {
+						while (!fActiveStations.IsEmpty())
+							_TogglePlay(fActiveStations.LastItem());
+					} else {
+						while (!fActiveStations.IsEmpty())
+							_TogglePlay(fActiveStations.LastItem());
 
-			if (fAllowParallelPlayback == false) {
-				if (fActiveStations.HasItem(stationItem)) {
-					while (!fActiveStations.IsEmpty())
-						_TogglePlay(fActiveStations.LastItem());
-				} else {
-					while (!fActiveStations.IsEmpty())
-						_TogglePlay(fActiveStations.LastItem());
-
+						_TogglePlay(stationItem);
+					}
+				} else
 					_TogglePlay(stationItem);
-				}
-			} else if (stationItem != NULL)
-				_TogglePlay(stationItem);
+			}
 
 			break;
 		}
@@ -302,7 +308,7 @@ MainWindow::MessageReceived(BMessage* message)
 
 			if (player != NULL && status == B_OK) {
 				StreamPlayer::PlayState state;
-				status = message->FindInt32("state", (int32*) &state);
+				status = message->FindInt32("state", (int32*)&state);
 
 				int stationIndex = fStationList->StationIndex(
 					player->GetStation());
@@ -311,25 +317,25 @@ MainWindow::MessageReceived(BMessage* message)
 						= fStationList->ItemAt(stationIndex);
 					stationItem->StateChanged(player->State());
 
-					if (player->State() == StreamPlayer::Stopped) {
-						delete player;
+					if (player->State() == StreamPlayer::Stopped)
 						stationItem->SetPlayer(NULL);
-					}
 
 					if (stationIndex == fStationList->CurrentSelection()) {
-						fStationPanel->LockLooper();
-						fStationPanel->StateChanged(state);
-						fStationPanel->UnlockLooper();
+						if (fStationPanel->LockLooper()) {
+							fStationPanel->StateChanged(state);
+							fStationPanel->UnlockLooper();
+						}
 					}
 				}
 			}
+
 			break;
 		}
 
 		case MSG_PLAYER_BUFFER_LEVEL:
 		{
 			StreamPlayer* player = NULL;
-			status_t status = message->FindPointer("player", (void**) &player);
+			status_t status = message->FindPointer("player", (void**)&player);
 			float level = message->GetFloat("level", 0.0f);
 			if (player != NULL && status == B_OK) {
 				Station* station = player->GetStation();
@@ -391,16 +397,6 @@ MainWindow::QuitRequested()
 
 	return true;
 }
-
-
-void
-MainWindow::SetVisible(bool visible)
-{
-	if (visible)
-		Show();
-	else
-		Hide();
-};
 
 
 void
