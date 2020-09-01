@@ -53,8 +53,6 @@ public:
 	virtual	void				MessageReceived(BMessage* message);
 	virtual	bool				QuitRequested();
 
-	virtual	void				SetVisible(bool visible);
-
 private:
 			void				_TogglePlay(StationListViewItem* stationItem);
 

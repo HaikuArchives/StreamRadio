@@ -94,11 +94,12 @@ StationFinderRadioNetwork::FindBy(int capabilityIndex, const char* searchFor,
 		suspend_thread(fIconLookupThread);
 
 	fIconLookupList.MakeEmpty(true);
+
 	fIconLookupNotify = resultUpdateTarget;
 
 	BObjectList<Station>* result = new BObjectList<Station>();
 	if (result == NULL)
-		return result;
+		return NULL;
 
 	if (_CheckServer() != B_OK)
 		return result;
@@ -241,7 +242,8 @@ StationFinderRadioNetwork::_IconLookupFunc(void* data)
 
 		BMessage* notification = new BMessage(MSG_UPDATE_STATION);
 		notification->AddPointer("station", item->fStation);
-		if (_this->fIconLookupNotify->LockLooper()) {
+		if (_this->fIconLookupNotify != NULL
+			&& _this->fIconLookupNotify->LockLooper()) {
 			_this->fIconLookupNotify->PostMessage(notification);
 			_this->fIconLookupNotify->UnlockLooper();
 		}
