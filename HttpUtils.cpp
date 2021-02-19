@@ -194,31 +194,31 @@ HttpUtils::GetAll(BUrl url, BHttpHeaders* responseHeaders, bigtime_t timeOut,
 		return data;
 
 	HttpIOReader reader(data, responseHeaders, sizeLimit);
-	HttpRequest request(url, false, "HTTP", &reader);
+	BHttpRequest* request = dynamic_cast<BHttpRequest*>(BUrlProtocolRoster::MakeRequest(url.UrlString().String(), &reader, NULL));
 
 	if (contentType && !contentType->IsEmpty()) {
 		BHttpHeaders* requestHeaders = new BHttpHeaders();
 		requestHeaders->AddHeader("accept", contentType->String());
-		request.AdoptHeaders(requestHeaders);
+		request->AdoptHeaders(requestHeaders);
 	}
 
-	request.SetAutoReferrer(true);
-	request.SetFollowLocation(true);
-	request.SetTimeout(timeOut);
-	request.SetUserAgent("StreamRadio/0.0.4");
+	request->SetAutoReferrer(true);
+	request->SetFollowLocation(true);
+	request->SetTimeout(timeOut);
+	request->SetUserAgent("StreamRadio/0.0.4");
 
-	thread_id threadId = request.Run();
+	thread_id threadId = request->Run();
 	status_t status;
 	wait_for_thread(threadId, &status);
 
-	int32 statusCode = request.Result().StatusCode();
+	int32 statusCode = ((BHttpResult&)request->Result()).StatusCode();
 	size_t bufferLen = data->BufferLength();
-	if (!(statusCode == 0 || request.IsSuccessStatusCode(statusCode))
+	if (!(statusCode == 0 || request->IsSuccessStatusCode(statusCode))
 		|| bufferLen == 0) {
 		delete data;
 		data = NULL;
 	} else if (contentType != NULL)
-		contentType->SetTo(request.Result().ContentType());
+		contentType->SetTo(request->Result().ContentType());
 
 	return data;
 }
@@ -230,23 +230,23 @@ HttpUtils::GetStreamHeader(BUrl url, BHttpHeaders* responseHeaders)
 	status_t status;
 	HttpIOReader reader(NULL, responseHeaders, 0);
 
-	HttpRequest request(url, false, "HTTP", &reader);
-	request.SetMethod("GET");
-	request.SetAutoReferrer(true);
-	request.SetFollowLocation(true);
-	request.SetTimeout(10000);
-	request.SetDiscardData(true);
-	request.SetUserAgent("StreamRadio/0.0.4");
+	BHttpRequest* request = dynamic_cast<BHttpRequest*>(BUrlProtocolRoster::MakeRequest(url.UrlString().String(), NULL));
+	request->SetMethod("GET");
+	request->SetAutoReferrer(true);
+	request->SetFollowLocation(true);
+	request->SetTimeout(10000);
+	request->SetDiscardData(true);
+	request->SetUserAgent("StreamRadio/0.0.4");
 
 	BHttpHeaders* requestHeaders = new BHttpHeaders();
 	requestHeaders->AddHeader("Icy-MetaData", 1);
-	request.AdoptHeaders(requestHeaders);
+	request->AdoptHeaders(requestHeaders);
 
-	thread_id threadId = request.Run();
+	thread_id threadId = request->Run();
 	wait_for_thread(threadId, &status);
 
 	if (status == B_OK) {
-		BHttpResult result = request.Result();
+		BHttpResult result = (BHttpResult&)request->Result();
 		if (result.StatusCode() == 200 || result.StatusCode() == B_OK)
 			*responseHeaders = result.Headers();
 		else

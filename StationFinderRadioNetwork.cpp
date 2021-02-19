@@ -169,7 +169,7 @@ StationFinderRadioNetwork::FindBy(int capabilityIndex, const char* searchFor,
 
 				station->SetUniqueIdentifier(stationMessage.GetString(
 					"stationuuid", B_EMPTY_STRING));
-
+					
 				station->SetName(stationMessage.GetString("name", "unknown"));
 
 				station->SetSource(stationMessage.GetString("url",
@@ -180,8 +180,10 @@ StationFinderRadioNetwork::FindBy(int capabilityIndex, const char* searchFor,
 
 				BString iconUrl;
 				if (stationMessage.FindString("favicon", &iconUrl) == B_OK) {
-					fIconLookupList.AddItem(
-						new IconLookup(station, BUrl(iconUrl)));
+					if (!iconUrl.IsEmpty()) {
+						fIconLookupList.AddItem(
+							new IconLookup(station, BUrl(iconUrl)));
+					}
 				}
 
 				station->SetGenre(stationMessage.GetString("tags",
