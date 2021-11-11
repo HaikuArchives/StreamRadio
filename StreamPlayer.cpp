@@ -54,7 +54,7 @@ StreamPlayer::StreamPlayer(Station* station, BLooper* notify)
 
 StreamPlayer::~StreamPlayer()
 {
-	_SetState(StreamPlayer::Stopped);
+	//_SetState(StreamPlayer::Stopped);
 	if (fInitStatus == B_OK && fPlayer != NULL)
 		fPlayer->Stop(true, false);
 

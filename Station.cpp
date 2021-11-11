@@ -503,18 +503,18 @@ Station::Load(BString name, BEntry* entry)
 		archive.Unflatten(archiveBuffer);
 		free(archiveBuffer);
 		station->fLogo = (BBitmap*) BBitmap::Instantiate(&archive);
-	} else
+	} else {
 		station->fLogo = new BBitmap(BRect(0, 0, 32, 32), B_RGB32);
-
-	status = stationInfo.GetIcon(station->fLogo, B_LARGE_ICON);
-	if (status != B_OK)
-		delete station->fLogo;
-
-	station->fLogo = new BBitmap(BRect(0, 0, 16, 16), B_RGB32);
-	status = stationInfo.GetIcon(station->fLogo, B_MINI_ICON);
-	if (status != B_OK) {
-		delete station->fLogo;
-		station->fLogo = NULL;
+		status = stationInfo.GetIcon(station->fLogo, B_LARGE_ICON);
+		if (status != B_OK) {
+			delete station->fLogo;
+			station->fLogo = new BBitmap(BRect(0, 0, 16, 16), B_RGB32);
+			status = stationInfo.GetIcon(station->fLogo, B_MINI_ICON);
+			if (status != B_OK) {
+				delete station->fLogo;
+				station->fLogo = NULL;
+			}
+		}
 	}
 
 	if (!station->fSource.IsValid()) {
