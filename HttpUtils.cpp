@@ -220,6 +220,7 @@ HttpUtils::GetAll(BUrl url, BHttpHeaders* responseHeaders, bigtime_t timeOut,
 	} else if (contentType != NULL)
 		contentType->SetTo(request->Result().ContentType());
 
+	delete request;
 	return data;
 }
 
@@ -253,5 +254,6 @@ HttpUtils::GetStreamHeader(BUrl url, BHttpHeaders* responseHeaders)
 			status = B_ERROR;
 	}
 
+	delete request;
 	return status;
 }

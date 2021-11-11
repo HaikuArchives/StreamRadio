@@ -17,6 +17,7 @@
 #ifndef _DEBUG_H
 #define _DEBUG_H
 
+#include <stdio.h>
 
 /*
  * Contains definitions for tracing, debugging, profiling and logging
