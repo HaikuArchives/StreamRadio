@@ -19,7 +19,6 @@
 #include <AboutWindow.h>
 #include <Catalog.h>
 
-#include "About.h"
 #include "RadioApp.h"
 #include "StationFinder.h"
 #include "StationFinderListenLive.h"
@@ -104,7 +103,7 @@ RadioApp::AboutRequested()
 	const char* kAuthors[] = {
 		"Fishpond",
 		"Javier Steinaker",
-		"Jacob Secunda"
+		"Jacob Secunda",
 		"Humdinger",
 		NULL
 	};
