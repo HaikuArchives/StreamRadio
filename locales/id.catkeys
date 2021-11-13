@@ -1,0 +1,44 @@
+1	Indonesian	application/x-vnd.Fishpond-StreamRadio	1780791103
+%station% now plays %title%	MainWindow		%station% sekarang memutar %title%
+About	MainWindow		Tentang
+Add station failed	MainWindow		Menambahkan stasiun gagal
+Added station %s to list	MainWindow		Menambah stasiun %s ke daftar
+Allow parallel playback	MainWindow		Ijinkan pemutaran paralel
+App	MainWindow		Aplikasi
+Check station	MainWindow		Memeriksa stasiun
+Failed playing station %s: %s	MainWindow		Gagal memutar stasiun %s: %s
+File %s could not be loaded as a station	MainWindow		Berkas %s tidak bisa dimuat sebagai stasiun
+Find stations…	MainWindow		Find stations…
+Help…	MainWindow		Tolong…
+Now playing %s	MainWindow		Sekarang memutar %s
+OK	MainWindow		OKE
+Paste Shoutcast URL	MainWindow		Tempel URL Shoutcast 
+Probing station %station% failed	MainWindow		Menyelidiki stasiun %station% gagal
+Probing station %station% successful	MainWindow		Menyelidiki %station% berhasil
+Quit	MainWindow		Keluar
+Remove station	MainWindow		Remove station
+Search	MainWindow		Mencari
+Station	MainWindow		Station
+Station %s did not respond correctly and could not be added	MainWindow		Stasiun %s tidak merespon dengan benar dan tidak bisa ditambahkan
+Unknown station	MainWindow		Stasiun tak-dikenal
+unknown title	MainWindow		judul anonim
+A directory for saving stations has been created in your settings folder. Link this directory to your deskbar menu to play stations directly.	Station		Direktori untuk menyimpan stasiun telah dibuat di folder pengaturan Anda. Tautkan direktori ini ke menu deskbar Anda untuk memutar stasiun secara langsung.
+OK	Station		OKE
+Stations directory created	Station		Direktori stasiun dibuat
+A player for online radio.	RadioApp		A player for online radio.
+Usage: StreamRadio <filename>\n<filename> should be a Shoutcast playlist file.\nIf the station already exists, it is made to play otherwise it is added.\n	RadioApp		Penggunaan: StreamRadio <filename>\n<filename> harus merupakan file shoutcast.\nJika stasiun sudah ada, itu dibuat untuk diputar jika tidak maka akan ditambahkan.\n
+Add	StationFinder		Tambah
+Add station failed	StationFinder		Gagal menambahkan stasiun
+Find stations	StationFinder		Temukan stasiun
+OK	StationFinder		OKE
+Search by	StationFinder		Cari berdasarkan
+Search for	StationFinder		Pencarian untuk
+Service	StationFinder		Servis
+Station %s did not respond correctly and could not be added	StationFinder		Stasiun %s tidak merespon sehingga tidak bisa ditambahkan
+Community Radio Browser	StationFinderRadioNetwork		Browser Radio Komunitas
+Genre	StationPanel		Aliran
+Name	StationPanel		Nama
+Station URL	StationPanel		Stasiun URL 
+Stream URL	StationPanel		Aliran URL
+listenlive.eu [experimental]	StationFinderListenLive		listenlive.eu [eksperimen]
+StreamRadio	System name		StreamRadio

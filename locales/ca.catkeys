@@ -1,44 +1,44 @@
-1	English	application/x-vnd.Fishpond-Radio	2625353478
-A directory for saving stations has been created in your settings folder. Link this directory to your deskbar menu to play stations directly.	Station		S'ha creat un directori per desar les emissores a la carpeta de configuració. Enllaceu aquest directori al menú de la barra d’escriptori per reproduir-les directament.
-Station %s did not respond correctly and could not be added	MainWindow		L'emissora %s no ha respost correctament i no s'ha pogut afegir.
-OK	StationFinder		D'acord
-Service	StationFinder		Servei
-Stations directory created	Station		S'ha creat el directori d'emissores.
-Allow parallel playback	MainWindow		Permet la reproducció paral·lela.
-About	MainWindow		Quant a
-Added station %s to list	MainWindow		S'ha afegit l'emissora %s a la llista.
-OK	MainWindow		D'acord
-Remove station	MainWindow		Remove station
-Check station	MainWindow		Comprova l'emissora
-Add station failed	StationFinder		Ha fallat afegir l'emissora.
+1	Catalan	application/x-vnd.Fishpond-StreamRadio	1780791103
 %station% now plays %title%	MainWindow		%station% ara reprodueix %title%
-Unknown station	MainWindow		Emissora desconeguda
-Station	MainWindow		Station
-Find stations	StationFinder		Troba emissores
-Quit	MainWindow		Surt
-File %s could not be loaded as a station	MainWindow		el fitxer %s no s'ha pogut carregar com a emissora.
-Now playing %s	MainWindow		Ara es reprodueix %s
-Failed playing station %s: %s	MainWindow		Ha fallat reproduir de l'emissora %s: %s
-Search for	StationFinder		Cerca per
-Station %s did not respond correctly and could not be added	StationFinder		L'emissora %s no ha respost correctament i no s'ha pogut afegir.
+About	MainWindow		Quant a
 Add station failed	MainWindow		Ha fallat afegir una emissora.
-listenlive.eu [experimental]	StationFinderListenLive		listenlive.eu [experimental]
-Add	StationFinder		Afegeix
-Search	MainWindow		Cerca
-OK	Station		D'acord
-StreamRadio	System name		StreamRàdio
-Station URL	StationPanel		URL de l'emissora
-Search by	StationFinder		Cerca per
-Probing station %station% failed	MainWindow		Ha fallat sondar l'emissora %station%.
-Help…	MainWindow		Ajuda...
-Genre	StationPanel		Gènere
-Usage: StreamRadio <filename>\n<filename> should be a Shoutcast playlist file.\nIf the station already exists, it is made to play otherwise it is added.\n	RadioApp		Ús: StreamRadio <nom_de_fitxer>\n El <nom_de_fitxer> hauria de ser un fitxer de llista de reproducció de Shoutcast.\nSi l’emissora ja existeix, es reprodueix; si no, s’afegeix.\n
-Stream URL	StationPanel		URL del flux
+Added station %s to list	MainWindow		S'ha afegit l'emissora %s a la llista.
+Allow parallel playback	MainWindow		Permet la reproducció paral·lela.
 App	MainWindow		Aplicació
-Community Radio Browser	StationFinderRadioNetwork		Navegador de ràdio comunitari
-Paste Shoutcast URL	MainWindow		Enganxeu l'URL de Shoutcast
-Name	StationPanel		Nom
-Probing station %station% successful	MainWindow		Sondeig correcte de l'emissora %station%
-About	About		Quant a
+Check station	MainWindow		Comprova l'emissora
+Failed playing station %s: %s	MainWindow		Ha fallat reproduir de l'emissora %s: %s
+File %s could not be loaded as a station	MainWindow		el fitxer %s no s'ha pogut carregar com a emissora.
 Find stations…	MainWindow		Find stations…
+Help…	MainWindow		Ajuda...
+Now playing %s	MainWindow		Ara es reprodueix %s
+OK	MainWindow		D'acord
+Paste Shoutcast URL	MainWindow		Enganxeu l'URL de Shoutcast
+Probing station %station% failed	MainWindow		Ha fallat sondar l'emissora %station%.
+Probing station %station% successful	MainWindow		Sondeig correcte de l'emissora %station%
+Quit	MainWindow		Surt
+Remove station	MainWindow		Remove station
+Search	MainWindow		Cerca
+Station	MainWindow		Station
+Station %s did not respond correctly and could not be added	MainWindow		L'emissora %s no ha respost correctament i no s'ha pogut afegir.
+Unknown station	MainWindow		Emissora desconeguda
 unknown title	MainWindow		títol desconegut
+A directory for saving stations has been created in your settings folder. Link this directory to your deskbar menu to play stations directly.	Station		S'ha creat un directori per desar les emissores a la carpeta de configuració. Enllaceu aquest directori al menú de la barra d’escriptori per reproduir-les directament.
+OK	Station		D'acord
+Stations directory created	Station		S'ha creat el directori d'emissores.
+A player for online radio.	RadioApp		A player for online radio.
+Usage: StreamRadio <filename>\n<filename> should be a Shoutcast playlist file.\nIf the station already exists, it is made to play otherwise it is added.\n	RadioApp		Ús: StreamRadio <nom_de_fitxer>\n El <nom_de_fitxer> hauria de ser un fitxer de llista de reproducció de Shoutcast.\nSi l’emissora ja existeix, es reprodueix; si no, s’afegeix.\n
+Add	StationFinder		Afegeix
+Add station failed	StationFinder		Ha fallat afegir l'emissora.
+Find stations	StationFinder		Troba emissores
+OK	StationFinder		D'acord
+Search by	StationFinder		Cerca per
+Search for	StationFinder		Cerca per
+Service	StationFinder		Servei
+Station %s did not respond correctly and could not be added	StationFinder		L'emissora %s no ha respost correctament i no s'ha pogut afegir.
+Community Radio Browser	StationFinderRadioNetwork		Navegador de ràdio comunitari
+Genre	StationPanel		Gènere
+Name	StationPanel		Nom
+Station URL	StationPanel		URL de l'emissora
+Stream URL	StationPanel		URL del flux
+listenlive.eu [experimental]	StationFinderListenLive		listenlive.eu [experimental]
+StreamRadio	System name		StreamRàdio

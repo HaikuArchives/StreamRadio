@@ -1,0 +1,44 @@
+1	Dutch	application/x-vnd.Fishpond-StreamRadio	1780791103
+%station% now plays %title%	MainWindow		%station% speelt nu %title%
+About	MainWindow		Over
+Add station failed	MainWindow		Station toevoegen mislukt
+Added station %s to list	MainWindow		Station %s toegevoegd aan de lijst
+Allow parallel playback	MainWindow		Parallel afspelen toestaan
+App	MainWindow		Toepassing
+Check station	MainWindow		Controleer station
+Failed playing station %s: %s	MainWindow		Fout bij aspelen station %s: %s
+File %s could not be loaded as a station	MainWindow		Bestand %s kan niet geladen worden als een station
+Find stations…	MainWindow		Zoek stations…
+Help…	MainWindow		Help…
+Now playing %s	MainWindow		Speelt nu %s
+OK	MainWindow		OK
+Paste Shoutcast URL	MainWindow		Plak Shoutcast URL
+Probing station %station% failed	MainWindow		Testen van station %station% mislukt
+Probing station %station% successful	MainWindow		Tesen van station %station% gelukt
+Quit	MainWindow		Afsluiten
+Remove station	MainWindow		Station verwijderen
+Search	MainWindow		Zoek
+Station	MainWindow		Station
+Station %s did not respond correctly and could not be added	MainWindow		Station %s reageert niet correct en kan niet geladen worden
+Unknown station	MainWindow		Onbekend station
+unknown title	MainWindow		onbekende titel
+A directory for saving stations has been created in your settings folder. Link this directory to your deskbar menu to play stations directly.	Station		Een map voor het opslaan van stations is aangemaakt in je instellingen folder. Link deze map in je Deskbar om stations dadelijk af te spelen.
+OK	Station		OK
+Stations directory created	Station		Stations map aangemaakt
+A player for online radio.	RadioApp		Een speler voor online Radio.
+Usage: StreamRadio <filename>\n<filename> should be a Shoutcast playlist file.\nIf the station already exists, it is made to play otherwise it is added.\n	RadioApp		Gebruik: StreamRadio <filename>\n<filename> moet een Shoutcast playlist bestand zijn.\nIf het station bestaat reeds, het is gemaakt om af te spelen anders wordt het toegevoegd.\n
+Add	StationFinder		Toevoegen
+Add station failed	StationFinder		Station toevoegen mislukt
+Find stations	StationFinder		Zoek stations
+OK	StationFinder		OK
+Search by	StationFinder		Zoek met
+Search for	StationFinder		Zoek naar
+Service	StationFinder		Service
+Station %s did not respond correctly and could not be added	StationFinder		Station %s reageert niet correct en kan niet toegevoegd worden
+Community Radio Browser	StationFinderRadioNetwork		Community Radio Browser
+Genre	StationPanel		Genre
+Name	StationPanel		Naam
+Station URL	StationPanel		Station URL
+Stream URL	StationPanel		Stream URL
+listenlive.eu [experimental]	StationFinderListenLive		listenlive.eu [experimental]
+StreamRadio	System name		StreamRadio

@@ -1,0 +1,44 @@
+1	Turkish	application/x-vnd.Fishpond-StreamRadio	1780791103
+%station% now plays %title%	MainWindow		%station% — %title%
+About	MainWindow		Hakkında
+Add station failed	MainWindow		İstasyon eklenemedi
+Added station %s to list	MainWindow		%s istasyonu listeye eklendi
+Allow parallel playback	MainWindow		Paralel çalmaya izin ver
+App	MainWindow		StreamRadio
+Check station	MainWindow		İstasyon denetle
+Failed playing station %s: %s	MainWindow		%s istasyonu çalınamadı: %s
+File %s could not be loaded as a station	MainWindow		%s dosyası bir istasyon olarak yüklenemedi
+Find stations…	MainWindow		İstasyon bul…
+Help…	MainWindow		Yardım…
+Now playing %s	MainWindow		Şimdi çalınıyor: %s
+OK	MainWindow		Tamam
+Paste Shoutcast URL	MainWindow		Shoutcast URL'si yapıştır
+Probing station %station% failed	MainWindow		%station% istasyonu aranamadı
+Probing station %station% successful	MainWindow		%station% başarıyla arandı
+Quit	MainWindow		Çık
+Remove station	MainWindow		İstasyon kaldır
+Search	MainWindow		Ara
+Station	MainWindow		İstasyon
+Station %s did not respond correctly and could not be added	MainWindow		%s istasyonu düzgün bir yanıt döndürmediği için eklenemedi
+Unknown station	MainWindow		Bilinmeyen istasyon
+unknown title	MainWindow		bilinmeyen başlık
+A directory for saving stations has been created in your settings folder. Link this directory to your deskbar menu to play stations directly.	Station		İstasyonları kaydetmek için bir dizin ayarlar klasörünüzde oluşturuldu. İstasyonları doğrudan çalmak için bu dizini Masaüstü Çubuğu menünüze bağlayın.
+OK	Station		Tamam
+Stations directory created	Station		İstasyonlar dizini oluşturuldu
+A player for online radio.	RadioApp		A player for online radio.
+Usage: StreamRadio <filename>\n<filename> should be a Shoutcast playlist file.\nIf the station already exists, it is made to play otherwise it is added.\n	RadioApp		Kullanım: StreamRadio <dosyaadı>\n<dosyaadı> bir Shoutcast çalma listesi dosyası olmalıdır.\nEğer istasyon halihazırda varsa çalınır, yoksa eklenir.\n
+Add	StationFinder		Ekle
+Add station failed	StationFinder		İstasyon eklenemedi
+Find stations	StationFinder		İstasyon Bul
+OK	StationFinder		Tamam
+Search by	StationFinder		Şununla ara
+Search for	StationFinder		Şunu ara
+Service	StationFinder		Hizmet
+Station %s did not respond correctly and could not be added	StationFinder		%s düzgün bir yanıt döndürmediği için eklenemedi
+Community Radio Browser	StationFinderRadioNetwork		Topluluk Radyo Tarayıcısı
+Genre	StationPanel		Tür
+Name	StationPanel		Ad
+Station URL	StationPanel		İstasyon URL'si
+Stream URL	StationPanel		Akış URL'si
+listenlive.eu [experimental]	StationFinderListenLive		listenlive.eu [deneysel]
+StreamRadio	System name		StreamRadio

@@ -1,0 +1,44 @@
+1	Italian	application/x-vnd.Fishpond-StreamRadio	1780791103
+%station% now plays %title%	MainWindow		%station% sta riproducendo ora %title%
+About	MainWindow		Informazioni
+Add station failed	MainWindow		Impossibile aggiungere stazione
+Added station %s to list	MainWindow		Stazione aggiunta %s alla lista
+Allow parallel playback	MainWindow		Consenti riproduzione parallela
+App	MainWindow		App
+Check station	MainWindow		Controlla stazione
+Failed playing station %s: %s	MainWindow		Impossibile riprodurre stazione %s: %s
+File %s could not be loaded as a station	MainWindow		Impossibile caricare il file %s come stazione
+Find stations…	MainWindow		Trova stazioni…
+Help…	MainWindow		Aiuto…
+Now playing %s	MainWindow		Riproduzione di %s
+OK	MainWindow		OK
+Paste Shoutcast URL	MainWindow		Incolla URL Shoutcast
+Probing station %station% failed	MainWindow		Impossibile esaminare stazione %station%
+Probing station %station% successful	MainWindow		Esame stazione %station% concluso
+Quit	MainWindow		Esci
+Remove station	MainWindow		Rimuovi stazione
+Search	MainWindow		Cerca
+Station	MainWindow		Stazione
+Station %s did not respond correctly and could not be added	MainWindow		Impossibile aggiungere stazione %s in quanto non risponde correttamente
+Unknown station	MainWindow		Stazione sconosciuta
+unknown title	MainWindow		titolo sconosciuto
+A directory for saving stations has been created in your settings folder. Link this directory to your deskbar menu to play stations directly.	Station		Una directory di salvataggio stazioni è stata creta nella tua cartella delle impostazioni. Crea un collegamento al menu della deskbar per riprodurre direttamente le stazioni.
+OK	Station		OK
+Stations directory created	Station		Cartella stazioni creata
+A player for online radio.	RadioApp		A player for online radio.
+Usage: StreamRadio <filename>\n<filename> should be a Shoutcast playlist file.\nIf the station already exists, it is made to play otherwise it is added.\n	RadioApp		Utliizzo: StreamRadio <nome file>\n<fone file> dovrebbe essere un file di playlist  Shoutcast.\nSe la stazione non esiste viene aggiunta altrimenti viene riprodotta.\n
+Add	StationFinder		Aggiungi
+Add station failed	StationFinder		Impossibile aggiungere stazione
+Find stations	StationFinder		Trova stazioni
+OK	StationFinder		OK
+Search by	StationFinder		Cerca per
+Search for	StationFinder		Cerca per
+Service	StationFinder		Servizio
+Station %s did not respond correctly and could not be added	StationFinder		Impossibile aggiungere stazione %s in quanto non risponde correttamente
+Community Radio Browser	StationFinderRadioNetwork		Community Radio Browser
+Genre	StationPanel		Genere
+Name	StationPanel		Nome
+Station URL	StationPanel		URL stazione
+Stream URL	StationPanel		URL flusso
+listenlive.eu [experimental]	StationFinderListenLive		listenlive.eu [sperimentale]
+StreamRadio	System name		StreamRadio

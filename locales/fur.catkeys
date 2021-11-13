@@ -1,0 +1,44 @@
+1	Friulian	application/x-vnd.Fishpond-StreamRadio	1780791103
+%station% now plays %title%	MainWindow		%station% e trasmet %title%
+About	MainWindow		Informazions
+Add station failed	MainWindow		No si è rivâts a zontâ la stazion
+Added station %s to list	MainWindow		Si à zontade la stazion %s ae liste
+Allow parallel playback	MainWindow		Permet riproduzion in paralêl
+App	MainWindow		Aplicazion
+Check station	MainWindow		Controle stazion
+Failed playing station %s: %s	MainWindow		No si è rivâts a riprodusi la stazion %s: %s
+File %s could not be loaded as a station	MainWindow		Nol pues jessi cjariât come stazion il file %s
+Find stations…	MainWindow		Find stations…
+Help…	MainWindow		Jutori…
+Now playing %s	MainWindow		In riproduzion %s
+OK	MainWindow		VA BEN
+Paste Shoutcast URL	MainWindow		Tache l'URL Shoutcast
+Probing station %station% failed	MainWindow		Prove de stazion %station% falide
+Probing station %station% successful	MainWindow		Prove de stazion %station% lade ben
+Quit	MainWindow		Jes
+Remove station	MainWindow		Remove station
+Search	MainWindow		Cîr
+Station	MainWindow		Station
+Station %s did not respond correctly and could not be added	MainWindow		La stazion %s no rispuint in maniere juste e no pues jessi zontade
+Unknown station	MainWindow		Stazion no cognossude
+unknown title	MainWindow		titul no cognossût
+A directory for saving stations has been created in your settings folder. Link this directory to your deskbar menu to play stations directly.	Station		E je stade creade une cartele pes stazions salvadis inte cartele des tôs impostazions. Coleghe cheste cartele al to menù dal deskbar par riprodusi in maniere direte lis stazions.
+OK	Station		Va ben
+Stations directory created	Station		Cartele des stazions creade
+A player for online radio.	RadioApp		A player for online radio.
+Usage: StreamRadio <filename>\n<filename> should be a Shoutcast playlist file.\nIf the station already exists, it is made to play otherwise it is added.\n	RadioApp		Ûs: StreamRadio <non_file>\n<non_file> al à di sei une liste di riproduzion Shoutcast.\nSe la stazion e esist za, e ven fate partî in câs contrari e ven zontade.\n
+Add	StationFinder		Zonte
+Add station failed	StationFinder		Zontâ de stazion falît
+Find stations	StationFinder		Cjate stazions
+OK	StationFinder		VA BEN
+Search by	StationFinder		Cîr par
+Search for	StationFinder		Cîr par
+Service	StationFinder		Servizi
+Station %s did not respond correctly and could not be added	StationFinder		La stazion %s no rispuint in maniere juste e no pues jessi zontade
+Community Radio Browser	StationFinderRadioNetwork		Navigadôr Radio Comunitari
+Genre	StationPanel		Gjenar
+Name	StationPanel		Non
+Station URL	StationPanel		URL de stazion
+Stream URL	StationPanel		URL dal flus
+listenlive.eu [experimental]	StationFinderListenLive		listenlive.eu [sperimentâl]
+StreamRadio	System name		FlusRadio
