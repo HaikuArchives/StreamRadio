@@ -38,8 +38,7 @@ APP_MIME_SIG = application/x-vnd.Fishpond-StreamRadio
 #	means this Makefile will not work correctly if two source files with the
 #	same name (source.c or source.cpp) are included from different directories.
 #	Also note that spaces in folder names do not work well with this Makefile.
-SRCS := About.cpp \
-		HttpUtils.cpp \
+SRCS := HttpUtils.cpp \
 		MainWindow.cpp \
 		RadioApp.cpp \
 		RadioSettings.cpp \
@@ -89,10 +88,11 @@ LIBPATHS =
 #	Additional paths to look for system headers. These use the form
 #	"#include <header>". Directories that contain the files in SRCS are
 #	NOT auto-included here.
-SYSTEM_INCLUDE_PATHS = /boot/system/develop/headers/private/media \
-					   /boot/system/develop/headers/private/media/experimental \
-					   /boot/system/develop/headers/private/shared \
-					   /boot/system/develop/headers/private/netservices
+SYSTEM_INCLUDE_PATHS = 	/system/develop/headers/private/interface \
+						/system/develop/headers/private/media \
+						/system/develop/headers/private/media/experimental \
+						/system/develop/headers/private/shared \
+						/system/develop/headers/private/netservices
 
 #	Additional paths paths to look for local headers. These use the form
 #	#include "header". Directories that contain the files in SRCS are

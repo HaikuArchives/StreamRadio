@@ -16,6 +16,7 @@
  */
 
 
+#include <AboutWindow.h>
 #include <Catalog.h>
 
 #include "About.h"
@@ -97,7 +98,23 @@ RadioApp::ArgvReceived(int32 argc, char** argv)
 void
 RadioApp::AboutRequested()
 {
-	About* about = new About();
+	BAboutWindow * about = new BAboutWindow(
+		B_TRANSLATE_SYSTEM_NAME("StreamRadio"), kAppSignature);
+
+	const char* kAuthors[] = {
+		"Fishpond",
+		"Javier Steinaker",
+		"Jacob Secunda"
+		"Humdinger",
+		NULL
+	};
+
+	const char* kCopyright = "The HaikuArchives team";
+
+	about->AddDescription(B_TRANSLATE("A player for online radio."));
+	about->AddAuthors(kAuthors);
+	about->AddCopyright(2017, kCopyright, NULL);
+
 	about->Show();
 }
 
