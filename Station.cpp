@@ -578,12 +578,15 @@ Station::RegFind(const char* text, const char* pattern)
 Station*
 Station::LoadIndirectUrl(BString& shoutCastUrl)
 {
+	BUrl url(shoutCastUrl);
+	if (!url.IsValid())
+		return NULL;
+
 	status_t status;
 	const char* patternTitle = "<title[^>]*>(.*?)</title[^>]*>";
 	const char* patternIcon
 		= "<link\\s*rel=\"shortcut icon\"\\s*href=\"([^\"]*?)\".*?";
 
-	BUrl url(shoutCastUrl);
 	BString contentType("*/*");
 
 	BMallocIO* dataIO = HttpUtils::GetAll(url, NULL, 10000, &contentType, 2000);
