@@ -8,7 +8,7 @@ App	MainWindow		Aplicación
 Check station	MainWindow		Comprobar estación
 Failed playing station %s: %s	MainWindow		Error al reproducir la estación %s: %s
 File %s could not be loaded as a station	MainWindow		El archivo %s no pudo ser reconocido como una estación
-Find stations…	MainWindow		Find stations…
+Find stations…	MainWindow		Buscar estaciones…
 Help…	MainWindow		Ayuda…
 Now playing %s	MainWindow		Reproduciendo %s
 OK	MainWindow		Aceptar
@@ -16,16 +16,16 @@ Paste Shoutcast URL	MainWindow		Pegar URL de Shoutcast
 Probing station %station% failed	MainWindow		Falló la conexión a %station%
 Probing station %station% successful	MainWindow		La conexión a %station% fue exitosa
 Quit	MainWindow		Salir
-Remove station	MainWindow		Remove station
+Remove station	MainWindow		Quitar estación
 Search	MainWindow		Buscar
-Station	MainWindow		Station
+Station	MainWindow		Estación
 Station %s did not respond correctly and could not be added	MainWindow		La estación %s no respondió correctamente y no pudo ser añadida
 Unknown station	MainWindow		Estación desconocida
 unknown title	MainWindow		título desconocido
 A directory for saving stations has been created in your settings folder. Link this directory to your deskbar menu to play stations directly.	Station		Una carpeta para guardar estaciones ha sido creada en tu directorio de configuración. Enlaza esta carpeta a tu menú de Deskbar para reproducir estaciones directamente.
 OK	Station		Aceptar
 Stations directory created	Station		Carpeta de estaciones creada
-A player for online radio.	RadioApp		A player for online radio.
+A player for online radio.	RadioApp		Un reproductor de radio en línea.
 Usage: StreamRadio <filename>\n<filename> should be a Shoutcast playlist file.\nIf the station already exists, it is made to play otherwise it is added.\n	RadioApp		Modo de uso: StreamRadio <filename>\n<filename> debe ser un archivo de lista de reproducción de Shoutcast.\nSi la estación ya existe, comienza a reproducirse, de lo contrario es añadida.\n
 Add	StationFinder		Añadir
 Add station failed	StationFinder		Error al añadir estación

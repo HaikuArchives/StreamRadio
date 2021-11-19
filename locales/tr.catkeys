@@ -25,14 +25,14 @@ unknown title	MainWindow		bilinmeyen başlık
 A directory for saving stations has been created in your settings folder. Link this directory to your deskbar menu to play stations directly.	Station		İstasyonları kaydetmek için bir dizin ayarlar klasörünüzde oluşturuldu. İstasyonları doğrudan çalmak için bu dizini Masaüstü Çubuğu menünüze bağlayın.
 OK	Station		Tamam
 Stations directory created	Station		İstasyonlar dizini oluşturuldu
-A player for online radio.	RadioApp		A player for online radio.
+A player for online radio.	RadioApp		Çevrimiçi radyo oynatıcısı
 Usage: StreamRadio <filename>\n<filename> should be a Shoutcast playlist file.\nIf the station already exists, it is made to play otherwise it is added.\n	RadioApp		Kullanım: StreamRadio <dosyaadı>\n<dosyaadı> bir Shoutcast çalma listesi dosyası olmalıdır.\nEğer istasyon halihazırda varsa çalınır, yoksa eklenir.\n
 Add	StationFinder		Ekle
 Add station failed	StationFinder		İstasyon eklenemedi
 Find stations	StationFinder		İstasyon Bul
 OK	StationFinder		Tamam
-Search by	StationFinder		Şununla ara
-Search for	StationFinder		Şunu ara
+Search by	StationFinder		Arama ölçütü
+Search for	StationFinder		Arama metni
 Service	StationFinder		Hizmet
 Station %s did not respond correctly and could not be added	StationFinder		%s düzgün bir yanıt döndürmediği için eklenemedi
 Community Radio Browser	StationFinderRadioNetwork		Topluluk Radyo Tarayıcısı
