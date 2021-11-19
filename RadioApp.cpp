@@ -102,9 +102,9 @@ RadioApp::AboutRequested()
 
 	const char* kAuthors[] = {
 		"Fishpond",
-		"Javier Steinaker",
-		"Jacob Secunda",
 		"Humdinger",
+		"Jacob Secunda",
+		"Javier Steinaker",
 		NULL
 	};
 
