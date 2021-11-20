@@ -1,6 +1,13 @@
 
 resource app_signature "application/x-vnd.Fishpond-StreamRadio";
 
+resource app_version {
+	major = 0, middle = 0, minor = 4,
+	variety = B_APPV_DEVELOPMENT, internal = 1,
+	short_info="A player for online radio",
+	long_info="Find and stream online radio stations"
+};
+
 resource file_types message {
 	"types" = "audio/x-mpegurl",
 	"types" = "audio/x-scpls"
