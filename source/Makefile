@@ -3,19 +3,12 @@
 ## Fill in this file to specify the project being created, and the referenced
 ## Makefile-Engine will do all of the hard work for you. This handles any
 ## architecture of Haiku.
+##
+## For more information, see:
+## file:///system/develop/documentation/makefile-engine.html
 
 # The name of the binary.
-NAME = StreamRadio
-ARCH = $(shell getarch)
-
-V_MAJOR = 0
-V_MIDDLE = 0
-V_MINOR = 4
-V_VARIETY = B_APPV_DEVELOPMENT
-V_BUILD = 1
-
-TARGET_DIR := dist
-PACKAGE = $(TARGET_DIR)/$(NAME)_$(VERSION)-$(ARCH).hpkg
+NAME = ../../dist/StreamRadio
 
 # The type of binary, must be one of:
 #	APP:	Application
@@ -24,7 +17,7 @@ PACKAGE = $(TARGET_DIR)/$(NAME)_$(VERSION)-$(ARCH).hpkg
 #	DRIVER: Kernel driver
 TYPE = APP
 
-# 	If you plan to use localization, specify the application's MIME signature.
+# If you plan to use localization, specify the application's MIME signature.
 APP_MIME_SIG = application/x-vnd.Fishpond-StreamRadio
 
 #	The following lines tell Pe and Eddie where the SRCS, RDEFS, and RSRCS are
@@ -38,19 +31,22 @@ APP_MIME_SIG = application/x-vnd.Fishpond-StreamRadio
 #	means this Makefile will not work correctly if two source files with the
 #	same name (source.c or source.cpp) are included from different directories.
 #	Also note that spaces in folder names do not work well with this Makefile.
-SRCS := HttpUtils.cpp \
-		MainWindow.cpp \
-		RadioApp.cpp \
-		RadioSettings.cpp \
-		Station.cpp \
-		StationFinder.cpp \
-		StationFinderListenLive.cpp \
-		StationFinderRadioNetwork.cpp \
-		StationListView.cpp \
-		StationPanel.cpp \
-		StreamIO.cpp \
-		StreamPlayer.cpp \
-		Utils.cpp
+SRCS = \
+	 HttpUtils.cpp  \
+	 MainWindow.cpp  \
+	 RadioApp.cpp  \
+	 RadioSettings.cpp  \
+	 Station.cpp  \
+	 StationFinder.cpp  \
+	 StationFinderListenLive.cpp  \
+	 StationFinderRadioNetwork.cpp  \
+	 StationListView.cpp  \
+	 StationPanel.cpp  \
+	 StreamIO.cpp  \
+	 StreamPlayer.cpp  \
+	 Utils.cpp  \
+
+
 
 #	Specify the resource definition files to use. Full or relative paths can be
 #	used.
@@ -58,7 +54,7 @@ RDEFS = StreamRadio.rdef
 
 #	Specify the resource files to use. Full or relative paths can be used.
 #	Both RDEFS and RSRCS can be utilized in the same Makefile.
-RSRCS =
+RSRCS = 
 
 # End Pe/Eddie support.
 # @<-src@
@@ -88,7 +84,7 @@ LIBPATHS =
 #	Additional paths to look for system headers. These use the form
 #	"#include <header>". Directories that contain the files in SRCS are
 #	NOT auto-included here.
-SYSTEM_INCLUDE_PATHS = 	/system/develop/headers/private/interface \
+SYSTEM_INCLUDE_PATHS =	/system/develop/headers/private/interface \
 						/system/develop/headers/private/media \
 						/system/develop/headers/private/media/experimental \
 						/system/develop/headers/private/shared \
@@ -100,7 +96,7 @@ SYSTEM_INCLUDE_PATHS = 	/system/develop/headers/private/interface \
 LOCAL_INCLUDE_PATHS =
 
 #	Specify the level of optimization that you want. Specify either NONE (O0),
-#	SOME (O1), FULL (O2), or leave blank (for the default optimization level).
+#	SOME (O1), FULL (O3), or leave blank (for the default optimization level).
 OPTIMIZE = FULL
 
 # 	Specify the codes for languages you are going to support in this
@@ -138,8 +134,7 @@ LINKER_FLAGS =
 #	Specify the version of this binary. Example:
 #		-app 3 4 0 d 0 -short 340 -long "340 "`echo -n -e '\302\251'`"1999 GNU GPL"
 #	This may also be specified in a resource.
-VERSION = $(V_MAJOR).$(V_MIDDLE).$(V_MINOR)-$(V_BUILD)
-APP_VERSION := -app $(V_MAJOR) $(V_MIDDLE) $(V_MINOR) $(V_VARIETY) $(V_BUILD) -short "$(V_MAJOR).$(V_MIDDLE).$(V_MINOR)" -long "$(NAME) v$(VERSION) ©Fishpond 2017"
+APP_VERSION :=
 
 #	(Only used when "TYPE" is "DRIVER"). Specify the desired driver install
 #	location in the /dev hierarchy. Example:
@@ -149,50 +144,7 @@ APP_VERSION := -app $(V_MAJOR) $(V_MIDDLE) $(V_MINOR) $(V_VARIETY) $(V_BUILD) -s
 #	appear at /dev/video/usb when loaded. The default is "misc".
 DRIVER_PATH =
 
-VERSION_RDEF = $(NAME)-version.rdef
-RDEFS += $(VERSION_RDEF)
-
 ## Include the Makefile-Engine
-DEVEL_DIRECTORY = \
-	$(shell findpaths -e B_FIND_PATH_DEVELOP_DIRECTORY etc/makefile-engine)
-include $(DEVEL_DIRECTORY)
-
-ifeq ($(DEBUGGER),TRUE)
-	DEFINES += DEBUGGING TRACING
-endif
-
-PACKAGE_DIR = $(OBJ_DIR)/package
-ARCH_PACKAGE_INFO = $(OBJ_DIR)/PackageInfo_$(ARCH)
-
-$(ARCH_PACKAGE_INFO): Makefile
-	cat ./PackageInfo | sed 's/$$VERSION/$(VERSION)/' | sed 's/$$ARCH/$(ARCH)/' > $(ARCH_PACKAGE_INFO)
-
-$(PACKAGE): $(TARGET_DIR)/$(NAME) $(ARCH_PACKAGE_INFO)
-	mkdir -p $(PACKAGE_DIR)/apps
-	mkdir -p $(PACKAGE_DIR)/data/deskbar/menu/Applications
-	cp $(TARGET_DIR)/$(NAME) $(PACKAGE_DIR)/apps/
-	-ln -s ../../../../apps/$(NAME) $(PACKAGE_DIR)/data/deskbar/menu/Applications/$(NAME)
-	package create -C $(PACKAGE_DIR)/ -i $(OBJ_DIR)/PackageInfo_$(ARCH) $(PACKAGE)
-	mimeset $(PACKAGE)
-
-package: $(PACKAGE)
-
-clean: rdefclean distclean
-
-rdefclean:
-	-rm $(VERSION_RDEF)
-
-distclean:
-	-rm $(TARGET_DIR)/$(NAME)
-
-$(VERSION_RDEF): Makefile
-	echo "resource app_signature \"$(APP_MIME_SIG)\";" > $(VERSION_RDEF)
-	echo "resource app_version {" >> $(VERSION_RDEF)
-	echo "     major = $(V_MAJOR), middle = $(V_MIDDLE), minor = $(V_MINOR)," >> $(VERSION_RDEF)
-	echo "     variety = $(V_VARIETY), internal = $(V_BUILD)," >> $(VERSION_RDEF)
-	echo "     short_info=\"A player for online radio\"," >> $(VERSION_RDEF)
-	echo "	   long_info=\"Find and stream online radio stations\"" >> $(VERSION_RDEF)
-	echo "};" >> $(VERSION_RDEF)
-
-install:: package
-	pkgman install $(PACKAGE)
+DEVEL_DIRECTORY := \
+	$(shell findpaths -r "makefile_engine" B_FIND_PATH_DEVELOP_DIRECTORY)
+include $(DEVEL_DIRECTORY)/etc/makefile-engine
