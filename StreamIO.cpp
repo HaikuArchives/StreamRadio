@@ -179,6 +179,9 @@ StreamIO::SetSize(off_t size)
 status_t
 StreamIO::Open()
 {
+	if (fReq == NULL)
+		return B_ERROR;
+
 	fReqThread = fReq->Run();
 	if (fReqThread < B_OK)
 		return B_ERROR;
