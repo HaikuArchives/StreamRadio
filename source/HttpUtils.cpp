@@ -84,51 +84,6 @@ private:
 };
 
 
-class HttpHeaderReader : public BUrlProtocolListener {
-public:
-	HttpHeaderReader(char* buffer = NULL, ssize_t size = 0)
-		:
-		BUrlProtocolListener(),
-		fBuffer(buffer),
-		fSize(size),
-		fPos(0)
-	{};
-
-
-	virtual	void
-	HeadersReceived(BUrlRequest* caller)
-	{
-		if (fBuffer == NULL && caller->IsRunning())
-			caller->Stop();
-	}
-
-
-	virtual	void
-	DataReceived(BUrlRequest* caller, const char* data, off_t position,
-		ssize_t size)
-	{
-		if (fSize == 0 || fBuffer == NULL) {
-			if (caller->IsRunning())
-				caller->Stop();
-			return;
-		}
-
-		ssize_t receive = fSize - fPos;
-		if (size < receive)
-			receive = size;
-		memcpy(fBuffer + fPos, data, receive);
-		fPos += receive;
-		if (fPos >= fSize && caller->IsRunning())
-			caller->Stop();
-	}
-
-private:
-			char*				fBuffer;
-			ssize_t				fSize;
-			off_t				fPos;
-};
-
-
 /**
  * Loops on the DNS responses looking for connectivity on specified port.
  */
@@ -224,39 +179,4 @@ HttpUtils::GetAll(BUrl url, BHttpHeaders* responseHeaders, bigtime_t timeOut,
 
 	delete request;
 	return data;
-}
-
-
-status_t
-HttpUtils::GetStreamHeader(BUrl url, BHttpHeaders* responseHeaders)
-{
-	status_t status;
-	HttpIOReader reader(NULL, responseHeaders, 0);
-
-	BHttpRequest* request = dynamic_cast<BHttpRequest*>(
-		BUrlProtocolRoster::MakeRequest(url.UrlString().String(), NULL));
-	request->SetMethod("GET");
-	request->SetAutoReferrer(true);
-	request->SetFollowLocation(true);
-	request->SetTimeout(10000);
-	request->SetDiscardData(true);
-	request->SetUserAgent("StreamRadio/0.0.4");
-
-	BHttpHeaders* requestHeaders = new BHttpHeaders();
-	requestHeaders->AddHeader("Icy-MetaData", 1);
-	request->AdoptHeaders(requestHeaders);
-
-	thread_id threadId = request->Run();
-	wait_for_thread(threadId, &status);
-
-	if (status == B_OK) {
-		BHttpResult result = (BHttpResult&)request->Result();
-		if (result.StatusCode() == 200 || result.StatusCode() == B_OK)
-			*responseHeaders = result.Headers();
-		else
-			status = B_ERROR;
-	}
-
-	delete request;
-	return status;
 }
