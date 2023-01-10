@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2017 Kai Niessen <kai.niessen@online.de>
+ * Copyright 2023 Haiku, Inc. All rights reserved.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +23,10 @@
 #include <regex.h>
 
 #include <Catalog.h>
+#include <MediaIO.h>
 #include <NetworkAddressResolver.h>
+#include <Socket.h>
+#include <Url.h>
 
 #include "Debug.h"
 #include "HttpUtils.h"
@@ -45,8 +49,7 @@ StreamIO::StreamIO(Station* station, BLooper* metaListener)
 	fStation(station),
 	fReq(NULL),
 	fReqThread(-1),
-	fPosition(0),
-	fTotalSize(0),
+	fUnsynched(0),
 	fMetaInt(0),
 	fMetaSize(0),
 	fUntilMetaStart(0),
@@ -77,8 +80,8 @@ StreamIO::StreamIO(Station* station, BLooper* metaListener)
 	// IP's should be small, anyway.
 
 	if (url.Protocol() == "https") {
-		fReq = dynamic_cast<BHttpRequest*>(
-			BUrlProtocolRoster::MakeRequest(url.UrlString().String(), this));
+		fReq = dynamic_cast<BHttpRequest*>(BUrlProtocolRoster::MakeRequest(
+			url.UrlString().String(), this, this));
 	} else {
 		BUrl* newUrl = new BUrl();
 		if (newUrl == NULL)
@@ -89,7 +92,7 @@ StreamIO::StreamIO(Station* station, BLooper* metaListener)
 			return;
 
 		fReq = dynamic_cast<BHttpRequest*>(BUrlProtocolRoster::MakeRequest(
-			newUrl->UrlString().String(), this));
+			newUrl->UrlString().String(), this, this));
 		delete newUrl;
 	}
 
@@ -104,14 +107,15 @@ StreamIO::StreamIO(Station* station, BLooper* metaListener)
 	fReq->AdoptHeaders(headers);
 	fReq->SetFollowLocation(true);
 	fReq->SetMaxRedirections(3);
+	fReq->SetStopOnError(true);
 
 	fInputAdapter = BuildInputAdapter();
 
 	const char* mime = fStation->Mime()->Type();
 	if (!strcmp(mime, "audio/mpeg") || !strcmp(mime, "audio/aacp"))
-		fDataFuncs.Add(&StreamIO::DataUnsyncedReceived);
+		fDataFuncs.Add(&StreamIO::_DataUnsyncedReceived);
 
-	fDataFuncs.Add(&StreamIO::DataSyncedReceived);
+	fDataFuncs.Add(&StreamIO::_DataSyncedReceived);
 }
 
 
@@ -150,7 +154,7 @@ StreamIO::ReadAt(off_t position, void* buffer, size_t size)
 			TRACE("Read %" B_PRIdSSIZE " of %" B_PRIuSIZE
 				  " bytes from position %" B_PRIdOFF ", %" B_PRIuSIZE
 				  " remaining\n",
-				read, size, position, Buffered());
+				read, size, position, fBuffered);
 			fBuffered -= read;
 		} else {
 			TRACE("Reading %" B_PRIuSIZE " bytes from position %" B_PRIdOFF
@@ -186,8 +190,6 @@ StreamIO::Open()
 	if (fReqThread < B_OK)
 		return B_ERROR;
 
-	fReqStartTime = system_time() + HTTP_TIMEOUT;
-
 	return BAdapterIO::Open();
 }
 
@@ -206,36 +208,14 @@ StreamIO::SetLimiter(size_t limit)
 }
 
 
-size_t
-StreamIO::Buffered()
-{
-	return fBuffered;
-}
-
-
-status_t
-StreamIO::SeekRequested(off_t position)
-{
-	return BAdapterIO::SeekRequested(position);
-}
-
-
 void
-StreamIO::HeadersReceived(BUrlRequest* request, const BUrlResult& result)
+StreamIO::HeadersReceived(BUrlRequest* request)
 {
 	BHttpRequest* httpReq = dynamic_cast<BHttpRequest*>(request);
 	const BHttpResult* httpResult
 		= dynamic_cast<const BHttpResult*>(&request->Result());
 
-	if (httpReq->IsServerErrorStatusCode(httpResult->StatusCode())) {
-		request->Stop();
-		fReqThread = -1;
-		return;
-	}
-
 	if (httpReq->IsRedirectionStatusCode(httpResult->StatusCode())) {
-		if (httpResult->Length() > 0)
-			fDataFuncs.Add(&StreamIO::DataRedirectReceived, 0);
 		if (httpResult->StatusCode() == 301) { // Permanent redirect
 			fStation->SetStreamUrl(httpResult->Headers()["location"]);
 			TRACE("Permanently redirected to %s\n",
@@ -246,10 +226,7 @@ StreamIO::HeadersReceived(BUrlRequest* request, const BUrlResult& result)
 		return;
 	}
 
-	if (httpReq->IsSuccessStatusCode(httpResult->StatusCode()))
-		httpReq->SetDiscardData(false);
-
-	off_t size = result.Length();
+	off_t size = httpResult->Length();
 	if (size > 0)
 		BAdapterIO::SetSize(size);
 	else
@@ -260,66 +237,64 @@ StreamIO::HeadersReceived(BUrlRequest* request, const BUrlResult& result)
 	if (sMetaInt != NULL) {
 		fMetaInt = atoi(sMetaInt);
 		fUntilMetaStart = fMetaInt;
-		fDataFuncs.Add(&StreamIO::DataWithMetaReceived, 0);
+		fDataFuncs.Add(&StreamIO::_DataWithMetaReceived, 0);
 	}
 }
 
 
-void
-StreamIO::DataSyncedReceived(BUrlRequest* request, const char* data,
-	off_t position, ssize_t size, int next)
+ssize_t
+StreamIO::_DataSyncedReceived(const char* data, size_t size, int next)
 {
-	fInputAdapter->Write(data, size);
-	fBuffered += size;
+	ssize_t written = fInputAdapter->Write(data, size);
+	fBuffered += written;
+	return written;
 }
 
 
-void
-StreamIO::DataRedirectReceived(BUrlRequest* request, const char* data,
-	off_t position, ssize_t size, int next)
+ssize_t
+StreamIO::_DataWithMetaReceived(const char* data, size_t size, int next)
 {
-	fDataFuncs.Remove(next - 1);
-}
+	ssize_t written = 0;
 
-
-void
-StreamIO::DataWithMetaReceived(BUrlRequest* request, const char* data,
-	off_t position, ssize_t size, int next)
-{
 	while (size > 0) {
 		if (fUntilMetaEnd != 0) {
+			// We are reading metadata
 			if (fUntilMetaEnd <= size) {
+				// The metadata ends before the buffer
 				memcpy(fMetaBuffer + fMetaSize, (void*)data, fUntilMetaEnd);
 
+				written += fUntilMetaEnd;
 				data += fUntilMetaEnd;
 				size -= fUntilMetaEnd;
 				fMetaSize += fUntilMetaEnd;
 				fMetaBuffer[fMetaSize] = 0;
 
-				// ProcessMeta;
-				ProcessMeta();
+				_ProcessMeta();
 				fMetaSize = 0;
 
 				fUntilMetaEnd = 0;
 				fUntilMetaStart = fMetaInt;
 			} else {
 				memcpy(fMetaBuffer + fMetaSize, (void*) data, size);
+
+				written += size;
 				fMetaSize += size;
 				data += size;
 				fUntilMetaEnd -= size;
 				size = 0;
 			}
 		} else {
+			// No metadata right now, feed content to consumer
 			DataFunc nextFunc = fDataFuncs.Item(next);
 			if (size <= fUntilMetaStart) {
-				(*this.*nextFunc)(request, data, position, size, next + 1);
+				written += (*this.*nextFunc)(data, size, next + 1);
+
 				fUntilMetaStart -= size;
 				size = 0;
 			} else {
-				(*this.*nextFunc)(
-					request, data, position, fUntilMetaStart, next + 1);
+				// Metadata starts before the end of the buffer
+				written += (*this.*nextFunc)(data, fUntilMetaStart, next + 1);
 				size -= fUntilMetaStart;
-				position += fUntilMetaStart;
 				data += fUntilMetaStart;
 
 				fUntilMetaStart = 0;
@@ -335,22 +310,26 @@ StreamIO::DataWithMetaReceived(BUrlRequest* request, const char* data,
 					fUntilMetaEnd = 0;
 					data--;
 					size++;
+					written--;
 				}
 
 				data++;
 				size--;
+				written++;
 			}
 		}
 	}
+
+	return written;
 }
 
 
-void
-StreamIO::DataUnsyncedReceived(BUrlRequest* request, const char* data,
-	off_t position, ssize_t size, int next)
+ssize_t
+StreamIO::_DataUnsyncedReceived(const char* data,
+	size_t size, int next)
 {
 	off_t frameStart;
-	for (frameStart = 0; frameStart < size - 1; frameStart++) {
+	for (frameStart = 0; frameStart < size; frameStart++) {
 		if (fFrameSync == none) {
 			if (data[frameStart] == kMpegHeader1) {
 				fFrameSync = first;
@@ -361,34 +340,34 @@ StreamIO::DataUnsyncedReceived(BUrlRequest* request, const char* data,
 			fDataFuncs.Remove(next);
 			DataFunc nextFunc = fDataFuncs.Item(next);
 
-			(*this.*nextFunc)(
-				request, &kMpegHeader1, position + frameStart - 1, 1, next + 1);
-			(*this.*nextFunc)(request, data + frameStart, position + frameStart,
+			(*this.*nextFunc)(&kMpegHeader1, 1, next + 1);
+			return frameStart + (*this.*nextFunc)(data + frameStart,
 				size - frameStart, next + 1);
-			return;
 		} else
 			fFrameSync = none;
 	}
 
-	if (position + frameStart > 8192) {
+	fUnsynched += size;
+	if (fUnsynched > 8192) {
 		MSG("No mp3 frame header encountered in first %" B_PRIiOFF
 			" bytes, giving up...",
-			position + frameStart);
+			fUnsynched);
 
 		next--;
 		fDataFuncs.Remove(next);
-		// DataFunc nextFunc = fDataFuncs.Item(next);
 	}
+
+	return size;
 }
 
 
-void
-StreamIO::DataReceived(
-	BUrlRequest* request, const char* data, off_t position, ssize_t size)
+ssize_t
+StreamIO::Write(const void* buffer, size_t size)
 {
 	DataFunc f = fDataFuncs.First();
 	if (f)
-		(*this.*f)(request, data, position, size, 1);
+		return (*this.*f)((const char*)buffer, size, 1);
+	return 0;
 }
 
 
@@ -408,7 +387,7 @@ StreamIO::DebugMessage(BUrlRequest* caller, BUrlProtocolDebugMessage type,
 
 
 void
-StreamIO::ProcessMeta()
+StreamIO::_ProcessMeta()
 {
 	TRACE("Meta: %s\n", fMetaBuffer);
 
