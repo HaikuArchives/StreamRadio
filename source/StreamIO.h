@@ -18,15 +18,13 @@
 #define _STREAM_IO_H
 
 
-#include <Handler.h>
 #include <HttpRequest.h>
 #include <Looper.h>
-#include <Socket.h>
-#include <Url.h>
 #include <UrlProtocolRoster.h>
 
 #include <AdapterIO.h>
-#include <MediaIO.h>
+
+#include "override.h"
 
 using namespace BPrivate::Network;
 
@@ -37,8 +35,7 @@ class Station;
 class StreamIO;
 
 
-typedef void (StreamIO::*DataFunc)(BUrlRequest* request, const char* data,
-	off_t position, ssize_t size, int next);
+typedef ssize_t (StreamIO::*DataFunc)(const char* data, size_t size, int next);
 
 
 class DataFuncs {
@@ -89,56 +86,48 @@ private:
 };
 
 
-class StreamIO : public BAdapterIO, protected BUrlProtocolListener {
+class StreamIO : public BAdapterIO, BUrlProtocolListener {
 public:
 								StreamIO(Station* station,
 									BLooper* metaListener = NULL);
-	virtual						~StreamIO();
-
-	virtual void				GetFlags(int32* flags) const;
-
-	virtual ssize_t				WriteAt(off_t position, const void* buffer,
-									size_t size);
-	virtual ssize_t				ReadAt(off_t position, void* buffer,
-									size_t size);
-
-	virtual status_t			SetSize(off_t size);
-
-	virtual status_t			Open();
-	virtual bool				IsRunning() const;
+								~StreamIO();
 
 			void				SetLimiter(size_t limit = 0);
-			size_t				Buffered();
 
-protected:
-	virtual status_t			SeekRequested(off_t position);
-	virtual void				HeadersReceived(
-									BUrlRequest* request,
-									const BUrlResult& result);
-	virtual void				DataRedirectReceived(BUrlRequest* request,
-									const char* data, off_t position,
-									ssize_t size, int next);
-	virtual void				DataWithMetaReceived(BUrlRequest* request,
-									const char* data, off_t position,
-									ssize_t size, int next);
-	virtual void				DataUnsyncedReceived(BUrlRequest* request,
-									const char* data, off_t position,
-									ssize_t size, int next);
-	virtual void				DataSyncedReceived(BUrlRequest* request,
-									const char* data, off_t position,
-									ssize_t size, int next);
+// BAdapterIO
+			status_t			Open() override;
 
-	virtual void				DataReceived(BUrlRequest* request,
-									const char* data, off_t position,
-									ssize_t size);
-	virtual void				RequestCompleted(BUrlRequest* request,
-									bool success);
-	virtual void				DebugMessage(BUrlRequest* caller,
+private:
+// BAdapterIO
+			void				GetFlags(int32* flags) const override;
+
+			ssize_t				Write(const void* buffer,
+									size_t size) override;
+			ssize_t				WriteAt(off_t position, const void* buffer,
+									size_t size) override;
+			ssize_t				ReadAt(off_t position, void* buffer,
+									size_t size) override;
+
+			status_t			SetSize(off_t size) override;
+
+			bool				IsRunning() const override;
+
+// BUrlProtocolListener
+			void				HeadersReceived(BUrlRequest* request) override;
+			void				RequestCompleted(BUrlRequest* request,
+									bool success) override;
+			void				DebugMessage(BUrlRequest* caller,
 									BUrlProtocolDebugMessage type,
-									const char* text);
+									const char* text) override;
 
-			void				UpdateSize();
-			void				ProcessMeta();
+//
+			ssize_t				_DataWithMetaReceived(
+									const char* data, size_t size, int next);
+			ssize_t				_DataUnsyncedReceived(
+									const char* data, size_t size, int next);
+			ssize_t				_DataSyncedReceived(
+									const char* data, size_t size, int next);
+			void				_ProcessMeta();
 
 private:
 			enum				FrameSync {none, first, done};
@@ -146,8 +135,7 @@ private:
 			Station*			fStation;
 			BHttpRequest*		fReq;
 			thread_id			fReqThread;
-			off_t				fPosition;
-			off_t				fTotalSize;
+			size_t				fUnsynched;
 			size_t				fMetaInt;
 			size_t				fMetaSize;
 			off_t				fUntilMetaStart;
@@ -159,12 +147,10 @@ private:
 
 			DataFuncs			fDataFuncs;
 			BInputAdapter*		fInputAdapter;
-			BString				fStreamTitle;
 
 			const char*			fIcyName;
 			bool				fIsMutable;
 			char				fMetaBuffer[512];
-			bigtime_t			fReqStartTime;
 
 };
 

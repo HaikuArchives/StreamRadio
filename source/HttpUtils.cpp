@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2017 Kai Niessen <kai.niessen@online.de>
+ * Copyright 2023 Haiku, Inc. All rights reserved.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,71 +17,45 @@
  */
 
 
+#include <DataIO.h>
 #include <NetworkAddressResolver.h>
 
 #include "Debug.h"
 #include "HttpUtils.h"
 #include "Utils.h"
+#include "override.h"
 
 
-class HttpIOReader : public BUrlProtocolListener {
+class DataLimit : public BUrlProtocolListener, public BDataIO {
 public:
-	HttpIOReader(BPositionIO* data,
-		BHttpHeaders* responseHeaders,
-		ssize_t limit)
-		:
-		fData(data),
-		fLimit(limit),
-		fHeaders(responseHeaders),
-		fIsRedirect(false)
-	{};
-
-
-	~HttpIOReader()
-	{};
-
-
-	virtual void
-	HeadersReceived(BUrlRequest* caller, const BUrlResult& result)
-	{
-		const BHttpResult* httpResult =
-			dynamic_cast<const BHttpResult*>(&result);
-		if (httpResult != NULL && fHeaders != NULL) {
-			*fHeaders = httpResult->Headers();
-			fIsRedirect = BHttpRequest::IsRedirectionStatusCode(
-				httpResult->StatusCode());
-		}
-	}
-
-
-	virtual	void
-	DataReceived(BUrlRequest* caller, const char* data, off_t position,
-		ssize_t size)
-	{
-		if (fIsRedirect)
-			return;
-
-		if (fData == NULL) {
-			caller->Stop();
-			return;
+		DataLimit(BDataIO* sink, size_t limit)
+			:
+			fSink(sink),
+			fLimit(limit)
+		{
 		}
 
-		fData->Write(data, size);
-		if (fLimit != 0) {
-			// Was fLimit < size, which could lead to fLimit = 0 and an
-			// endless loop
-			if (fLimit <= size)
+		ssize_t Write(const void *buffer, size_t size) override
+		{
+			if (size > fLimit)
+				size = fLimit;
+
+			ssize_t written = fSink->Write(buffer, size);
+			if (written > 0)
+				fLimit -= written;
+
+			return written;
+		}
+
+		void BytesWritten(BUrlRequest* caller, size_t size) override
+		{
+			if (fLimit == 0)
 				caller->Stop();
-			else
-				fLimit -= size;
 		}
-	}
 
 private:
-			BPositionIO*		fData;
-			ssize_t				fLimit;
-			BHttpHeaders*		fHeaders;
-			bool				fIsRedirect;
+		BDataIO*	fSink;
+		size_t		fLimit;
 };
 
 
@@ -149,9 +124,14 @@ HttpUtils::GetAll(BUrl url, BHttpHeaders* responseHeaders, bigtime_t timeOut,
 	if (data == NULL)
 		return data;
 
-	HttpIOReader reader(data, responseHeaders, sizeLimit);
-	BHttpRequest* request = dynamic_cast<BHttpRequest*>(
-		BUrlProtocolRoster::MakeRequest(url.UrlString().String(), data, &reader, NULL));
+	DataLimit reader(data, sizeLimit);
+	BHttpRequest* request;
+	if (sizeLimit)
+		request = dynamic_cast<BHttpRequest*>(BUrlProtocolRoster::MakeRequest(
+			url.UrlString().String(), &reader, &reader, NULL));
+	else
+		request = dynamic_cast<BHttpRequest*>(BUrlProtocolRoster::MakeRequest(
+			url.UrlString().String(), data, NULL, NULL));
 
 	if (contentType && !contentType->IsEmpty()) {
 		BHttpHeaders* requestHeaders = new BHttpHeaders();
@@ -168,14 +148,18 @@ HttpUtils::GetAll(BUrl url, BHttpHeaders* responseHeaders, bigtime_t timeOut,
 	status_t status;
 	wait_for_thread(threadId, &status);
 
-	int32 statusCode = ((BHttpResult&)request->Result()).StatusCode();
+	BHttpResult& result = (BHttpResult&)request->Result();
+	int32 statusCode = result.StatusCode();
 	size_t bufferLen = data->BufferLength();
 	if (!(statusCode == 0 || request->IsSuccessStatusCode(statusCode))
 		|| bufferLen == 0) {
 		delete data;
 		data = NULL;
 	} else if (contentType != NULL)
-		contentType->SetTo(request->Result().ContentType());
+		contentType->SetTo(result.ContentType());
+
+	if (responseHeaders != NULL)
+		*responseHeaders = result.Headers();
 
 	delete request;
 	return data;
