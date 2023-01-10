@@ -37,9 +37,6 @@ public:
 									bigtime_t timeOut = 3000,
 									BString* contentType = NULL,
 									size_t sizeLimit = 0);
-
-	static	status_t			GetStreamHeader(BUrl url,
-									BHttpHeaders* headers);
 };
 
 
