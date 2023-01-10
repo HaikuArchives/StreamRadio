@@ -195,7 +195,8 @@ HttpUtils::GetAll(BUrl url, BHttpHeaders* responseHeaders, bigtime_t timeOut,
 		return data;
 
 	HttpIOReader reader(data, responseHeaders, sizeLimit);
-	BHttpRequest* request = dynamic_cast<BHttpRequest*>(BUrlProtocolRoster::MakeRequest(url.UrlString().String(), &reader, NULL));
+	BHttpRequest* request = dynamic_cast<BHttpRequest*>(
+		BUrlProtocolRoster::MakeRequest(url.UrlString().String(), data, &reader, NULL));
 
 	if (contentType && !contentType->IsEmpty()) {
 		BHttpHeaders* requestHeaders = new BHttpHeaders();
@@ -232,7 +233,8 @@ HttpUtils::GetStreamHeader(BUrl url, BHttpHeaders* responseHeaders)
 	status_t status;
 	HttpIOReader reader(NULL, responseHeaders, 0);
 
-	BHttpRequest* request = dynamic_cast<BHttpRequest*>(BUrlProtocolRoster::MakeRequest(url.UrlString().String(), NULL));
+	BHttpRequest* request = dynamic_cast<BHttpRequest*>(
+		BUrlProtocolRoster::MakeRequest(url.UrlString().String(), NULL));
 	request->SetMethod("GET");
 	request->SetAutoReferrer(true);
 	request->SetFollowLocation(true);
