@@ -24,6 +24,9 @@
 #include <StringList.h>
 #include <Url.h>
 
+using namespace BPrivate::Network;
+
+
 class HttpUtils {
 public:
 	static	status_t			CheckPort(BUrl url, BUrl* newUrl,

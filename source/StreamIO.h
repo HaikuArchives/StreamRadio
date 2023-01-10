@@ -28,6 +28,7 @@
 #include <AdapterIO.h>
 #include <MediaIO.h>
 
+using namespace BPrivate::Network;
 
 #define MSG_META_CHANGE 'META'
 
