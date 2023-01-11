@@ -313,6 +313,7 @@ Station::Probe()
 
 	if (headers.CountHeaders() == 0) {
 		fFlags &= !STATION_URI_VALID;
+		delete buffer;
 		return B_TIMED_OUT;
 	}
 
@@ -594,8 +595,10 @@ Station::LoadIndirectUrl(BString& shoutCastUrl)
 		return NULL;
 
 	Station* station = new Station(B_EMPTY_STRING, B_EMPTY_STRING);
-	if (station == NULL)
+	if (station == NULL) {
+		delete dataIO;
 		return station;
+	}
 
 	dataIO->Write("", 1);
 	const char* body = (char*)dataIO->Buffer();
