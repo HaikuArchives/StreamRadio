@@ -50,7 +50,7 @@ StationFinderRadioNetwork::StationFinderRadioNetwork()
 	:
 	StationFinderService(),
 	fIconLookupThread(-1),
-	fIconLookupList()
+	fIconLookupList(100, true)
 {
 	serviceName.SetTo(B_TRANSLATE("Community Radio Browser"));
 	serviceHomePage.SetUrlString("https://www.radio-browser.info");
@@ -223,6 +223,7 @@ StationFinderRadioNetwork::FindBy(int capabilityIndex, const char* searchFor,
 			resume_thread(fIconLookupThread);
 		}
 	} else {
+		delete data;
 		delete result;
 		result = NULL;
 	}
