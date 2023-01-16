@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2017 Kai Niessen <kai.niessen@online.de>
  * Copyright (C) 2020 Jacob Secunda
+ * Copyright 2023 Haiku, Inc. All rights reserved.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -67,6 +68,7 @@ StationFinderRadioNetwork::StationFinderRadioNetwork()
 
 StationFinderRadioNetwork::~StationFinderRadioNetwork()
 {
+	_WaitForIconLookupThread();
 	fIconLookupList.MakeEmpty(true);
 }
 
@@ -90,8 +92,7 @@ BObjectList<Station>*
 StationFinderRadioNetwork::FindBy(int capabilityIndex, const char* searchFor,
 	BLooper* resultUpdateTarget)
 {
-	if (fIconLookupThread)
-		suspend_thread(fIconLookupThread);
+	_WaitForIconLookupThread();
 
 	fIconLookupList.MakeEmpty(true);
 	fIconLookupNotify = resultUpdateTarget;
@@ -216,10 +217,8 @@ StationFinderRadioNetwork::FindBy(int capabilityIndex, const char* searchFor,
 		}
 
 		if (!fIconLookupList.IsEmpty()) {
-			if (fIconLookupThread < 0) {
-				fIconLookupThread = spawn_thread(
-					&_IconLookupFunc, "iconlookup", B_LOW_PRIORITY, this);
-			}
+			fIconLookupThread = spawn_thread(
+				&_IconLookupFunc, "iconlookup", B_LOW_PRIORITY, this);
 			resume_thread(fIconLookupThread);
 		}
 	} else {
@@ -235,17 +234,18 @@ int32
 StationFinderRadioNetwork::_IconLookupFunc(void* data)
 {
 	StationFinderRadioNetwork* _this = (StationFinderRadioNetwork*)data;
-	while (!_this->fIconLookupList.IsEmpty()) {
+	while (_this->fIconLookupThread >=0 && !_this->fIconLookupList.IsEmpty()) {
 		IconLookup* item = _this->fIconLookupList.FirstItem();
 		BBitmap* logo = _this->RetrieveLogo(item->fIconUrl);
-		if (logo != NULL)
+		if (logo != NULL) {
 			item->fStation->SetLogo(logo);
 
-		BMessage* notification = new BMessage(MSG_UPDATE_STATION);
-		notification->AddPointer("station", item->fStation);
-		if (_this->fIconLookupNotify->LockLooper()) {
-			_this->fIconLookupNotify->PostMessage(notification);
-			_this->fIconLookupNotify->UnlockLooper();
+			BMessage* notification = new BMessage(MSG_UPDATE_STATION);
+			notification->AddPointer("station", item->fStation);
+			if (_this->fIconLookupThread >=0 && _this->fIconLookupNotify->LockLooper()) {
+				_this->fIconLookupNotify->PostMessage(notification);
+				_this->fIconLookupNotify->UnlockLooper();
+			}
 		}
 		_this->fIconLookupList.RemoveItem(item, true);
 	}
@@ -279,4 +279,15 @@ StationFinderRadioNetwork::_CheckServer()
 	sCachedServerUrl.SetTo(testServerUrl.UrlString());
 
 	return B_OK;
+}
+
+void
+StationFinderRadioNetwork::_WaitForIconLookupThread()
+{
+	if (fIconLookupThread >= 0) {
+		status_t status;
+		thread_id tid = fIconLookupThread;
+		fIconLookupThread = -1;
+		wait_for_thread(tid, &status);
+	}
 }

@@ -46,6 +46,7 @@ public:
 private:
 	static	int32				_IconLookupFunc(void* data);
 			status_t			_CheckServer();
+			void				_WaitForIconLookupThread();
 
 private:
 	static	const char*			kBaseUrl;
