@@ -18,7 +18,6 @@
 #define _UTILS_H
 
 
-#include <Application.h>
 #include <Bitmap.h>
 
 
@@ -35,6 +34,7 @@ public:
 	virtual						~Utils() {};
 
 	static	BBitmap*			ResourceBitmap(int32 id);
+	static	const char*			UserAgent();
 };
 
 

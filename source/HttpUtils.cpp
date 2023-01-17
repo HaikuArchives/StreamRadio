@@ -20,6 +20,7 @@
 
 #include "Debug.h"
 #include "HttpUtils.h"
+#include "Utils.h"
 
 
 class HttpIOReader : public BUrlProtocolListener {
@@ -205,7 +206,7 @@ HttpUtils::GetAll(BUrl url, BHttpHeaders* responseHeaders, bigtime_t timeOut,
 	request->SetAutoReferrer(true);
 	request->SetFollowLocation(true);
 	request->SetTimeout(timeOut);
-	request->SetUserAgent("StreamRadio/0.0.4");
+	request->SetUserAgent(Utils::UserAgent());
 
 	thread_id threadId = request->Run();
 	status_t status;
