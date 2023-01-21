@@ -242,8 +242,7 @@ Station::RetrieveStreamUrl()
 	BMallocIO* plsData = HttpUtils::GetAll(fSource, NULL, 100000, &contentType,
 		2000);
 	if (plsData != NULL) {
-		status = ParseUrlReference((const char*) plsData->Buffer(),
-					contentType);
+		status = ParseUrlReference((const char*) plsData->Buffer(), fSource);
 		delete plsData;
 	}
 
@@ -408,7 +407,7 @@ Station::ProbeBuffer(BPositionIO* buffer)
 
 
 status_t
-Station::ParseUrlReference(const char* body, const char* mime)
+Station::ParseUrlReference(const char* body, const BUrl& baseUrl)
 {
 	const char* patterns[4] = {"^file[0-9]+=([^\r\n]*)[\r\n$]+", // ShoutcastUrl
 		"^(http://[^\r\n]*)[\r\n]+$", // Mpeg Url;
@@ -418,7 +417,7 @@ Station::ParseUrlReference(const char* body, const char* mime)
 	for (int32 i = 0; i < 3; i++) {
 		char* match = RegFind(body, patterns[i]);
 		if (match != NULL) {
-			fStreamUrl.SetUrlString(match);
+			fStreamUrl = BUrl(baseUrl, match);
 			free(match);
 
 			match = RegFind(body, patterns[3]);
@@ -531,11 +530,7 @@ Station::Load(BString name, BEntry* entry)
 
 		char* buffer = (char*)malloc(size);
 		file.Read(buffer, size);
-
-		char mime[64];
-		stationInfo.GetType(mime);
-		station->ParseUrlReference(buffer, mime);
-
+		station->ParseUrlReference(buffer, BUrl(BPath(entry)));
 		free(buffer);
 	}
 
@@ -607,7 +602,7 @@ Station::LoadIndirectUrl(BString& shoutCastUrl)
 	if (pos >= 0)
 		contentType.Truncate(pos);
 
-	status = station->ParseUrlReference(body, contentType.String());
+	status = station->ParseUrlReference(body, url);
 	if (status != B_OK && contentType.StartsWith(("audio/")))
 		station->SetStreamUrl(url);
 

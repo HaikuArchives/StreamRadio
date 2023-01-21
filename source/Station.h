@@ -148,7 +148,7 @@ protected:
 			void				CheckFlags();
 	static	char*				RegFind(const char* text, const char* pattern);
 			status_t			ParseUrlReference(const char* body,
-									const char* mime);
+									const BUrl& baseUrl);
 			void				CleanName();
 
 			BString				fName;
