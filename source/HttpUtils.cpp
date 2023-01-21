@@ -133,6 +133,9 @@ HttpUtils::GetAll(BUrl url, BHttpHeaders* responseHeaders, bigtime_t timeOut,
 		request = dynamic_cast<BHttpRequest*>(BUrlProtocolRoster::MakeRequest(
 			url.UrlString().String(), data, NULL, NULL));
 
+	if (request == NULL)
+		return NULL;
+
 	if (contentType && !contentType->IsEmpty()) {
 		BHttpHeaders* requestHeaders = new BHttpHeaders();
 		requestHeaders->AddHeader("accept", contentType->String());

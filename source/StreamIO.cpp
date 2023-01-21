@@ -96,6 +96,9 @@ StreamIO::StreamIO(Station* station, BLooper* metaListener)
 		delete newUrl;
 	}
 
+	if (fReq == NULL)
+		return;
+
 	BHttpHeaders* headers = new BHttpHeaders();
 	if (headers == NULL)
 		return;
