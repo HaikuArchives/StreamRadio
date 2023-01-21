@@ -260,7 +260,6 @@ Station::Probe()
 {
 	BHttpHeaders headers;
 	BMallocIO* buffer;
-	BUrl* resolvedUrl = new BUrl();
 	BString contentType("audio/*");
 
 	// If source URL is a playlist, retrieve the actual stream URL
@@ -291,13 +290,13 @@ Station::Probe()
 		buffer = HttpUtils::GetAll(fStreamUrl, &headers, 2 * 1000 * 1000,
 			&contentType, 4096);
 	} else {
-		status_t resolveStatus = HttpUtils::CheckPort(fStreamUrl, resolvedUrl);
+		BUrl resolvedUrl;
+		status_t resolveStatus = HttpUtils::CheckPort(fStreamUrl, &resolvedUrl);
 		if (resolveStatus != B_OK)
 			return B_ERROR;
 
 		buffer = HttpUtils::GetAll(
-			*resolvedUrl, &headers, 2 * 1000 * 1000, &contentType, 4096);
-		delete resolvedUrl;
+			resolvedUrl, &headers, 2 * 1000 * 1000, &contentType, 4096);
 	}
 
 #ifdef DEBUGGING
@@ -566,6 +565,7 @@ Station::RegFind(const char* text, const char* pattern)
 		match = strndup(text + matchBuffer[1].rm_so,
 			matchBuffer[1].rm_eo - matchBuffer[1].rm_so);
 	}
+	regfree(&patternBuffer);
 
 	return match;
 }
@@ -641,12 +641,16 @@ Station::LoadIndirectUrl(BString& shoutCastUrl)
 		dataIO->Write(&"", 1);
 		body = (char*) dataIO->Buffer();
 		char* title = RegFind(body, patternTitle);
-		if (title != NULL)
+		if (title != NULL) {
 			station->fName.SetTo(title);
+			free(title);
+		}
 
 		char* icon = RegFind(body, patternIcon);
-		if (icon != NULL)
+		if (icon != NULL) {
 			finalUrl.SetPath(BString(icon));
+			free(icon);
+		}
 
 		contentType = "image/*";
 
