@@ -420,6 +420,7 @@ StreamIO::_ProcessMeta()
 
 		text += matches[0].rm_eo;
 	}
+	regfree(&regex);
 
 	fMetaListener->PostMessage(msg);
 }
