@@ -47,6 +47,7 @@ RadioApp::ReadyToRun()
 {
 	mainWindow = new MainWindow();
 	mainWindow->Show();
+
 	if (fArgvMessage != NULL)
 		mainWindow->PostMessage(fArgvMessage);
 }
@@ -55,7 +56,10 @@ RadioApp::ReadyToRun()
 void
 RadioApp::RefsReceived(BMessage* message)
 {
-	mainWindow->PostMessage(message);
+	if (mainWindow != NULL)
+		mainWindow->PostMessage(message);
+	else
+		fArgvMessage = new BMessage(*message);
 }
 
 
