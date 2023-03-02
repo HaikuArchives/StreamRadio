@@ -128,6 +128,7 @@ void
 MainWindow::MessageReceived(BMessage* message)
 {
 	switch (message->what) {
+		case B_SIMPLE_DATA:
 		case B_REFS_RECEIVED:
 		{
 			entry_ref ref;
@@ -143,7 +144,8 @@ MainWindow::MessageReceived(BMessage* message)
 						delete station;
 						station = existingStation;
 						stationItem = fStationList->Item(station);
-						_TogglePlay(stationItem);
+						if (stationItem != NULL)
+							_ToggleStation(stationItem);
 					} else {
 						stationItem = new StationListViewItem(station);
 						fStationList->AddItem(stationItem);
@@ -279,18 +281,8 @@ MainWindow::MessageReceived(BMessage* message)
 			StationListViewItem* stationItem
 				= fStationList->ItemAt(stationIndex);
 
-			if (fAllowParallelPlayback == false) {
-				if (fActiveStations.HasItem(stationItem)) {
-					while (!fActiveStations.IsEmpty())
-						_TogglePlay(fActiveStations.LastItem());
-				} else {
-					while (!fActiveStations.IsEmpty())
-						_TogglePlay(fActiveStations.LastItem());
-
-					_TogglePlay(stationItem);
-				}
-			} else if (stationItem != NULL)
-				_TogglePlay(stationItem);
+			if (stationItem != NULL)
+				_ToggleStation(stationItem);
 
 			break;
 		}
@@ -401,6 +393,24 @@ MainWindow::SetVisible(bool visible)
 	else
 		Hide();
 };
+
+
+void
+MainWindow::_ToggleStation(StationListViewItem* stationItem)
+{
+	if (fAllowParallelPlayback == false) {
+		if (fActiveStations.HasItem(stationItem)) {
+			while (!fActiveStations.IsEmpty())
+				_TogglePlay(fActiveStations.LastItem());
+		} else {
+			while (!fActiveStations.IsEmpty())
+				_TogglePlay(fActiveStations.LastItem());
+
+			_TogglePlay(stationItem);
+		}
+	} else
+		_TogglePlay(stationItem);
+}
 
 
 void
