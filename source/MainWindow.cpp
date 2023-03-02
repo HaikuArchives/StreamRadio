@@ -147,8 +147,9 @@ MainWindow::MessageReceived(BMessage* message)
 						if (stationItem != NULL)
 							_ToggleStation(stationItem);
 					} else {
-						stationItem = new StationListViewItem(station);
-						fStationList->AddItem(stationItem);
+						fSettings->Stations->AddItem(station);
+						fStationList->Sync(fSettings->Stations);
+						fSettings->Stations->Save();
 						result.SetToFormat(
 							B_TRANSLATE("Added station %s to list"),
 							station->Name()->String());
