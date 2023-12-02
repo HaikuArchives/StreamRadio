@@ -430,6 +430,7 @@ MainWindow::_TogglePlay(StationListViewItem* stationItem)
 			if (status == B_OK) {
 				stationItem->SetPlayer(player);
 				stationItem->StateChanged(StreamPlayer::Playing);
+				fStationList->SelectItem(stationItem);
 				BString success;
 				success.SetToFormat(B_TRANSLATE("Now playing %s"),
 					stationItem->GetStation()->Name()->String());

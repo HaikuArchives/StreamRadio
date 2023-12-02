@@ -266,6 +266,15 @@ StationListView::Item(Station* station)
 
 
 void
+StationListView::SelectItem(StationListViewItem* item)
+{
+	int32 index = IndexOf(item);
+	Select(index);
+	ScrollToSelection();
+}
+
+
+void
 StationListView::Sync(StationsList* stations)
 {
 	LockLooper();
