@@ -56,6 +56,7 @@ public:
 	virtual	void				SetVisible(bool visible);
 
 private:
+			void				_Invoke(StationListViewItem* stationItem);
 			void				_TogglePlay(StationListViewItem* stationItem);
 
 private:
