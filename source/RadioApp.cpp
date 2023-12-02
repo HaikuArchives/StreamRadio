@@ -47,32 +47,42 @@ RadioApp::ReadyToRun()
 {
 	mainWindow = new MainWindow();
 	mainWindow->Show();
-	if (fArgvMessage != NULL)
+	if (fArgvMessage != NULL) {
 		mainWindow->PostMessage(fArgvMessage);
+		delete fArgvMessage;
+		fArgvMessage = NULL;
+	}
 }
 
 
 void
 RadioApp::RefsReceived(BMessage* message)
 {
-	mainWindow->PostMessage(message);
+	if (IsLaunching()) {
+		if (fArgvMessage != NULL)
+			delete fArgvMessage;
+		fArgvMessage = new BMessage(*message);
+	} else if (mainWindow != NULL) {
+		mainWindow->PostMessage(message);
+	}
 }
 
 
 void
 RadioApp::ArgvReceived(int32 argc, char** argv)
 {
-	fArgvMessage = new BMessage(B_REFS_RECEIVED);
+	if (fArgvMessage == NULL)
+		fArgvMessage = new BMessage(B_REFS_RECEIVED);
 
 	int32 count = 0;
 	for (int32 i = 1; i < argc; i++) {
 		char* arg = argv[i];
-		if (!strncmp(arg, "--help", 7)) {
+		if (strncmp(arg, "--help", 7) == 0) {
 			printf(B_TRANSLATE("Usage: StreamRadio <filename>\n"
 				"<filename> should be a Shoutcast playlist file.\n"
 				"If the station already exists, it is made to play "
 				"otherwise it is added.\n"));
-			continue;
+			exit(1);
 		}
 
 		BEntry entry(arg);
@@ -85,12 +95,12 @@ RadioApp::ArgvReceived(int32 argc, char** argv)
 	}
 
 	if (count != 0) {
-		if (mainWindow != NULL)
-			mainWindow->PostMessage(fArgvMessage);
-	} else {
-		delete fArgvMessage;
-		fArgvMessage = NULL;
+		if (mainWindow == NULL)
+			return;
+		mainWindow->PostMessage(fArgvMessage);
 	}
+	delete fArgvMessage;
+	fArgvMessage = NULL;
 }
 
 

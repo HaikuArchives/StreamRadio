@@ -79,7 +79,7 @@ MainWindow::MainWindow()
 
 	fStationList = new StationListView(true);
 	BScrollView* stationScroll = new BScrollView(
-		"scrollStation", fStationList, B_FOLLOW_ALL_SIDES, 0, false, true);
+		"scrollStation", fStationList, 0, false, true);
 
 	fStationPanel = new StationPanel(this);
 
@@ -91,7 +91,7 @@ MainWindow::MainWindow()
 			.SetInsets(B_USE_WINDOW_INSETS, 0, B_USE_WINDOW_INSETS,
 				B_USE_WINDOW_INSETS)
 			.AddSplit(B_VERTICAL, 2)
-				.Add(stationScroll)
+				.Add(stationScroll, 1.0f)
 				.Add(fStationPanel)
 				.SetCollapsible(1, true)
 			.End()
@@ -143,7 +143,7 @@ MainWindow::MessageReceived(BMessage* message)
 						delete station;
 						station = existingStation;
 						stationItem = fStationList->Item(station);
-						_TogglePlay(stationItem);
+						_Invoke(stationItem);
 					} else {
 						stationItem = new StationListViewItem(station);
 						fStationList->AddItem(stationItem);
@@ -278,20 +278,7 @@ MainWindow::MessageReceived(BMessage* message)
 			int32 stationIndex = message->GetInt32("index", -1);
 			StationListViewItem* stationItem
 				= fStationList->ItemAt(stationIndex);
-
-			if (fAllowParallelPlayback == false) {
-				if (fActiveStations.HasItem(stationItem)) {
-					while (!fActiveStations.IsEmpty())
-						_TogglePlay(fActiveStations.LastItem());
-				} else {
-					while (!fActiveStations.IsEmpty())
-						_TogglePlay(fActiveStations.LastItem());
-
-					_TogglePlay(stationItem);
-				}
-			} else if (stationItem != NULL)
-				_TogglePlay(stationItem);
-
+			_Invoke(stationItem);
 			break;
 		}
 
@@ -401,6 +388,26 @@ MainWindow::SetVisible(bool visible)
 	else
 		Hide();
 };
+
+
+void
+MainWindow::_Invoke(StationListViewItem* stationItem)
+{
+	if (stationItem == NULL)
+		return;
+	if (fAllowParallelPlayback == false) {
+		if (fActiveStations.HasItem(stationItem)) {
+			while (!fActiveStations.IsEmpty())
+				_TogglePlay(fActiveStations.LastItem());
+		} else {
+			while (!fActiveStations.IsEmpty())
+				_TogglePlay(fActiveStations.LastItem());
+
+			_TogglePlay(stationItem);
+		}
+	} else if (stationItem != NULL)
+		_TogglePlay(stationItem);
+}
 
 
 void
