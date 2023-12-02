@@ -356,6 +356,10 @@ MainWindow::MessageReceived(BMessage* message)
 			fSettings->SetAllowParallelPlayback(fAllowParallelPlayback);
 			fMenuParallelPlayback->SetMarked(fAllowParallelPlayback);
 
+			if (!fAllowParallelPlayback) {
+				while (fActiveStations.CountItems() > 1)
+					_TogglePlay(fActiveStations.LastItem());
+			}
 			break;
 		}
 
@@ -395,18 +399,13 @@ MainWindow::_Invoke(StationListViewItem* stationItem)
 {
 	if (stationItem == NULL)
 		return;
-	if (fAllowParallelPlayback == false) {
-		if (fActiveStations.HasItem(stationItem)) {
-			while (!fActiveStations.IsEmpty())
-				_TogglePlay(fActiveStations.LastItem());
-		} else {
-			while (!fActiveStations.IsEmpty())
-				_TogglePlay(fActiveStations.LastItem());
-
-			_TogglePlay(stationItem);
-		}
-	} else if (stationItem != NULL)
-		_TogglePlay(stationItem);
+	if (!fAllowParallelPlayback) {
+		while (!fActiveStations.IsEmpty())
+			_TogglePlay(fActiveStations.LastItem());
+		if (fActiveStations.HasItem(stationItem))
+			return;
+	}
+	_TogglePlay(stationItem);
 }
 
 
