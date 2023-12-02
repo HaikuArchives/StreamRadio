@@ -83,6 +83,7 @@ public:
 			StationListViewItem*	Item(Station* station);
 			StationListViewItem*	ItemAt(int32 index);
 			Station*			StationAt(int32 index);
+			void				SelectItem(StationListViewItem* item);
 
 			void				SetPlayMessage(BMessage* playMsg);
 			bool				CanPlay() { return fCanPlay; }
