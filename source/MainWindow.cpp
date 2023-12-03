@@ -162,10 +162,9 @@ MainWindow::MessageReceived(BMessage* message)
 
 		case MSG_SEARCH:
 		{
-			if (fStationFinder == NULL) {
+			if (fStationFinder == NULL)
 				fStationFinder = new StationFinderWindow(this);
-				fStationFinder->Show();
-			}
+			fStationFinder->Show();
 
 			break;
 		}

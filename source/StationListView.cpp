@@ -37,9 +37,10 @@
 StationListViewItem::StationListViewItem(Station* station)
 	:
 	BListItem(0, true),
-	fPlayer(NULL)
+	fPlayer(NULL),
+	fStation(station),
+	fList(NULL)
 {
-	fStation = station;
 	SetHeight(SLV_HEIGHT);
 }
 
@@ -50,6 +51,7 @@ StationListViewItem::~StationListViewItem()
 		fPlayer->Stop();
 		delete fPlayer;
 	}
+	delete fStation;
 }
 
 
@@ -196,17 +198,18 @@ StationListViewItem::SetFillRatio(float fillRatio)
 StationListView::StationListView(bool canPlay)
 	:
 	BListView("Stations", B_SINGLE_SELECTION_LIST),
+	fPlayMsg(NULL),
 	fCanPlay(canPlay)
 {
 	SetResizingMode(B_FOLLOW_ALL_SIDES);
 	SetExplicitMinSize(BSize(300, 2 * SLV_HEIGHT));
-	fPlayMsg = NULL;
 }
 
 
 StationListView::~StationListView()
 {
 	delete fPlayMsg;
+	MakeEmpty();
 }
 
 
@@ -222,6 +225,18 @@ bool
 StationListView::AddItem(Station* station)
 {
 	return AddItem(new StationListViewItem(station));
+}
+
+
+void
+StationListView::MakeEmpty()
+{
+	for (int32 i = CountItems() - 1; i >= 0; i--) {
+		StationListViewItem* stationItem = (StationListViewItem*) ItemAt(i);
+		RemoveItem(i);
+		delete stationItem;
+	}
+	BListView::MakeEmpty();
 }
 
 

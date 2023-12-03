@@ -47,6 +47,7 @@ public:
 			void				DrawBufferFillBar(BView* owner, BRect frame);
 	virtual void				Update(BView* owner, const BFont* font);
 			Station*			GetStation() { return fStation; }
+			void				ClearStation() { fStation = NULL; }
 			void 				StateChanged(StreamPlayer::PlayState newState);
 			void 				SetFillRatio(float fillRatio);
 
@@ -78,6 +79,7 @@ public:
 
 	virtual bool				AddItem(Station* station);
 	virtual bool				AddItem(StationListViewItem* item);
+	virtual void				MakeEmpty();
 
 			int32				StationIndex(Station* station);
 			StationListViewItem*	Item(Station* station);
