@@ -146,8 +146,10 @@ StationFinderService::RetrieveLogo(BUrl url)
 	BMallocIO* bmData = HttpUtils::GetAll(url, NULL, 3000, &contentType);
 	if (bmData != NULL) {
 		bm = BTranslationUtils::GetBitmap(bmData);
-		if (bm != NULL && bm->InitCheck() != B_OK)
+		if (bm != NULL && bm->InitCheck() != B_OK) {
+			delete bm;
 			bm = NULL;
+		}
 
 		delete bmData;
 	}
@@ -270,7 +272,6 @@ StationFinderWindow::~StationFinderWindow()
 {
 	delete fCurrentService;
 
-	fResultView->MakeEmpty();
 	fTxSearch->StopWatchingAll(this);
 
 	delete fMessenger;
@@ -319,8 +320,12 @@ StationFinderWindow::MessageReceived(BMessage* msg)
 					BMessage* dispatch = new BMessage(msg->what);
 					dispatch->AddPointer("station", station);
 
-					if (fMessenger->SendMessage(dispatch) == B_OK)
-						fResultView->RemoveItem(index);
+					if (fMessenger->SendMessage(dispatch) == B_OK) {
+						StationListViewItem* item =
+							(StationListViewItem*) fResultView->RemoveItem(index);
+						item->ClearStation();
+						delete item;
+					}
 				} else {
 					BString msg;
 					msg.SetToFormat(
