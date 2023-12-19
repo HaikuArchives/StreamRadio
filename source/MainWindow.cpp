@@ -398,13 +398,17 @@ MainWindow::_Invoke(StationListViewItem* stationItem)
 {
 	if (stationItem == NULL)
 		return;
+	bool wasActive = false;
 	if (!fAllowParallelPlayback) {
-		while (!fActiveStations.IsEmpty())
-			_TogglePlay(fActiveStations.LastItem());
-		if (fActiveStations.HasItem(stationItem))
-			return;
+		while (!fActiveStations.IsEmpty()) {
+			StationListViewItem* item = fActiveStations.LastItem();
+			if (item == stationItem)
+				wasActive = true;
+			_TogglePlay(item);
+		}
 	}
-	_TogglePlay(stationItem);
+	if (!wasActive)
+		_TogglePlay(stationItem);
 }
 
 
@@ -416,18 +420,17 @@ MainWindow::_TogglePlay(StationListViewItem* stationItem)
 		{
 			status_t status = B_ERROR;
 
-			StreamPlayer* player
-				= new StreamPlayer(stationItem->GetStation(), this);
-			if (player != NULL) {
-				status = player->InitCheck();
-				if (status == B_OK)
-					status = player->Play();
+			StreamPlayer* player = stationItem->Player();
+			if (player == NULL)
+				player = new StreamPlayer(stationItem->GetStation(), this);
+			status = player->InitCheck();
+			if (status == B_OK) {
+				status = player->Play();
 			} else {
 				status = B_NO_MEMORY;
 			}
 
 			if (status == B_OK) {
-				stationItem->SetPlayer(player);
 				stationItem->StateChanged(StreamPlayer::Playing);
 				fStationList->SelectItem(stationItem);
 				BString success;
@@ -446,6 +449,7 @@ MainWindow::_TogglePlay(StationListViewItem* stationItem)
 					strerror(status));
 				fStatusBar->SetText(error);
 			}
+			stationItem->SetPlayer(player);
 
 			break;
 		}
