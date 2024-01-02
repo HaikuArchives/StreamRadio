@@ -37,7 +37,8 @@ StreamPlayer::StreamPlayer(Station* station, BLooper* notify)
 	fNotify(notify),
 	fMediaFile(NULL),
 	fPlayer(NULL),
-	fState(StreamPlayer::Stopped)
+	fState(StreamPlayer::Stopped),
+	fFlushCount(0)
 {
 	TRACE("Trying to set player for stream %s\n",
 		station->StreamUrl().UrlString().String());
@@ -181,6 +182,11 @@ StreamPlayer::_GetDecodedChunk(void* cookie, void* buffer, size_t size,
 		/ (format.format & media_raw_audio_format::B_AUDIO_SIZE_MASK);
 	fMediaFile->TrackAt(0)->ReadFrames(
 		buffer, &reqFrames, &player->fHeader, &player->fInfo);
+
+	if (player->fFlushCount++ > 1000) {
+		player->fFlushCount = 0;
+		player->fStream->FlushRead();
+	}
 }
 
 

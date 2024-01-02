@@ -76,6 +76,7 @@ private:
 			media_format		fDecodedFormat;
 			media_header		fHeader;
 			media_decode_info	fInfo;
+			int32				fFlushCount;
 };
 
 
