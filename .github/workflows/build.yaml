@@ -28,7 +28,7 @@ jobs:
             mkdir -p dist
             cd source
             if [[ `uname -m` == BePC ]]; then
-              setarch x86 'make && make bindcatalogs'
+              setarch x86 "make && make bindcatalogs"
             else
               make && make bindcatalogs
             fi
