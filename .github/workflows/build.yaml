@@ -25,8 +25,10 @@ jobs:
           version: ${{ matrix.config.version }}
           architecture: ${{ matrix.config.architecture }}
           run: |
+            mkdir -p dist
+            cd source
             if [[ `uname -m` == BePC ]]; then
-              setarch x86 make -C source
+              setarch x86 'make && make bindcatalogs'
             else
-              make -C source
+              make && make bindcatalogs
             fi
