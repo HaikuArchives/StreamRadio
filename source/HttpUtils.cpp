@@ -28,34 +28,29 @@
 
 class DataLimit : public BUrlProtocolListener, public BDataIO {
 public:
-		DataLimit(BDataIO* sink, size_t limit)
-			:
-			fSink(sink),
-			fLimit(limit)
-		{
-		}
+	DataLimit(BDataIO* sink, size_t limit) : fSink(sink), fLimit(limit) {}
 
-		ssize_t Write(const void *buffer, size_t size) override
-		{
-			if (size > fLimit)
-				size = fLimit;
+	ssize_t Write(const void* buffer, size_t size) override
+	{
+		if (size > fLimit)
+			size = fLimit;
 
-			ssize_t written = fSink->Write(buffer, size);
-			if (written > 0)
-				fLimit -= written;
+		ssize_t written = fSink->Write(buffer, size);
+		if (written > 0)
+			fLimit -= written;
 
-			return written;
-		}
+		return written;
+	}
 
-		void BytesWritten(BUrlRequest* caller, size_t size) override
-		{
-			if (fLimit == 0)
-				caller->Stop();
-		}
+	void BytesWritten(BUrlRequest* caller, size_t size) override
+	{
+		if (fLimit == 0)
+			caller->Stop();
+	}
 
 private:
-		BDataIO*	fSink;
-		size_t		fLimit;
+	BDataIO* fSink;
+	size_t fLimit;
 };
 
 
@@ -71,8 +66,8 @@ HttpUtils::CheckPort(BUrl url, BUrl* newUrl, uint32 flags)
 	else
 		port = 80;
 
-	BReference<const BNetworkAddressResolver> resolver
-		= BNetworkAddressResolver::Resolve(url.Host(), port, flags);
+	BReference<const BNetworkAddressResolver> resolver =
+		BNetworkAddressResolver::Resolve(url.Host(), port, flags);
 	if (resolver.Get() == NULL)
 		return B_NO_MEMORY;
 	status_t status = resolver->InitCheck();
@@ -91,16 +86,15 @@ HttpUtils::CheckPort(BUrl url, BUrl* newUrl, uint32 flags)
 			status = resolver->GetNextAddress(&cookie, ipAddress);
 		if (status != B_OK)
 			return status;
-		socket = new(std::nothrow) BSocket();
+		socket = new (std::nothrow) BSocket();
 		portStatus = socket->Connect(ipAddress);
 		delete socket;
 	}
 
 	// If port number is 80, do not add it to the final URL
 	// Then, prepend the appropiate protocol
-	newUrlString = ipAddress.ToString(ipAddress.Port() != 80)
-					   .Prepend("://")
-					   .Prepend(url.Protocol());
+	newUrlString =
+		ipAddress.ToString(ipAddress.Port() != 80).Prepend("://").Prepend(url.Protocol());
 	if (url.HasPath())
 		newUrlString.Append(url.Path());
 	newUrl->SetUrlString(newUrlString.String());
@@ -117,8 +111,8 @@ HttpUtils::CheckPort(BUrl url, BUrl* newUrl, uint32 flags)
  * @return              BMallocIO* filled with retrieved content
  */
 BMallocIO*
-HttpUtils::GetAll(BUrl url, BHttpHeaders* responseHeaders, bigtime_t timeOut,
-	BString* contentType, size_t sizeLimit)
+HttpUtils::GetAll(BUrl url, BHttpHeaders* responseHeaders, bigtime_t timeOut, BString* contentType,
+	size_t sizeLimit)
 {
 	BMallocIO* data = new BMallocIO();
 	if (data == NULL)
@@ -127,11 +121,11 @@ HttpUtils::GetAll(BUrl url, BHttpHeaders* responseHeaders, bigtime_t timeOut,
 	DataLimit reader(data, sizeLimit);
 	BHttpRequest* request;
 	if (sizeLimit)
-		request = dynamic_cast<BHttpRequest*>(BUrlProtocolRoster::MakeRequest(
-			url.UrlString().String(), &reader, &reader, NULL));
+		request = dynamic_cast<BHttpRequest*>(
+			BUrlProtocolRoster::MakeRequest(url.UrlString().String(), &reader, &reader, NULL));
 	else
-		request = dynamic_cast<BHttpRequest*>(BUrlProtocolRoster::MakeRequest(
-			url.UrlString().String(), data, NULL, NULL));
+		request = dynamic_cast<BHttpRequest*>(
+			BUrlProtocolRoster::MakeRequest(url.UrlString().String(), data, NULL, NULL));
 
 	if (request == NULL)
 		return NULL;
@@ -154,8 +148,7 @@ HttpUtils::GetAll(BUrl url, BHttpHeaders* responseHeaders, bigtime_t timeOut,
 	BHttpResult& result = (BHttpResult&)request->Result();
 	int32 statusCode = result.StatusCode();
 	size_t bufferLen = data->BufferLength();
-	if (!(statusCode == 0 || request->IsSuccessStatusCode(statusCode))
-		|| bufferLen == 0) {
+	if (!(statusCode == 0 || request->IsSuccessStatusCode(statusCode)) || bufferLen == 0) {
 		delete data;
 		data = NULL;
 	} else if (contentType != NULL)

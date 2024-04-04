@@ -40,28 +40,27 @@ class MainWindow;
 
 class StationPanel : public BView {
 public:
-								StationPanel(MainWindow* mainWindow,
-									bool expanded = false);
-	virtual						~StationPanel();
+	StationPanel(MainWindow* mainWindow, bool expanded = false);
+	virtual ~StationPanel();
 
-	virtual void				AttachedToWindow();
-	virtual void				MessageReceived(BMessage* msg);
+	virtual void AttachedToWindow();
+	virtual void MessageReceived(BMessage* msg);
 
-			void				SetStation(StationListViewItem* stationItem);
-			void				StateChanged(StreamPlayer::PlayState newState);
+	void SetStation(StationListViewItem* stationItem);
+	void StateChanged(StreamPlayer::PlayState newState);
 
 private:
-			StationListViewItem*	fStationItem;
-			MainWindow* 		fMainWindow;
+	StationListViewItem* fStationItem;
+	MainWindow* fMainWindow;
 
-			BView*				fLogo;
-			BTextControl*		fName;
-			BTextControl*		fUrl;
-			BTextControl*		fGenre;
-			BTextControl*		fStationUrl;
-			BButton*			fVisitStation;
-			BSlider*			fVolume;
+	BView* fLogo;
+	BTextControl* fName;
+	BTextControl* fUrl;
+	BTextControl* fGenre;
+	BTextControl* fStationUrl;
+	BButton* fVisitStation;
+	BSlider* fVolume;
 };
 
 
-#endif // _STATION_PANEL_H
+#endif	// _STATION_PANEL_H

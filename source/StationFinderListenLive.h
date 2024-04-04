@@ -25,34 +25,31 @@
 
 class StationFinderListenLive : public StationFinderService {
 public:
-								StationFinderListenLive();
-	virtual						~StationFinderListenLive();
+	StationFinderListenLive();
+	virtual ~StationFinderListenLive();
 
-	static	void					RegisterSelf();
-	static	StationFinderService*	Instantiate();
+	static void RegisterSelf();
+	static StationFinderService* Instantiate();
 
-	virtual	BObjectList<Station>*	FindBy(int capabilityIndex,
-										const char* searchFor,
-										BLooper* resultUpdateTarget);
+	virtual BObjectList<Station>* FindBy(
+		int capabilityIndex, const char* searchFor, BLooper* resultUpdateTarget);
 
-			BObjectList<Station>*	ParseCountryReturn(BMallocIO* data,
-										const char* country);
-			BObjectList<Station>*	ParseGenreReturn(BMallocIO* data,
-										const char* genre);
+	BObjectList<Station>* ParseCountryReturn(BMallocIO* data, const char* country);
+	BObjectList<Station>* ParseGenreReturn(BMallocIO* data, const char* genre);
 
 private:
-	static	int32					_PlsLookupFunc(void* data);
+	static int32 _PlsLookupFunc(void* data);
 
 private:
-	static	const char*				kBaseUrl;
+	static const char* kBaseUrl;
 
-			BStringList				fCountryKeywordAndPath;
-			BStringList				fGenreKeywordAndPath;
-			thread_id				fLookupThread;
-			BObjectList<Station>	fPlsLookupList;
+	BStringList fCountryKeywordAndPath;
+	BStringList fGenreKeywordAndPath;
+	thread_id fLookupThread;
+	BObjectList<Station> fPlsLookupList;
 
-			BLooper*				fLookupNotify;
+	BLooper* fLookupNotify;
 };
 
 
-#endif // _STATION_FINDER_LISTEN_LIVE_H
+#endif	// _STATION_FINDER_LISTEN_LIVE_H

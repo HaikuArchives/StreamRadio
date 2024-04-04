@@ -34,38 +34,28 @@
 
 
 StationPanel::StationPanel(MainWindow* mainWindow, bool expanded)
-	:
-	BView("stationpanel", B_WILL_DRAW),
-	fStationItem(NULL),
-	fMainWindow(mainWindow)
+	: BView("stationpanel", B_WILL_DRAW), fStationItem(NULL), fMainWindow(mainWindow)
 {
 	SetResizingMode(B_FOLLOW_LEFT_RIGHT | B_FOLLOW_BOTTOM);
-	SetExplicitAlignment(
-		BAlignment(B_ALIGN_USE_FULL_WIDTH, B_ALIGN_VERTICAL_UNSET));
+	SetExplicitAlignment(BAlignment(B_ALIGN_USE_FULL_WIDTH, B_ALIGN_VERTICAL_UNSET));
 
 	fLogo = new BView("logo", B_WILL_DRAW);
 	fLogo->SetExplicitSize(BSize(96, 96));
-	fLogo->SetViewColor(
-		tint_color(ui_color(B_PANEL_BACKGROUND_COLOR), B_DARKEN_2_TINT));
+	fLogo->SetViewColor(tint_color(ui_color(B_PANEL_BACKGROUND_COLOR), B_DARKEN_2_TINT));
 
-	fName = new BTextControl(
-		"name", B_TRANSLATE("Name"), "-", new BMessage(MSG_CHG_NAME));
+	fName = new BTextControl("name", B_TRANSLATE("Name"), "-", new BMessage(MSG_CHG_NAME));
 
-	fUrl = new BTextControl(
-		"url", B_TRANSLATE("Stream URL"), "-", new BMessage(MSG_CHG_STREAMURL));
+	fUrl = new BTextControl("url", B_TRANSLATE("Stream URL"), "-", new BMessage(MSG_CHG_STREAMURL));
 
-	fGenre = new BTextControl(
-		"genre", B_TRANSLATE("Genre"), "-", new BMessage(MSG_CHG_GENRE));
+	fGenre = new BTextControl("genre", B_TRANSLATE("Genre"), "-", new BMessage(MSG_CHG_GENRE));
 
-	fStationUrl = new BTextControl("surl", B_TRANSLATE("Station URL"), "-",
-		new BMessage(MSG_CHG_STATIONURL));
+	fStationUrl =
+		new BTextControl("surl", B_TRANSLATE("Station URL"), "-", new BMessage(MSG_CHG_STATIONURL));
 
-	fVisitStation
-		= new BButton("bnVisitStation", "", new BMessage(MSG_VISIT_STATION));
+	fVisitStation = new BButton("bnVisitStation", "", new BMessage(MSG_VISIT_STATION));
 	fVisitStation->SetIcon(Utils::ResourceBitmap(RES_BN_WEB));
 
-	fVolume = new BSlider(
-		"volume", NULL, new BMessage(MSG_CHG_VOLUME), 0, 100, B_VERTICAL);
+	fVolume = new BSlider("volume", NULL, new BMessage(MSG_CHG_VOLUME), 0, 100, B_VERTICAL);
 	fVolume->SetModificationMessage(new BMessage(MSG_CHG_VOLUME));
 
 	BLayoutBuilder::Grid<>(this, B_USE_SMALL_SPACING, B_USE_SMALL_SPACING)
@@ -79,13 +69,11 @@ StationPanel::StationPanel(MainWindow* mainWindow, bool expanded)
 		.Add(fVisitStation, 5, 2)
 		.Add(fVolume, 6, 0, 1, 3)
 		.AddGlue(1, 3, 5, 1)
-	.End();
+		.End();
 }
 
 
-StationPanel::~StationPanel()
-{
-}
+StationPanel::~StationPanel() {}
 
 
 void
@@ -128,8 +116,8 @@ StationPanel::SetStation(StationListViewItem* stationItem)
 
 		fStationItem = NULL;
 	} else {
-		if (stationItem->Player() != NULL
-			&& stationItem->Player()->State() == StreamPlayer::Playing) {
+		if (stationItem->Player() != NULL &&
+			stationItem->Player()->State() == StreamPlayer::Playing) {
 			fVolume->SetEnabled(true);
 			fVolume->SetValue(stationItem->Player()->Volume() * 100);
 		} else
@@ -139,8 +127,8 @@ StationPanel::SetStation(StationListViewItem* stationItem)
 
 		Station* station = stationItem->GetStation();
 		if (station->Logo()) {
-			fLogo->SetViewBitmap(station->Logo(), station->Logo()->Bounds(),
-				fLogo->Bounds(), 0, B_FILTER_BITMAP_BILINEAR);
+			fLogo->SetViewBitmap(station->Logo(), station->Logo()->Bounds(), fLogo->Bounds(), 0,
+				B_FILTER_BITMAP_BILINEAR);
 		} else
 			fLogo->ClearViewBitmap();
 
@@ -164,8 +152,8 @@ StationPanel::SetStation(StationListViewItem* stationItem)
 void
 StationPanel::StateChanged(StreamPlayer::PlayState newState)
 {
-	if (fStationItem != NULL && fStationItem->Player() != NULL
-		&& fStationItem->Player()->State() == StreamPlayer::Playing) {
+	if (fStationItem != NULL && fStationItem->Player() != NULL &&
+		fStationItem->Player()->State() == StreamPlayer::Playing) {
 		fVolume->SetEnabled(true);
 		fVolume->SetValue(fStationItem->Player()->Volume() * 100);
 	} else {
@@ -178,17 +166,15 @@ StationPanel::StateChanged(StreamPlayer::PlayState newState)
 void
 StationPanel::MessageReceived(BMessage* msg)
 {
-	Station* station
-		= (fStationItem != NULL) ? fStationItem->GetStation() : NULL;
+	Station* station = (fStationItem != NULL) ? fStationItem->GetStation() : NULL;
 	if (station != NULL) {
 		entry_ref ref;
-		if (msg->WasDropped() && msg->IsSourceRemote()
-			&& msg->FindRef("refs", &ref) == B_OK) {
+		if (msg->WasDropped() && msg->IsSourceRemote() && msg->FindRef("refs", &ref) == B_OK) {
 			BBitmap* bm = BTranslationUtils::GetBitmap(&ref);
 			if (bm != NULL) {
 				station->SetLogo(bm);
-				fLogo->SetViewBitmap(station->Logo(), station->Logo()->Bounds(),
-					fLogo->Bounds(), 0, B_FILTER_BITMAP_BILINEAR);
+				fLogo->SetViewBitmap(station->Logo(), station->Logo()->Bounds(), fLogo->Bounds(), 0,
+					B_FILTER_BITMAP_BILINEAR);
 			}
 
 			return;
@@ -222,8 +208,7 @@ StationPanel::MessageReceived(BMessage* msg)
 
 			case MSG_VISIT_STATION:
 			{
-				MSG("Trying to launch url %s\n",
-					station->StationUrl().UrlString().String());
+				MSG("Trying to launch url %s\n", station->StationUrl().UrlString().String());
 
 				if (station->StationUrl().UrlString().IsEmpty()) {
 					BString search;

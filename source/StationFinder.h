@@ -55,36 +55,35 @@ typedef class StationFinderService* (*InstantiateFunc)();
 
 class StationFinderServices {
 public:
-								StationFinderServices(){};
-								~StationFinderServices();
+	StationFinderServices(){};
+	~StationFinderServices();
 
-	static	void 				Register(char* serviceName, InstantiateFunc);
+	static void Register(char* serviceName, InstantiateFunc);
 
-	static	StationFinderService*	Instantiate(char* s);
+	static StationFinderService* Instantiate(char* s);
 
-	static	int32				CountItems();
-	static	char*				Name(int i);
+	static int32 CountItems();
+	static char* Name(int i);
 
 private:
-	static	std::vector<std::pair<char*, InstantiateFunc> >	sServices;
+	static std::vector<std::pair<char*, InstantiateFunc> > sServices;
 };
 
 class FindByCapability {
 public:
-								FindByCapability(char* name);
-								FindByCapability(char* name, char* keyWords,
-									char* delimiter);
-								~FindByCapability();
+	FindByCapability(char* name);
+	FindByCapability(char* name, char* keyWords, char* delimiter);
+	~FindByCapability();
 
-			bool				HasKeyWords();
-			void				SetKeyWords(char* keyWords, char* delimiter);
-	const	BStringList*		KeyWords();
+	bool HasKeyWords();
+	void SetKeyWords(char* keyWords, char* delimiter);
+	const BStringList* KeyWords();
 
-			const char*			Name();
+	const char* Name();
 
 private:
-			BString				fName;
-			BStringList			fKeywords;
+	BString fName;
+	BStringList fKeywords;
 };
 
 class StationFinderService {
@@ -92,68 +91,63 @@ class StationFinderService {
 
 public:
 	// Overridden in specific StationFinder implementations
-								StationFinderService();
-	virtual						~StationFinderService();
+	StationFinderService();
+	virtual ~StationFinderService();
 
-	static	void				RegisterSelf();
-	static	StationFinderService*	Instantiate();
+	static void RegisterSelf();
+	static StationFinderService* Instantiate();
 
-	virtual	BObjectList<Station>*	FindBy(int capabilityIndex,
-										const char* searchFor,
-										BLooper* resultUpdateTarget) = 0;
+	virtual BObjectList<Station>* FindBy(
+		int capabilityIndex, const char* searchFor, BLooper* resultUpdateTarget) = 0;
 
 	// Provided by ancestor class
-			const char*			Name() const { return serviceName.String(); }
+	const char* Name() const { return serviceName.String(); }
 
-			int					CountCapabilities() const
-									{ return findByCapabilities.CountItems(); }
-			FindByCapability*	Capability(int index) const
-									{ return findByCapabilities.ItemAt(index); }
+	int CountCapabilities() const { return findByCapabilities.CountItems(); }
+	FindByCapability* Capability(int index) const { return findByCapabilities.ItemAt(index); }
 
-	static	void				Register(char* name,
-									InstantiateFunc instantiate);
+	static void Register(char* name, InstantiateFunc instantiate);
 
 protected:
-			// To be filled by specific StationFinder implementations
-			BString				serviceName;
-			BUrl				serviceHomePage;
-			BBitmap*			serviceLogo;
-			BObjectList<FindByCapability>	findByCapabilities;
+	// To be filled by specific StationFinder implementations
+	BString serviceName;
+	BUrl serviceHomePage;
+	BBitmap* serviceLogo;
+	BObjectList<FindByCapability> findByCapabilities;
 
-			// Helper functions
-			BBitmap*			RetrieveLogo(BUrl url);
-			FindByCapability*	RegisterSearchCapability(char* name);
-			FindByCapability*	RegisterSearchCapability(char* name,
-									char* keyWords, char* delimiter);
+	// Helper functions
+	BBitmap* RetrieveLogo(BUrl url);
+	FindByCapability* RegisterSearchCapability(char* name);
+	FindByCapability* RegisterSearchCapability(char* name, char* keyWords, char* delimiter);
 };
 
 class StationFinderWindow : public BWindow {
 public:
-								StationFinderWindow(BWindow* parent);
-	virtual						~StationFinderWindow();
+	StationFinderWindow(BWindow* parent);
+	virtual ~StationFinderWindow();
 
-			void				MessageReceived(BMessage* msg);
-	virtual	bool				QuitRequested();
+	void MessageReceived(BMessage* msg);
+	virtual bool QuitRequested();
 
-			void				SelectService(int index);
-			void				SelectCapability(int index);
-			void				DoSearch(const char* text);
+	void SelectService(int index);
+	void SelectCapability(int index);
+	void DoSearch(const char* text);
 
 private:
-			StationFinderService*	fCurrentService;
+	StationFinderService* fCurrentService;
 
-			BMessenger*			fMessenger;
-			BTextControl*		fTxSearch;
-			BOptionPopUp*		fKwSearch;
-			BButton*			fBnSearch;
-			BOptionPopUp*		fDdServices;
-			BButton*			fBnVisit;
-			BOptionPopUp*		fDdSearchBy;
-			StationListView*	fResultView;
-			BButton*			fBnAdd;
+	BMessenger* fMessenger;
+	BTextControl* fTxSearch;
+	BOptionPopUp* fKwSearch;
+	BButton* fBnSearch;
+	BOptionPopUp* fDdServices;
+	BButton* fBnVisit;
+	BOptionPopUp* fDdSearchBy;
+	StationListView* fResultView;
+	BButton* fBnAdd;
 
-			BGridLayout*		fSearchGrid;
+	BGridLayout* fSearchGrid;
 };
 
 
-#endif // _STATION_FINDER_H
+#endif	// _STATION_FINDER_H

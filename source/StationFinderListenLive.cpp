@@ -30,7 +30,8 @@
 #define B_TRANSLATION_CONTEXT "StationFinderListenLive"
 
 
-const char* kGenreList = "Top 40|top40\r\
+const char* kGenreList =
+	"Top 40|top40\r\
 Hot Adult Contemporary|hotac\r\
 Adult Contemporary|ac\r\
 Oldies/80s/90s|oldies\r\
@@ -41,7 +42,8 @@ Rock/Classic Rock|rock\r\
 Alternative|alternative\r\
 Chillout/Lounge|chillout";
 
-const char* kCountryList = "Andorra|andorra\r\
+const char* kCountryList =
+	"Andorra|andorra\r\
 Armenia|armenia\r\
 Austria|austria\r\
 Azerbaijan|azerbaijan\r\
@@ -97,12 +99,11 @@ const char* StationFinderListenLive::kBaseUrl = "http://listenlive.eu/";
 
 
 StationFinderListenLive::StationFinderListenLive()
-	:
-	StationFinderService(),
-	fCountryKeywordAndPath(),
-	fGenreKeywordAndPath(),
-	fLookupThread(-1),
-	fPlsLookupList()
+	: StationFinderService(),
+	  fCountryKeywordAndPath(),
+	  fGenreKeywordAndPath(),
+	  fLookupThread(-1),
+	  fPlsLookupList()
 {
 	serviceName.SetTo(B_TRANSLATE("listenlive.eu [experimental]"));
 	serviceHomePage.SetUrlString("http://www.listenlive.eu/");
@@ -139,8 +140,7 @@ StationFinderListenLive::Instantiate()
 void
 StationFinderListenLive::RegisterSelf()
 {
-	Register(
-		"listenlive.eu [experimental]", &StationFinderListenLive::Instantiate);
+	Register("listenlive.eu [experimental]", &StationFinderListenLive::Instantiate);
 }
 
 
@@ -155,8 +155,8 @@ StationFinderListenLive::~StationFinderListenLive()
 
 
 BObjectList<Station>*
-StationFinderListenLive::FindBy(int capabilityIndex, const char* searchFor,
-	BLooper* resultUpdateTarget)
+StationFinderListenLive::FindBy(
+	int capabilityIndex, const char* searchFor, BLooper* resultUpdateTarget)
 {
 	if (fLookupThread >= 0)
 		suspend_thread(fLookupThread);
@@ -168,10 +168,9 @@ StationFinderListenLive::FindBy(int capabilityIndex, const char* searchFor,
 
 	BString urlString(kBaseUrl);
 	strlwr((char*)searchFor);
-	int keywordIndex
-		= Capability(capabilityIndex)->KeyWords()->IndexOf(searchFor);
-	BStringList* keywordAndPaths
-		= capabilityIndex ? &fGenreKeywordAndPath : &fCountryKeywordAndPath;
+	int keywordIndex = Capability(capabilityIndex)->KeyWords()->IndexOf(searchFor);
+	BStringList* keywordAndPaths =
+		capabilityIndex ? &fGenreKeywordAndPath : &fCountryKeywordAndPath;
 	BString path(keywordAndPaths->StringAt(keywordIndex));
 	path.Remove(0, path.FindFirst('|') + 1);
 	urlString << path << ".html";
@@ -180,11 +179,11 @@ StationFinderListenLive::FindBy(int capabilityIndex, const char* searchFor,
 	BMallocIO* data = HttpUtils::GetAll(url);
 	if (data != NULL) {
 		switch (capabilityIndex) {
-			case 0: // findByCountry
+			case 0:	 // findByCountry
 				result = ParseCountryReturn(data, searchFor);
 				break;
 
-			case 1: // findByGenre
+			case 1:	 // findByGenre
 				result = ParseGenreReturn(data, searchFor);
 				break;
 		}
@@ -195,8 +194,7 @@ StationFinderListenLive::FindBy(int capabilityIndex, const char* searchFor,
 
 	if (!fPlsLookupList.IsEmpty()) {
 		if (fLookupThread < 0)
-			fLookupThread = spawn_thread(
-				&_PlsLookupFunc, "plslookup", B_NORMAL_PRIORITY, this);
+			fLookupThread = spawn_thread(&_PlsLookupFunc, "plslookup", B_NORMAL_PRIORITY, this);
 		resume_thread(fLookupThread);
 	}
 
@@ -205,8 +203,7 @@ StationFinderListenLive::FindBy(int capabilityIndex, const char* searchFor,
 
 
 BObjectList<Station>*
-StationFinderListenLive::ParseCountryReturn(
-	BMallocIO* data, const char* searchFor)
+StationFinderListenLive::ParseCountryReturn(BMallocIO* data, const char* searchFor)
 {
 	BObjectList<Station>* result = new BObjectList<Station>(20, true);
 	if (result == NULL)
@@ -219,9 +216,9 @@ StationFinderListenLive::ParseCountryReturn(
 	//	<td><a href="http://oe1.orf.at/"><b>ORF Ö-1</b></a></td>
 	//	<td>Vienna</td>
 	//	<td><img src="wma.gif" width="12" height="12" alt="Windows
-	//Media"><br><img src="mp3.gif" width="12" height="12" alt="MP3"></td>
+	// Media"><br><img src="mp3.gif" width="12" height="12" alt="MP3"></td>
 	//	<td><a href="mms://apasf.apa.at/oe1_live_worldwide">128 Kbps</a><br><a
-	//href="http://mp3stream3.apasf.apa.at:8000/listen.pls">192 Kbps</a></td>
+	// href="http://mp3stream3.apasf.apa.at:8000/listen.pls">192 Kbps</a></td>
 	//	<td>Information/Culture</td>
 	//	</tr>
 
@@ -233,8 +230,8 @@ StationFinderListenLive::ParseCountryReturn(
 		"<td>\\s*<a\\s+href=\"([^\"]*)\">([^<]*)</a>([^<]|<[^/]|</[^t]|</"
 		"t[^d])*</td>\\s*"
 		"<td>([^<]*)</td>\\s*</tr>",
-		RE_ICASE | RE_DOT_NEWLINE | RE_DOT_NOT_NULL | RE_NO_BK_PARENS
-			| RE_NO_BK_VBAR | RE_BACKSLASH_ESCAPE_IN_LISTS);
+		RE_ICASE | RE_DOT_NEWLINE | RE_DOT_NOT_NULL | RE_NO_BK_PARENS | RE_NO_BK_VBAR |
+			RE_BACKSLASH_ESCAPE_IN_LISTS);
 
 	char* doc = (char*)data->Buffer();
 	off_t size;
@@ -249,9 +246,8 @@ StationFinderListenLive::ParseCountryReturn(
 		doc[matches[6].rm_eo] = 0;
 		doc[matches[8].rm_eo] = 0;
 		printf("Station %s at %s in %s address %s, data rate=%s, genre=%s\n",
-			doc + matches[2].rm_so, doc + matches[1].rm_so,
-			doc + matches[3].rm_so, doc + matches[5].rm_so,
-			doc + matches[6].rm_so, doc + matches[8].rm_so);
+			doc + matches[2].rm_so, doc + matches[1].rm_so, doc + matches[3].rm_so,
+			doc + matches[5].rm_so, doc + matches[6].rm_so, doc + matches[8].rm_so);
 
 		Station* station = new Station(doc + matches[2].rm_so, NULL);
 		if (station == NULL)
@@ -291,8 +287,7 @@ StationFinderListenLive::ParseCountryReturn(
 
 
 BObjectList<Station>*
-StationFinderListenLive::ParseGenreReturn(
-	BMallocIO* data, const char* searchFor)
+StationFinderListenLive::ParseGenreReturn(BMallocIO* data, const char* searchFor)
 {
 	BObjectList<Station>* result = new BObjectList<Station>(20, true);
 	if (result == NULL)
@@ -305,19 +300,19 @@ StationFinderListenLive::ParseGenreReturn(
 	//	<td><a href="http://oe1.orf.at/"><b>ORF Ö-1</b></a></td>
 	//	<td>Vienna</td>
 	//	<td><img src="wma.gif" width="12" height="12" alt="Windows
-	//Media"><br><img src="mp3.gif" width="12" height="12" alt="MP3"></td>
+	// Media"><br><img src="mp3.gif" width="12" height="12" alt="MP3"></td>
 	//	<td><a href="mms://apasf.apa.at/oe1_live_worldwide">128 Kbps</a><br><a
-	//href="http://mp3stream3.apasf.apa.at:8000/listen.pls">192 Kbps</a></td>
+	// href="http://mp3stream3.apasf.apa.at:8000/listen.pls">192 Kbps</a></td>
 	//	<td>Information/Culture</td>
 	//	</tr>
 
 	//	<tr>
 	//	<td><a href="http://www.radiostephansdom.at/"><b>Radio
-	//Stephansdom</b></a></td> 	<td>Vienna</td> 	<td>Austria</td> 	<td><img
-	//src="mp3.gif" width="12" height="12" alt="MP3"><br></td> 	<td><a
-	//href="http://streaming.lxcluster.at:8000/live32.m3u">32 Kbps</a>, <a
-	//href="http://streaming.lxcluster.at:8000/live56.m3u">56 Kbps</a><br><a
-	//href="http://streaming.lxcluster.at:8000/live128.m3u">128 Kbps</a></td>
+	// Stephansdom</b></a></td> 	<td>Vienna</td> 	<td>Austria</td> 	<td><img
+	// src="mp3.gif" width="12" height="12" alt="MP3"><br></td> 	<td><a
+	// href="http://streaming.lxcluster.at:8000/live32.m3u">32 Kbps</a>, <a
+	// href="http://streaming.lxcluster.at:8000/live56.m3u">56 Kbps</a><br><a
+	// href="http://streaming.lxcluster.at:8000/live128.m3u">128 Kbps</a></td>
 	//	</tr>
 
 	int res = regcomp(&regex,
@@ -329,8 +324,8 @@ StationFinderListenLive::ParseGenreReturn(
 		"<td>\\s*<a\\s+href=\"([^\"]*)\">([^<]*)</a>([^<]|<[^/]|</[^t]|</"
 		"t[^d])*</td>\\s*"
 		"</tr>",
-		RE_ICASE | RE_DOT_NEWLINE | RE_DOT_NOT_NULL | RE_NO_BK_PARENS
-			| RE_NO_BK_VBAR | RE_BACKSLASH_ESCAPE_IN_LISTS);
+		RE_ICASE | RE_DOT_NEWLINE | RE_DOT_NOT_NULL | RE_NO_BK_PARENS | RE_NO_BK_VBAR |
+			RE_BACKSLASH_ESCAPE_IN_LISTS);
 
 	char* doc = (char*)data->Buffer();
 	off_t size;
@@ -344,11 +339,9 @@ StationFinderListenLive::ParseGenreReturn(
 		doc[matches[4].rm_eo] = 0;
 		doc[matches[6].rm_eo] = 0;
 		doc[matches[7].rm_eo] = 0;
-		printf(
-			"Station %s at %s in %s - %s address %s, data rate=%s, genre=%s\n",
-			doc + matches[2].rm_so, doc + matches[1].rm_so,
-			doc + matches[3].rm_so, doc + matches[4].rm_so,
-			doc + matches[6].rm_so, doc + matches[7].rm_so, searchFor);
+		printf("Station %s at %s in %s - %s address %s, data rate=%s, genre=%s\n",
+			doc + matches[2].rm_so, doc + matches[1].rm_so, doc + matches[3].rm_so,
+			doc + matches[4].rm_so, doc + matches[6].rm_so, doc + matches[7].rm_so, searchFor);
 
 		Station* station = new Station(doc + matches[2].rm_so, NULL);
 		if (station == NULL)
@@ -392,11 +385,10 @@ StationFinderListenLive::_PlsLookupFunc(void* data)
 	StationFinderListenLive* _this = (StationFinderListenLive*)data;
 	while (!_this->fPlsLookupList.IsEmpty()) {
 		Station* station = _this->fPlsLookupList.FirstItem();
-		TRACE("Looking up stream URL for station %s in %s\n",
-			station->Name()->String(), station->Source().UrlString().String());
+		TRACE("Looking up stream URL for station %s in %s\n", station->Name()->String(),
+			station->Source().UrlString().String());
 
-		Station* plsStation = Station::LoadIndirectUrl(
-			(BString&)station->Source().UrlString());
+		Station* plsStation = Station::LoadIndirectUrl((BString&)station->Source().UrlString());
 		if (plsStation != NULL)
 			station->SetStreamUrl(plsStation->StreamUrl());
 

@@ -18,22 +18,17 @@
 
 class RelativePositionIO : public BPositionIO {
 public:
-	RelativePositionIO(BAdapterIO* owner, BPositionIO* buffer,
-		bigtime_t timeout)
-		:
-		BPositionIO(),
-		fOwner(owner),
-		fBackPosition(0),
-		fStartOffset(0),
-		fBuffer(buffer),
-		fTimeout(timeout)
+	RelativePositionIO(BAdapterIO* owner, BPositionIO* buffer, bigtime_t timeout)
+		: BPositionIO(),
+		  fOwner(owner),
+		  fBackPosition(0),
+		  fStartOffset(0),
+		  fBuffer(buffer),
+		  fTimeout(timeout)
 	{
 	}
 
-	virtual	~RelativePositionIO()
-	{
-		delete fBuffer;
-	}
+	virtual ~RelativePositionIO() { delete fBuffer; }
 
 	status_t ResetStartOffset(off_t offset)
 	{
@@ -105,26 +100,21 @@ public:
 		return B_OK;
 	}
 
-	virtual	ssize_t	ReadAt(off_t position, void* buffer,
-		size_t size)
+	virtual ssize_t ReadAt(off_t position, void* buffer, size_t size)
 	{
 		AutoReadLocker _(fLock);
 
-		return fBuffer->ReadAt(
-			_PositionToRelative(position), buffer, size);
-
+		return fBuffer->ReadAt(_PositionToRelative(position), buffer, size);
 	}
 
-	virtual	ssize_t	WriteAt(off_t position,
-		const void* buffer, size_t size)
+	virtual ssize_t WriteAt(off_t position, const void* buffer, size_t size)
 	{
 		AutoWriteLocker _(fLock);
 
-		return fBuffer->WriteAt(
-			_PositionToRelative(position), buffer, size);
+		return fBuffer->WriteAt(_PositionToRelative(position), buffer, size);
 	}
 
-	virtual	off_t Seek(off_t position, uint32 seekMode)
+	virtual off_t Seek(off_t position, uint32 seekMode)
 	{
 		AutoWriteLocker _(fLock);
 
@@ -140,14 +130,14 @@ public:
 		return _RelativeToPosition(fBuffer->Position());
 	}
 
-	virtual	status_t SetSize(off_t size)
+	virtual status_t SetSize(off_t size)
 	{
 		AutoWriteLocker _(fLock);
 
 		return fBuffer->SetSize(_PositionToRelative(size));
 	}
 
-	virtual	status_t GetSize(off_t* size) const
+	virtual status_t GetSize(off_t* size) const
 	{
 		AutoReadLocker _(fLock);
 
@@ -194,43 +184,27 @@ public:
 		return ((flags & B_MEDIA_SEEKABLE) == B_MEDIA_SEEKABLE);
 	}
 
-	const BPositionIO* Buffer() const
-	{
-		return fBuffer;
-	}
+	const BPositionIO* Buffer() const { return fBuffer; }
 
 private:
+	off_t _PositionToRelative(off_t position) const { return position - fStartOffset; }
 
-	off_t _PositionToRelative(off_t position) const
-	{
-		return position - fStartOffset;
-	}
+	off_t _RelativeToPosition(off_t position) const { return position + fStartOffset; }
 
-	off_t _RelativeToPosition(off_t position) const
-	{
-		return position + fStartOffset;
-	}
+	BAdapterIO* fOwner;
+	off_t fBackPosition;
+	off_t fStartOffset;
 
-	BAdapterIO*			fOwner;
-	off_t				fBackPosition;
-	off_t				fStartOffset;
+	BPositionIO* fBuffer;
 
-	BPositionIO*		fBuffer;
+	mutable RWLocker fLock;
 
-	mutable	RWLocker	fLock;
-
-	bigtime_t			fTimeout;
+	bigtime_t fTimeout;
 };
 
 
 BAdapterIO::BAdapterIO(int32 flags, bigtime_t timeout)
-	:
-	fFlags(flags),
-	fBuffer(NULL),
-	fTotalSize(0),
-	fOpened(false),
-	fSeekSem(-1),
-	fInputAdapter(NULL)
+	: fFlags(flags), fBuffer(NULL), fTotalSize(0), fOpened(false), fSeekSem(-1), fInputAdapter(NULL)
 {
 	CALLED();
 
@@ -238,7 +212,7 @@ BAdapterIO::BAdapterIO(int32 flags, bigtime_t timeout)
 }
 
 
-BAdapterIO::BAdapterIO(const BAdapterIO &)
+BAdapterIO::BAdapterIO(const BAdapterIO&)
 {
 	// copying not allowed...
 }
@@ -293,19 +267,17 @@ BAdapterIO::Seek(off_t position, uint32 seekMode)
 	off_t size = 0;
 
 	if (seekMode == SEEK_CUR)
-		absolutePosition = Position()+position;
+		absolutePosition = Position() + position;
 	else if (seekMode == SEEK_END) {
 		if (GetSize(&size) != B_OK)
 			return B_NOT_SUPPORTED;
 
-		absolutePosition = size-position;
+		absolutePosition = size - position;
 	}
 
 	status_t ret = _EvaluateWait(absolutePosition, 0);
 
-	if (ret == B_RESOURCE_UNAVAILABLE && fBuffer->IsStreaming()
-			&& fBuffer->IsSeekable()) {
-
+	if (ret == B_RESOURCE_UNAVAILABLE && fBuffer->IsStreaming() && fBuffer->IsSeekable()) {
 		fSeekSem = create_sem(0, "BAdapterIO seek sem");
 
 		if (SeekRequested(absolutePosition) != B_OK)
@@ -445,8 +417,8 @@ BAdapterIO::_EvaluateWait(off_t pos, off_t size)
 	if (GetSize(&totalSize) != B_OK)
 		TRACE("BAdapterIO::ReadAt: Can't get our size!\n");
 
-	TRACE("BAdapterIO::_EvaluateWait TS %" B_PRId64 " P %" B_PRId64
-		" S %" B_PRId64 "\n", totalSize, pos, size);
+	TRACE("BAdapterIO::_EvaluateWait TS %" B_PRId64 " P %" B_PRId64 " S %" B_PRId64 "\n", totalSize,
+		pos, size);
 
 	status_t err = fBuffer->EvaluatePosition(pos, totalSize);
 
@@ -461,16 +433,10 @@ BAdapterIO::_EvaluateWait(off_t pos, off_t size)
 }
 
 
-BInputAdapter::BInputAdapter(BAdapterIO* io)
-	:
-	fIO(io)
-{
-}
+BInputAdapter::BInputAdapter(BAdapterIO* io) : fIO(io) {}
 
 
-BInputAdapter::~BInputAdapter()
-{
-}
+BInputAdapter::~BInputAdapter() {}
 
 
 ssize_t
@@ -481,11 +447,32 @@ BInputAdapter::Write(const void* buffer, size_t size)
 
 
 // FBC
-void BAdapterIO::_ReservedAdapterIO1() {}
-void BAdapterIO::_ReservedAdapterIO2() {}
-void BAdapterIO::_ReservedAdapterIO3() {}
-void BAdapterIO::_ReservedAdapterIO4() {}
-void BAdapterIO::_ReservedAdapterIO5() {}
+void
+BAdapterIO::_ReservedAdapterIO1()
+{
+}
+void
+BAdapterIO::_ReservedAdapterIO2()
+{
+}
+void
+BAdapterIO::_ReservedAdapterIO3()
+{
+}
+void
+BAdapterIO::_ReservedAdapterIO4()
+{
+}
+void
+BAdapterIO::_ReservedAdapterIO5()
+{
+}
 
-void BInputAdapter::_ReservedInputAdapter1() {}
-void BInputAdapter::_ReservedInputAdapter2() {}
+void
+BInputAdapter::_ReservedInputAdapter1()
+{
+}
+void
+BInputAdapter::_ReservedInputAdapter2()
+{
+}

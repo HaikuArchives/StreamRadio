@@ -33,25 +33,16 @@
 #define B_TRANSLATION_CONTEXT "StationFinderRadioNetwork"
 
 
-const char* StationFinderRadioNetwork::kBaseUrl =
-	"https://all.api.radio-browser.info/";
+const char* StationFinderRadioNetwork::kBaseUrl = "https://all.api.radio-browser.info/";
 
 BString StationFinderRadioNetwork::sCachedServerUrl = B_EMPTY_STRING;
 
 
-IconLookup::IconLookup(Station* station, BUrl iconUrl)
-	:
-	fStation(station),
-	fIconUrl(iconUrl)
-{
-}
+IconLookup::IconLookup(Station* station, BUrl iconUrl) : fStation(station), fIconUrl(iconUrl) {}
 
 
 StationFinderRadioNetwork::StationFinderRadioNetwork()
-	:
-	StationFinderService(),
-	fIconLookupThread(-1),
-	fIconLookupList(100, true)
+	: StationFinderService(), fIconLookupThread(-1), fIconLookupList(100, true)
 {
 	serviceName.SetTo(B_TRANSLATE("Community Radio Browser"));
 	serviceHomePage.SetUrlString("https://www.radio-browser.info");
@@ -83,14 +74,13 @@ StationFinderRadioNetwork::Instantiate()
 void
 StationFinderRadioNetwork::RegisterSelf()
 {
-	Register(
-		"Community Radio Browser", &StationFinderRadioNetwork::Instantiate);
+	Register("Community Radio Browser", &StationFinderRadioNetwork::Instantiate);
 }
 
 
 BObjectList<Station>*
-StationFinderRadioNetwork::FindBy(int capabilityIndex, const char* searchFor,
-	BLooper* resultUpdateTarget)
+StationFinderRadioNetwork::FindBy(
+	int capabilityIndex, const char* searchFor, BLooper* resultUpdateTarget)
 {
 	_WaitForIconLookupThread();
 
@@ -112,35 +102,35 @@ StationFinderRadioNetwork::FindBy(int capabilityIndex, const char* searchFor,
 	urlString.Append("json/stations/");
 
 	switch (capabilityIndex) {
-		case 0: // Name search
+		case 0:	 // Name search
 			urlString.Append("byname/");
 			break;
 
-		case 1: // Tag search
+		case 1:	 // Tag search
 			urlString.Append("bytag/");
 			break;
 
-		case 2: // Language search
+		case 2:	 // Language search
 			urlString.Append("bylanguage/");
 			break;
 
-		case 3: // Country search
+		case 3:	 // Country search
 			urlString.Append("bycountry/");
 			break;
 
-		case 4: // Country code search
+		case 4:	 // Country code search
 			urlString.Append("bycountrycodeexact/");
 			break;
 
-		case 5: // State/Region search
+		case 5:	 // State/Region search
 			urlString.Append("bystate/");
 			break;
 
-		case 6: // Unique identifier search
+		case 6:	 // Unique identifier search
 			urlString.Append("byuuid/");
 			break;
 
-		default: // A very bad kind of search? Just do a name search...
+		default:  // A very bad kind of search? Just do a name search...
 			urlString.Append("byname/");
 			break;
 	}
@@ -152,61 +142,52 @@ StationFinderRadioNetwork::FindBy(int capabilityIndex, const char* searchFor,
 
 	BMessage parsedData;
 	BMallocIO* data = HttpUtils::GetAll(finalUrl);
-	if (data != NULL
-		&& BJson::Parse((const char*)data->Buffer(), data->BufferLength(),
-			parsedData) == B_OK) {
+	if (data != NULL &&
+		BJson::Parse((const char*)data->Buffer(), data->BufferLength(), parsedData) == B_OK) {
 		delete data;
 
 		char* name;
 		uint32 type;
 		int32 count;
-		for (int32 index = 0; parsedData.GetInfo(B_MESSAGE_TYPE, index,
-			&name, &type, &count) == B_OK; index++) {
+		for (int32 index = 0;
+			 parsedData.GetInfo(B_MESSAGE_TYPE, index, &name, &type, &count) == B_OK; index++) {
 			BMessage stationMessage;
 			if (parsedData.FindMessage(name, &stationMessage) == B_OK) {
 				Station* station = new Station("unknown");
 				if (station == NULL)
 					continue;
 
-				station->SetUniqueIdentifier(stationMessage.GetString(
-					"stationuuid", B_EMPTY_STRING));
-					
+				station->SetUniqueIdentifier(
+					stationMessage.GetString("stationuuid", B_EMPTY_STRING));
+
 				station->SetName(stationMessage.GetString("name", "unknown"));
 
-				station->SetSource(stationMessage.GetString("url",
-					B_EMPTY_STRING));
+				station->SetSource(stationMessage.GetString("url", B_EMPTY_STRING));
 
-				station->SetStation(stationMessage.GetString("homepage",
-					B_EMPTY_STRING));
+				station->SetStation(stationMessage.GetString("homepage", B_EMPTY_STRING));
 
 				BString iconUrl;
 				if (stationMessage.FindString("favicon", &iconUrl) == B_OK) {
 					if (!iconUrl.IsEmpty()) {
-						fIconLookupList.AddItem(
-							new IconLookup(station, BUrl(iconUrl)));
+						fIconLookupList.AddItem(new IconLookup(station, BUrl(iconUrl)));
 					}
 				}
 
-				station->SetGenre(stationMessage.GetString("tags",
-					B_EMPTY_STRING));
+				station->SetGenre(stationMessage.GetString("tags", B_EMPTY_STRING));
 
 				BString countryCode;
-				if (stationMessage.FindString("countrycode", &countryCode)
-					== B_OK) {
+				if (stationMessage.FindString("countrycode", &countryCode) == B_OK) {
 					BCountry* country = new BCountry(countryCode);
 					BString countryName;
-					if (country != NULL
-						&& country->GetName(countryName) == B_OK)
+					if (country != NULL && country->GetName(countryName) == B_OK)
 						station->SetCountry(countryName);
 
 					delete country;
 				}
 
-				station->SetLanguage(stationMessage.GetString("language",
-					B_EMPTY_STRING));
+				station->SetLanguage(stationMessage.GetString("language", B_EMPTY_STRING));
 
-				station->SetBitRate(stationMessage.GetDouble("bitrate", 0)
-					* 1000);
+				station->SetBitRate(stationMessage.GetDouble("bitrate", 0) * 1000);
 
 				// Set source URL as stream URL
 				// If the source is a playlist, this setting will be
@@ -217,8 +198,7 @@ StationFinderRadioNetwork::FindBy(int capabilityIndex, const char* searchFor,
 		}
 
 		if (!fIconLookupList.IsEmpty()) {
-			fIconLookupThread = spawn_thread(
-				&_IconLookupFunc, "iconlookup", B_LOW_PRIORITY, this);
+			fIconLookupThread = spawn_thread(&_IconLookupFunc, "iconlookup", B_LOW_PRIORITY, this);
 			resume_thread(fIconLookupThread);
 		}
 	} else {
@@ -235,7 +215,7 @@ int32
 StationFinderRadioNetwork::_IconLookupFunc(void* data)
 {
 	StationFinderRadioNetwork* _this = (StationFinderRadioNetwork*)data;
-	while (_this->fIconLookupThread >=0 && !_this->fIconLookupList.IsEmpty()) {
+	while (_this->fIconLookupThread >= 0 && !_this->fIconLookupList.IsEmpty()) {
 		IconLookup* item = _this->fIconLookupList.FirstItem();
 		BBitmap* logo = _this->RetrieveLogo(item->fIconUrl);
 		if (logo != NULL) {
@@ -243,7 +223,7 @@ StationFinderRadioNetwork::_IconLookupFunc(void* data)
 
 			BMessage* notification = new BMessage(MSG_UPDATE_STATION);
 			notification->AddPointer("station", item->fStation);
-			if (_this->fIconLookupThread >=0 && _this->fIconLookupNotify->LockLooper()) {
+			if (_this->fIconLookupThread >= 0 && _this->fIconLookupNotify->LockLooper()) {
 				_this->fIconLookupNotify->PostMessage(notification);
 				_this->fIconLookupNotify->UnlockLooper();
 			}
@@ -262,8 +242,8 @@ StationFinderRadioNetwork::_CheckServer()
 {
 	// Just a quick check up on our cached server...if it exists.
 	BUrl cachedServerUrl(sCachedServerUrl);
-	if (!sCachedServerUrl.IsEmpty()
-		&& HttpUtils::CheckPort(cachedServerUrl, &cachedServerUrl, 0) == B_OK) {
+	if (!sCachedServerUrl.IsEmpty() &&
+		HttpUtils::CheckPort(cachedServerUrl, &cachedServerUrl, 0) == B_OK) {
 		// It's still there!
 		return B_OK;
 	}
