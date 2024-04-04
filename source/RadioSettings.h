@@ -27,37 +27,37 @@
 
 class StationsList : public BObjectList<Station> {
 public:
-								StationsList();
-	virtual						~StationsList();
+	StationsList();
+	virtual ~StationsList();
 
-	virtual	bool				AddItem(Station* station);
-			bool				RemoveItem(Station* station);
-			bool				RemoveItem(BString* StationName);
-			Station*			FindItem(BString* Name);
+	virtual bool AddItem(Station* station);
+	bool RemoveItem(Station* station);
+	bool RemoveItem(BString* StationName);
+	Station* FindItem(BString* Name);
 
-			status_t			Load();
-			void				Save();
+	status_t Load();
+	void Save();
 };
 
 class RadioSettings : private BMessage {
 public:
-								RadioSettings();
-								RadioSettings(const RadioSettings& orig);
-	virtual						~RadioSettings();
+	RadioSettings();
+	RadioSettings(const RadioSettings& orig);
+	virtual ~RadioSettings();
 
-			status_t			Save();
+	status_t Save();
 
-			const char*			StationFinderName();
-			void				SetStationFinderName(const char* name);
+	const char* StationFinderName();
+	void SetStationFinderName(const char* name);
 
-			bool				GetAllowParallelPlayback();
-			void				SetAllowParallelPlayback(bool set);
+	bool GetAllowParallelPlayback();
+	void SetAllowParallelPlayback(bool set);
 
-			StationsList*		Stations;
+	StationsList* Stations;
 
 private:
-			status_t			_Load();
+	status_t _Load();
 };
 
 
-#endif // _RADIO_SETTINGS_H
+#endif	// _RADIO_SETTINGS_H

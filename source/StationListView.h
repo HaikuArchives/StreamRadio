@@ -38,67 +38,65 @@ class StationListViewItem : public BListItem {
 	friend class StationListView;
 
 public:
-								StationListViewItem(Station* station);
-	virtual						~StationListViewItem();
+	StationListViewItem(Station* station);
+	virtual ~StationListViewItem();
 
-	virtual void				DrawItem(BView* owner, BRect frame,
-									bool complete);
+	virtual void DrawItem(BView* owner, BRect frame, bool complete);
 
-			void				DrawBufferFillBar(BView* owner, BRect frame);
-	virtual void				Update(BView* owner, const BFont* font);
-			Station*			GetStation() { return fStation; }
-			void				ClearStation() { fStation = NULL; }
-			void 				StateChanged(StreamPlayer::PlayState newState);
-			void 				SetFillRatio(float fillRatio);
+	void DrawBufferFillBar(BView* owner, BRect frame);
+	virtual void Update(BView* owner, const BFont* font);
+	Station* GetStation() { return fStation; }
+	void ClearStation() { fStation = NULL; }
+	void StateChanged(StreamPlayer::PlayState newState);
+	void SetFillRatio(float fillRatio);
 
-			StreamPlayer*		Player() { return fPlayer; }
-			StreamPlayer::PlayState	State();
-			void 				SetPlayer(StreamPlayer* player)
-									{ fPlayer = player; }
+	StreamPlayer* Player() { return fPlayer; }
+	StreamPlayer::PlayState State();
+	void SetPlayer(StreamPlayer* player) { fPlayer = player; }
 
 private:
-	static	BBitmap*			_GetButtonBitmap(StreamPlayer::PlayState state);
+	static BBitmap* _GetButtonBitmap(StreamPlayer::PlayState state);
 
 private:
-	static	BBitmap*			sButtonBitmap[3];
+	static BBitmap* sButtonBitmap[3];
 
-			StreamPlayer*		fPlayer;
-			class Station*		fStation;
-			StationListView*	fList;
+	StreamPlayer* fPlayer;
+	class Station* fStation;
+	StationListView* fList;
 
-			float				fFillRatio;
+	float fFillRatio;
 };
 
 
 class StationListView : public BListView {
 public:
-								StationListView(bool canPlay = false);
-	virtual						~StationListView();
+	StationListView(bool canPlay = false);
+	virtual ~StationListView();
 
-			void				Sync(StationsList* stations);
+	void Sync(StationsList* stations);
 
-	virtual bool				AddItem(Station* station);
-	virtual bool				AddItem(StationListViewItem* item);
-	virtual void				MakeEmpty();
+	virtual bool AddItem(Station* station);
+	virtual bool AddItem(StationListViewItem* item);
+	virtual void MakeEmpty();
 
-			int32				StationIndex(Station* station);
-			StationListViewItem*	Item(Station* station);
-			StationListViewItem*	ItemAt(int32 index);
-			Station*			StationAt(int32 index);
-			void				SelectItem(StationListViewItem* item);
+	int32 StationIndex(Station* station);
+	StationListViewItem* Item(Station* station);
+	StationListViewItem* ItemAt(int32 index);
+	Station* StationAt(int32 index);
+	void SelectItem(StationListViewItem* item);
 
-			void				SetPlayMessage(BMessage* playMsg);
-			bool				CanPlay() { return fCanPlay; }
-
-private:
-	virtual void				MouseDown(BPoint where);
-	virtual void				MouseUp(BPoint where);
+	void SetPlayMessage(BMessage* playMsg);
+	bool CanPlay() { return fCanPlay; }
 
 private:
-			BPoint				fWhereDown;
-			BMessage*			fPlayMsg;
-			bool				fCanPlay;
+	virtual void MouseDown(BPoint where);
+	virtual void MouseUp(BPoint where);
+
+private:
+	BPoint fWhereDown;
+	BMessage* fPlayMsg;
+	bool fCanPlay;
 };
 
 
-#endif // _STATION_LIST_VIEW_H
+#endif	// _STATION_LIST_VIEW_H

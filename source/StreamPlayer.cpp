@@ -31,23 +31,21 @@
 
 
 StreamPlayer::StreamPlayer(Station* station, BLooper* notify)
-	:
-	BLocker("StreamPlayer"),
-	fStation(station),
-	fNotify(notify),
-	fMediaFile(NULL),
-	fPlayer(NULL),
-	fState(StreamPlayer::Stopped),
-	fFlushCount(0)
+	: BLocker("StreamPlayer"),
+	  fStation(station),
+	  fNotify(notify),
+	  fMediaFile(NULL),
+	  fPlayer(NULL),
+	  fState(StreamPlayer::Stopped),
+	  fFlushCount(0)
 {
-	TRACE("Trying to set player for stream %s\n",
-		station->StreamUrl().UrlString().String());
+	TRACE("Trying to set player for stream %s\n", station->StreamUrl().UrlString().String());
 
-	fStream = new(std::nothrow) StreamIO(station, notify);
+	fStream = new (std::nothrow) StreamIO(station, notify);
 	fInitStatus = fStream->Open();
 	if (fInitStatus != B_OK) {
-		MSG("Error retrieving stream from %s - %s\n",
-			station->StreamUrl().UrlString().String(), strerror(fInitStatus));
+		MSG("Error retrieving stream from %s - %s\n", station->StreamUrl().UrlString().String(),
+			strerror(fInitStatus));
 		return;
 	}
 }
@@ -76,9 +74,8 @@ StreamPlayer::Play()
 
 		case StreamPlayer::Stopped:
 		{
-			thread_id playThreadId
-				= spawn_thread((thread_func)StreamPlayer::_StartPlayThreadFunc,
-					fStation->Name()->String(), B_NORMAL_PRIORITY, this);
+			thread_id playThreadId = spawn_thread((thread_func)StreamPlayer::_StartPlayThreadFunc,
+				fStation->Name()->String(), B_NORMAL_PRIORITY, this);
 			resume_thread(playThreadId);
 
 			break;
@@ -172,16 +169,15 @@ StreamPlayer::_SetState(StreamPlayer::PlayState state)
 
 
 void
-StreamPlayer::_GetDecodedChunk(void* cookie, void* buffer, size_t size,
-	const media_raw_audio_format& format)
+StreamPlayer::_GetDecodedChunk(
+	void* cookie, void* buffer, size_t size, const media_raw_audio_format& format)
 {
 	StreamPlayer* player = (StreamPlayer*)cookie;
 	BMediaFile* fMediaFile = player->fMediaFile;
 
-	int64 reqFrames = size / format.channel_count
-		/ (format.format & media_raw_audio_format::B_AUDIO_SIZE_MASK);
-	fMediaFile->TrackAt(0)->ReadFrames(
-		buffer, &reqFrames, &player->fHeader, &player->fInfo);
+	int64 reqFrames =
+		size / format.channel_count / (format.format & media_raw_audio_format::B_AUDIO_SIZE_MASK);
+	fMediaFile->TrackAt(0)->ReadFrames(buffer, &reqFrames, &player->fHeader, &player->fInfo);
 
 	if (player->fFlushCount++ > 1000) {
 		player->fFlushCount = 0;
@@ -198,13 +194,12 @@ StreamPlayer::_StartPlayThreadFunc(StreamPlayer* _this)
 	_this->_SetState(StreamPlayer::Buffering);
 	_this->fStopRequested = false;
 	_this->fStream->SetLimiter(0x40000);
-	_this->fMediaFile = new(std::nothrow) BMediaFile(_this->fStream);
+	_this->fMediaFile = new (std::nothrow) BMediaFile(_this->fStream);
 
 	_this->fInitStatus = _this->fMediaFile->InitCheck();
 	if (_this->fInitStatus != B_OK) {
 		MSG("Error creating media extractor for %s - %s\n",
-			_this->fStation->StreamUrl().UrlString().String(),
-			strerror(_this->fInitStatus));
+			_this->fStation->StreamUrl().UrlString().String(), strerror(_this->fInitStatus));
 	}
 
 	if (_this->fInitStatus != B_OK || _this->fStopRequested) {
@@ -223,8 +218,7 @@ StreamPlayer::_StartPlayThreadFunc(StreamPlayer* _this)
 
 	if (_this->fMediaFile->CountTracks() == 0) {
 		MSG("No track found inside stream %s - %s\n",
-			_this->fStation->StreamUrl().UrlString().String(),
-			strerror(_this->fInitStatus));
+			_this->fStation->StreamUrl().UrlString().String(), strerror(_this->fInitStatus));
 	}
 
 	if (_this->fStopRequested) {
@@ -237,12 +231,10 @@ StreamPlayer::_StartPlayThreadFunc(StreamPlayer* _this)
 		return _this->fInitStatus;
 	}
 
-	_this->fInitStatus
-		= _this->fMediaFile->TrackAt(0)->GetCodecInfo(&_this->fCodecInfo);
+	_this->fInitStatus = _this->fMediaFile->TrackAt(0)->GetCodecInfo(&_this->fCodecInfo);
 	if (_this->fInitStatus != B_OK) {
 		MSG("Could not create decoder for %s - %s\n",
-			_this->fStation->StreamUrl().UrlString().String(),
-			strerror(_this->fInitStatus));
+			_this->fStation->StreamUrl().UrlString().String(), strerror(_this->fInitStatus));
 	}
 
 	if (_this->fInitStatus != B_OK || _this->fStopRequested) {
@@ -255,11 +247,9 @@ StreamPlayer::_StartPlayThreadFunc(StreamPlayer* _this)
 		return _this->fInitStatus;
 	}
 
-	_this->fInitStatus
-		= _this->fMediaFile->TrackAt(0)->DecodedFormat(&_this->fDecodedFormat);
+	_this->fInitStatus = _this->fMediaFile->TrackAt(0)->DecodedFormat(&_this->fDecodedFormat);
 	if (_this->fInitStatus != B_OK) {
-		MSG("Could not negotiate output format - %s\n",
-			strerror(_this->fInitStatus));
+		MSG("Could not negotiate output format - %s\n", strerror(_this->fInitStatus));
 	}
 
 	if (_this->fInitStatus != B_OK || _this->fStopRequested) {
@@ -277,13 +267,11 @@ StreamPlayer::_StartPlayThreadFunc(StreamPlayer* _this)
 		_this->fDecodedFormat.u.raw_audio.frame_rate);
 
 	_this->fPlayer = new BSoundPlayer(&_this->fDecodedFormat.u.raw_audio,
-		_this->fStation->Name()->String(), &StreamPlayer::_GetDecodedChunk,
-		NULL, _this);
+		_this->fStation->Name()->String(), &StreamPlayer::_GetDecodedChunk, NULL, _this);
 
 	_this->fInitStatus = _this->fPlayer->InitCheck();
 	if (_this->fInitStatus != B_OK) {
-		MSG("Sound Player failed to initialize (%s)\r\n",
-			strerror(_this->fInitStatus));
+		MSG("Sound Player failed to initialize (%s)\r\n", strerror(_this->fInitStatus));
 	}
 
 	if (_this->fInitStatus != B_OK || _this->fStopRequested) {
@@ -301,8 +289,7 @@ StreamPlayer::_StartPlayThreadFunc(StreamPlayer* _this)
 
 	_this->fInitStatus = _this->fPlayer->Start();
 	if (_this->fInitStatus != B_OK) {
-		MSG("Sound Player failed to start (%s)\r\n",
-			strerror(_this->fInitStatus));
+		MSG("Sound Player failed to start (%s)\r\n", strerror(_this->fInitStatus));
 	}
 
 	if (_this->fInitStatus != B_OK || _this->fStopRequested) {

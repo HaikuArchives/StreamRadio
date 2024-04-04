@@ -30,12 +30,12 @@
 
 class Utils {
 public:
-								Utils() {};
-	virtual						~Utils() {};
+	Utils(){};
+	virtual ~Utils(){};
 
-	static	BBitmap*			ResourceBitmap(int32 id);
-	static	const char*			UserAgent();
+	static BBitmap* ResourceBitmap(int32 id);
+	static const char* UserAgent();
 };
 
 
-#endif // _UTILS_H
+#endif	// _UTILS_H

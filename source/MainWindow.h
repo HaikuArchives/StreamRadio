@@ -47,29 +47,29 @@
 
 class MainWindow : public BWindow {
 public:
-								MainWindow();
-	virtual						~MainWindow();
+	MainWindow();
+	virtual ~MainWindow();
 
-	virtual	void				MessageReceived(BMessage* message);
-	virtual	bool				QuitRequested();
+	virtual void MessageReceived(BMessage* message);
+	virtual bool QuitRequested();
 
-	virtual	void				SetVisible(bool visible);
-
-private:
-			void				_Invoke(StationListViewItem* stationItem);
-			void				_TogglePlay(StationListViewItem* stationItem);
+	virtual void SetVisible(bool visible);
 
 private:
-			RadioSettings*		fSettings;
-			BMenuBar*			fMainMenu;
-			StationListView*	fStationList;
-			StationFinderWindow*	fStationFinder;
-			StationPanel*		fStationPanel;
-			BStringView*		fStatusBar;
-			BObjectList<StationListViewItem>	fActiveStations;
-			bool				fAllowParallelPlayback;
-			BMenuItem*			fMenuParallelPlayback;
+	void _Invoke(StationListViewItem* stationItem);
+	void _TogglePlay(StationListViewItem* stationItem);
+
+private:
+	RadioSettings* fSettings;
+	BMenuBar* fMainMenu;
+	StationListView* fStationList;
+	StationFinderWindow* fStationFinder;
+	StationPanel* fStationPanel;
+	BStringView* fStatusBar;
+	BObjectList<StationListViewItem> fActiveStations;
+	bool fAllowParallelPlayback;
+	BMenuItem* fMenuParallelPlayback;
 };
 
 
-#endif // _MAIN_WINDOW_H
+#endif	// _MAIN_WINDOW_H

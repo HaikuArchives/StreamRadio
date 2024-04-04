@@ -36,7 +36,7 @@
 #define STATION_URI_VALID 4
 #define STATION_HAS_ENCODING 8
 #define STATION_HAS_BITRATE 16
-#define STATION_HAS_FORMAT 32 // frame rate and channels
+#define STATION_HAS_FORMAT 32  // frame rate and channels
 #define STATION_HAS_META 64
 #define STATION_HAS_IDENTIFIER 128
 
@@ -46,52 +46,51 @@ class StreamPlayer;
 
 class Station {
 public:
-								Station(BString name,
-									BString uri = B_EMPTY_STRING);
-								Station(const Station& orig);
-	virtual						~Station();
+	Station(BString name, BString uri = B_EMPTY_STRING);
+	Station(const Station& orig);
+	virtual ~Station();
 
-			status_t			InitCheck();
-			status_t			Save();
-			status_t			RetrieveStreamUrl();
-			status_t			Probe();
-			status_t			ProbeBuffer(BPositionIO* buffer);
+	status_t InitCheck();
+	status_t Save();
+	status_t RetrieveStreamUrl();
+	status_t Probe();
+	status_t ProbeBuffer(BPositionIO* buffer);
 
-	static class	Station*	LoadFromPlsFile(BString name);
-	static class	Station*	Load(BString name, BEntry* entry);
-	static class	Station*	LoadIndirectUrl(BString& shoutCastUrl);
+	static class Station* LoadFromPlsFile(BString name);
+	static class Station* Load(BString name, BEntry* entry);
+	static class Station* LoadIndirectUrl(BString& shoutCastUrl);
 
-	static	BDirectory*			StationDirectory();
+	static BDirectory* StationDirectory();
 
-	inline	BString*			Name() { return &fName; }
-			void				SetName(BString name);
+	inline BString* Name() { return &fName; }
+	void SetName(BString name);
 
-	inline	BUrl				StreamUrl() { return fStreamUrl; }
-	inline	void				SetStreamUrl(BUrl uri)
+	inline BUrl StreamUrl() { return fStreamUrl; }
+	inline void SetStreamUrl(BUrl uri)
 	{
 		fStreamUrl = uri;
 		CheckFlags();
 		fUnsaved = true;
 	}
 
-	inline	BUrl				StationUrl() { return fStationUrl; }
-	inline	void				SetStation(BUrl url)
+	inline BUrl StationUrl() { return fStationUrl; }
+	inline void SetStation(BUrl url)
 	{
 		fStationUrl = url;
 		CheckFlags();
 		fUnsaved = true;
 	}
 
-	inline	BUrl				Source() { return fSource; }
-	inline	void				SetSource(BUrl source)
+	inline BUrl Source() { return fSource; }
+	inline void SetSource(BUrl source)
 	{
 		fSource = source;
 		CheckFlags();
 		fUnsaved = true;
 	}
 
-	inline	BBitmap*			Logo() { return fLogo; }
-	inline	void				SetLogo(BBitmap* logo)
+	inline BBitmap* Logo() { return fLogo; }
+	inline void SetLogo(BBitmap* logo)
 	{
 		delete fLogo;
 
@@ -99,82 +98,80 @@ public:
 		fUnsaved = true;
 	}
 
-	inline	BString				Genre() { return fGenre; }
-	inline	void				SetGenre(BString genre)
+	inline BString Genre() { return fGenre; }
+	inline void SetGenre(BString genre)
 	{
 		fGenre.SetTo(genre);
 		fUnsaved = true;
 	}
 
-	inline	BString				Country() { return fCountry; }
-	inline	void				SetCountry(BString country)
+	inline BString Country() { return fCountry; }
+	inline void SetCountry(BString country)
 	{
 		fCountry.SetTo(country);
 		fUnsaved = true;
 	}
 
-	inline	BString				Language() { return fLanguage; }
-	inline	void				SetLanguage(BString language)
+	inline BString Language() { return fLanguage; }
+	inline void SetLanguage(BString language)
 	{
 		fLanguage.SetTo(language);
 		fUnsaved = true;
 	}
 
-	inline	int32				SampleRate() { return fSampleRate; }
-	inline	int32				BitRate() { return fBitRate; }
-	inline	void				SetBitRate(int32 bitrate)
+	inline int32 SampleRate() { return fSampleRate; }
+	inline int32 BitRate() { return fBitRate; }
+	inline void SetBitRate(int32 bitrate)
 	{
 		fBitRate = bitrate;
 		fUnsaved = true;
 	}
 
-	inline	BString				UniqueIdentifier() { return fUniqueIdentifier; }
-	inline	void				SetUniqueIdentifier(BString uniqueIdentifier)
+	inline BString UniqueIdentifier() { return fUniqueIdentifier; }
+	inline void SetUniqueIdentifier(BString uniqueIdentifier)
 	{
 		fUniqueIdentifier.SetTo(uniqueIdentifier);
 		fUnsaved = true;
 	}
 
-	inline	int32				Channels() { return fChannels; }
-	inline	int32				Encoding() { return fEncoding; }
-	inline	size_t				FrameSize() { return fFrameSize; }
-	inline	BMimeType*			Mime() { return &fMime; }
+	inline int32 Channels() { return fChannels; }
+	inline int32 Encoding() { return fEncoding; }
+	inline size_t FrameSize() { return fFrameSize; }
+	inline BMimeType* Mime() { return &fMime; }
 
-	inline	int32				Flags() { return fFlags; }
-	inline	bool				Flags(uint32 flags)
-									{ return (fFlags & flags) == flags; }
+	inline int32 Flags() { return fFlags; }
+	inline bool Flags(uint32 flags) { return (fFlags & flags) == flags; }
 
 protected:
-			void				CheckFlags();
-	static	char*				RegFind(const char* text, const char* pattern);
-			status_t			ParseUrlReference(const char* body,
-									const BUrl& baseUrl);
-			void				CleanName();
+	void CheckFlags();
+	static char* RegFind(const char* text, const char* pattern);
+	status_t ParseUrlReference(const char* body, const BUrl& baseUrl);
+	void CleanName();
 
-			BString				fName;
-			BUrl				fStreamUrl;
-			BUrl				fStationUrl;
-			BString				fGenre;
-			BString				fCountry;
-			BString				fLanguage;
-			BUrl				fSource;
-			BMimeType			fMime;
-			uint32				fEncoding;
-			BBitmap*			fLogo;
-			uint32				fRating;
-			uint32				fBitRate;
-			uint32				fSampleRate;
-			BString				fUniqueIdentifier;
-			uint32				fMetaInterval;
-			uint32				fChannels;
-			uint32				fFlags;
-			size_t				fFrameSize;
+	BString fName;
+	BUrl fStreamUrl;
+	BUrl fStationUrl;
+	BString fGenre;
+	BString fCountry;
+	BString fLanguage;
+	BUrl fSource;
+	BMimeType fMime;
+	uint32 fEncoding;
+	BBitmap* fLogo;
+	uint32 fRating;
+	uint32 fBitRate;
+	uint32 fSampleRate;
+	BString fUniqueIdentifier;
+	uint32 fMetaInterval;
+	uint32 fChannels;
+	uint32 fFlags;
+	size_t fFrameSize;
 
-	static	BDirectory*			sStationsDirectory;
+	static BDirectory* sStationsDirectory;
 
 private:
-			bool				fUnsaved;
+	bool fUnsaved;
 };
 
 
-#endif // _STATION_H
+#endif	// _STATION_H

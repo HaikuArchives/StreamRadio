@@ -35,8 +35,7 @@ BBitmap*
 Utils::ResourceBitmap(int32 id)
 {
 	size_t size;
-	const char* data
-		= (const char*)be_app->AppResources()->FindResource('BBMP', id, &size);
+	const char* data = (const char*)be_app->AppResources()->FindResource('BBMP', id, &size);
 	if (size != 0 && data != NULL) {
 		BMessage msg;
 		if (msg.Unflatten(data) == B_OK)
@@ -61,8 +60,8 @@ Utils::UserAgent()
 		struct version_info version;
 		if (appFileInfo.GetVersionInfo(&version, B_APP_VERSION_KIND) == B_OK)
 			snprintf(sUserAgent, sizeof(sUserAgent),
-				"StreamRadio/%" B_PRIu32 ".%" B_PRIu32 ".%" B_PRIu32,
-				version.major, version.middle, version.minor);
+				"StreamRadio/%" B_PRIu32 ".%" B_PRIu32 ".%" B_PRIu32, version.major, version.middle,
+				version.minor);
 	}
 
 	if (sUserAgent[0] == 0) {

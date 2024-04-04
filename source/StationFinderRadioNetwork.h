@@ -24,38 +24,37 @@
 
 class IconLookup {
 public:
-								IconLookup(Station* station, BUrl iconUrl);
+	IconLookup(Station* station, BUrl iconUrl);
 
-			Station*			fStation;
-			BUrl				fIconUrl;
+	Station* fStation;
+	BUrl fIconUrl;
 };
 
 
 class StationFinderRadioNetwork : public StationFinderService {
 public:
-								StationFinderRadioNetwork();
-	virtual						~StationFinderRadioNetwork();
+	StationFinderRadioNetwork();
+	virtual ~StationFinderRadioNetwork();
 
-	static	void				RegisterSelf();
-	static	StationFinderService*	Instantiate();
+	static void RegisterSelf();
+	static StationFinderService* Instantiate();
 
-	virtual	BObjectList<Station>*	FindBy(int capabilityIndex,
-										const char* searchFor,
-										BLooper* resultUpdateTarget);
-
-private:
-	static	int32				_IconLookupFunc(void* data);
-			status_t			_CheckServer();
-			void				_WaitForIconLookupThread();
+	virtual BObjectList<Station>* FindBy(
+		int capabilityIndex, const char* searchFor, BLooper* resultUpdateTarget);
 
 private:
-	static	const char*			kBaseUrl;
-	static	BString				sCachedServerUrl;
+	static int32 _IconLookupFunc(void* data);
+	status_t _CheckServer();
+	void _WaitForIconLookupThread();
 
-			thread_id			fIconLookupThread;
-			BObjectList<IconLookup>	fIconLookupList;
-			BLooper*			fIconLookupNotify;
+private:
+	static const char* kBaseUrl;
+	static BString sCachedServerUrl;
+
+	thread_id fIconLookupThread;
+	BObjectList<IconLookup> fIconLookupList;
+	BLooper* fIconLookupNotify;
 };
 
 
-#endif // _STATION_FINDER_RADIO_NETWORK_H
+#endif	// _STATION_FINDER_RADIO_NETWORK_H

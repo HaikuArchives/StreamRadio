@@ -44,20 +44,19 @@ const char kMpegHeader2 = '\xe0';
 
 
 StreamIO::StreamIO(Station* station, BLooper* metaListener)
-	:
-	BAdapterIO(B_MEDIA_STREAMING | B_MEDIA_SEEKABLE, HTTP_TIMEOUT),
-	fStation(station),
-	fReq(NULL),
-	fReqThread(-1),
-	fUnsynched(0),
-	fMetaInt(0),
-	fMetaSize(0),
-	fUntilMetaStart(0),
-	fUntilMetaEnd(0),
-	fMetaListener(metaListener),
-	fFrameSync(none),
-	fLimit(0),
-	fBuffered(0)
+	: BAdapterIO(B_MEDIA_STREAMING | B_MEDIA_SEEKABLE, HTTP_TIMEOUT),
+	  fStation(station),
+	  fReq(NULL),
+	  fReqThread(-1),
+	  fUnsynched(0),
+	  fMetaInt(0),
+	  fMetaSize(0),
+	  fUntilMetaStart(0),
+	  fUntilMetaEnd(0),
+	  fMetaListener(metaListener),
+	  fFrameSync(none),
+	  fLimit(0),
+	  fBuffered(0)
 {
 	BUrl url = station->StreamUrl();
 
@@ -80,8 +79,8 @@ StreamIO::StreamIO(Station* station, BLooper* metaListener)
 	// IP's should be small, anyway.
 
 	if (url.Protocol() == "https") {
-		fReq = dynamic_cast<BHttpRequest*>(BUrlProtocolRoster::MakeRequest(
-			url.UrlString().String(), this, this));
+		fReq = dynamic_cast<BHttpRequest*>(
+			BUrlProtocolRoster::MakeRequest(url.UrlString().String(), this, this));
 	} else {
 		BUrl* newUrl = new BUrl();
 		if (newUrl == NULL)
@@ -91,8 +90,8 @@ StreamIO::StreamIO(Station* station, BLooper* metaListener)
 		if (portStatus != B_OK)
 			return;
 
-		fReq = dynamic_cast<BHttpRequest*>(BUrlProtocolRoster::MakeRequest(
-			newUrl->UrlString().String(), this, this));
+		fReq = dynamic_cast<BHttpRequest*>(
+			BUrlProtocolRoster::MakeRequest(newUrl->UrlString().String(), this, this));
 		delete newUrl;
 	}
 
@@ -154,21 +153,18 @@ StreamIO::ReadAt(off_t position, void* buffer, size_t size)
 	if (fLimit == 0 || position < fLimit) {
 		ssize_t read = BAdapterIO::ReadAt(position, buffer, size);
 		if (read > 0) {
-			TRACE("Read %" B_PRIdSSIZE " of %" B_PRIuSIZE
-				  " bytes from position %" B_PRIdOFF ", %" B_PRIuSIZE
-				  " remaining\n",
+			TRACE("Read %" B_PRIdSSIZE " of %" B_PRIuSIZE " bytes from position %" B_PRIdOFF
+				  ", %" B_PRIuSIZE " remaining\n",
 				read, size, position, fBuffered);
 			fBuffered -= read;
 		} else {
-			TRACE("Reading %" B_PRIuSIZE " bytes from position %" B_PRIdOFF
-				  " failed - %s\n",
-				size, position, strerror(read));
+			TRACE("Reading %" B_PRIuSIZE " bytes from position %" B_PRIdOFF " failed - %s\n", size,
+				position, strerror(read));
 		}
 
 		return read;
 	} else {
-		TRACE("Position %" B_PRIdOFF " has reached limit of %" B_PRIuSIZE
-			  ", blocking...\n",
+		TRACE("Position %" B_PRIdOFF " has reached limit of %" B_PRIuSIZE ", blocking...\n",
 			position, fLimit);
 
 		return 0;
@@ -215,14 +211,12 @@ void
 StreamIO::HeadersReceived(BUrlRequest* request)
 {
 	BHttpRequest* httpReq = dynamic_cast<BHttpRequest*>(request);
-	const BHttpResult* httpResult
-		= dynamic_cast<const BHttpResult*>(&request->Result());
+	const BHttpResult* httpResult = dynamic_cast<const BHttpResult*>(&request->Result());
 
 	if (httpReq->IsRedirectionStatusCode(httpResult->StatusCode())) {
-		if (httpResult->StatusCode() == 301) { // Permanent redirect
+		if (httpResult->StatusCode() == 301) {	// Permanent redirect
 			fStation->SetStreamUrl(httpResult->Headers()["location"]);
-			TRACE("Permanently redirected to %s\n",
-				httpResult->Headers()["location"]);
+			TRACE("Permanently redirected to %s\n", httpResult->Headers()["location"]);
 		} else
 			TRACE("Redirected to %s\n", httpResult->Headers()["location"]);
 
@@ -278,7 +272,7 @@ StreamIO::_DataWithMetaReceived(const char* data, size_t size, int next)
 				fUntilMetaEnd = 0;
 				fUntilMetaStart = fMetaInt;
 			} else {
-				memcpy(fMetaBuffer + fMetaSize, (void*) data, size);
+				memcpy(fMetaBuffer + fMetaSize, (void*)data, size);
 
 				written += size;
 				fMetaSize += size;
@@ -306,8 +300,7 @@ StreamIO::_DataWithMetaReceived(const char* data, size_t size, int next)
 					fUntilMetaStart = fMetaInt;
 					TRACE("Meta: Empty\n");
 				} else if (fUntilMetaEnd > 512) {
-					TRACE("Meta: Size of %" B_PRIdOFF " too large\n",
-						fUntilMetaEnd);
+					TRACE("Meta: Size of %" B_PRIdOFF " too large\n", fUntilMetaEnd);
 
 					fUntilMetaStart = fMetaInt;
 					fUntilMetaEnd = 0;
@@ -328,8 +321,7 @@ StreamIO::_DataWithMetaReceived(const char* data, size_t size, int next)
 
 
 ssize_t
-StreamIO::_DataUnsyncedReceived(const char* data,
-	size_t size, int next)
+StreamIO::_DataUnsyncedReceived(const char* data, size_t size, int next)
 {
 	off_t frameStart;
 	for (frameStart = 0; frameStart < size; frameStart++) {
@@ -344,16 +336,14 @@ StreamIO::_DataUnsyncedReceived(const char* data,
 			DataFunc nextFunc = fDataFuncs.Item(next);
 
 			(*this.*nextFunc)(&kMpegHeader1, 1, next + 1);
-			return frameStart + (*this.*nextFunc)(data + frameStart,
-				size - frameStart, next + 1);
+			return frameStart + (*this.*nextFunc)(data + frameStart, size - frameStart, next + 1);
 		} else
 			fFrameSync = none;
 	}
 
 	fUnsynched += size;
 	if (fUnsynched > 8192) {
-		MSG("No mp3 frame header encountered in first %" B_PRIiOFF
-			" bytes, giving up...",
+		MSG("No mp3 frame header encountered in first %" B_PRIiOFF " bytes, giving up...",
 			fUnsynched);
 
 		next--;
@@ -382,8 +372,7 @@ StreamIO::RequestCompleted(BUrlRequest* request, bool success)
 
 
 void
-StreamIO::DebugMessage(BUrlRequest* caller, BUrlProtocolDebugMessage type,
-	const char* text)
+StreamIO::DebugMessage(BUrlRequest* caller, BUrlProtocolDebugMessage type, const char* text)
 {
 	DEBUG("Debug Message: %s\n", text);
 }
@@ -404,8 +393,8 @@ StreamIO::_ProcessMeta()
 	msg->AddString("station", fStation->Name()->String());
 
 	int res = regcomp(&regex, "([^=]*)='(([^']|'[^;])*)';",
-		RE_ICASE | RE_DOT_NEWLINE | RE_DOT_NOT_NULL | RE_NO_BK_PARENS
-			| RE_NO_BK_VBAR | RE_BACKSLASH_ESCAPE_IN_LISTS);
+		RE_ICASE | RE_DOT_NEWLINE | RE_DOT_NOT_NULL | RE_NO_BK_PARENS | RE_NO_BK_VBAR |
+			RE_BACKSLASH_ESCAPE_IN_LISTS);
 
 	char* text = fMetaBuffer;
 	while ((res = regexec(&regex, text, 3, matches, 0)) == 0) {
@@ -415,8 +404,7 @@ StreamIO::_ProcessMeta()
 		if (text + matches[2].rm_so && !(text + matches[2].rm_so)[0])
 			msg->AddString(strlwr(text + matches[1].rm_so), fIcyName);
 		else
-			msg->AddString(
-				strlwr(text + matches[1].rm_so), text + matches[2].rm_so);
+			msg->AddString(strlwr(text + matches[1].rm_so), text + matches[2].rm_so);
 
 		text += matches[0].rm_eo;
 	}

@@ -30,21 +30,21 @@
 
 class RadioApp : BApplication {
 public:
-								RadioApp();
-								~RadioApp();
+	RadioApp();
+	~RadioApp();
 
-	virtual	void				ReadyToRun();
-	virtual	void				RefsReceived(BMessage* message);
-	virtual	void				ArgvReceived(int32 argc, char** argv);
-	virtual	void				AboutRequested();
+	virtual void ReadyToRun();
+	virtual void RefsReceived(BMessage* message);
+	virtual void ArgvReceived(int32 argc, char** argv);
+	virtual void AboutRequested();
 
-			MainWindow*			mainWindow;
+	MainWindow* mainWindow;
 
-			RadioSettings 		Settings;
+	RadioSettings Settings;
 
 private:
-			BMessage*			fArgvMessage;
+	BMessage* fArgvMessage;
 };
 
 
-#endif // _RADIO_APP_H
+#endif	// _RADIO_APP_H

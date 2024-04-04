@@ -19,18 +19,17 @@
 
 #include "Station.h"
 
-#include <exception>
 #include <regex.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <exception>
 
 #include <Alert.h>
 #include <BitmapStream.h>
 #include <Catalog.h>
 #include <Directory.h>
 #include <Entry.h>
-#include <fs_attr.h>
 #include <File.h>
 #include <FindDirectory.h>
 #include <HttpRequest.h>
@@ -45,6 +44,7 @@
 #include <TranslationUtils.h>
 #include <TranslatorRoster.h>
 #include <UrlSynchronousRequest.h>
+#include <fs_attr.h>
 
 #include "Debug.h"
 #include "HttpUtils.h"
@@ -59,24 +59,23 @@ const char* kMimePls = "audio/x-scpls";
 
 
 Station::Station(BString name, BString uri)
-	:
-	fName(name),
-	fStreamUrl(uri),
-	fStationUrl(B_EMPTY_STRING),
-	fGenre(B_EMPTY_STRING),
-	fCountry(B_EMPTY_STRING),
-	fLanguage(B_EMPTY_STRING),
-	fSource(B_EMPTY_STRING),
-	fMime(B_EMPTY_STRING),
-	fEncoding(0),
-	fLogo(NULL),
-	fRating(0),
-	fBitRate(0),
-	fSampleRate(0),
-	fUniqueIdentifier(B_EMPTY_STRING),
-	fMetaInterval(0),
-	fChannels(0),
-	fFlags(0)
+	: fName(name),
+	  fStreamUrl(uri),
+	  fStationUrl(B_EMPTY_STRING),
+	  fGenre(B_EMPTY_STRING),
+	  fCountry(B_EMPTY_STRING),
+	  fLanguage(B_EMPTY_STRING),
+	  fSource(B_EMPTY_STRING),
+	  fMime(B_EMPTY_STRING),
+	  fEncoding(0),
+	  fLogo(NULL),
+	  fRating(0),
+	  fBitRate(0),
+	  fSampleRate(0),
+	  fUniqueIdentifier(B_EMPTY_STRING),
+	  fMetaInterval(0),
+	  fChannels(0),
+	  fFlags(0)
 {
 	CheckFlags();
 	if (Flags(STATION_URI_VALID) && !Flags(STATION_HAS_FORMAT))
@@ -85,21 +84,20 @@ Station::Station(BString name, BString uri)
 
 
 Station::Station(const Station& orig)
-	:
-	fName(orig.fName),
-	fStreamUrl(orig.fStreamUrl),
-	fStationUrl(orig.fStationUrl),
-	fGenre(orig.fGenre),
-	fCountry(orig.fCountry),
-	fLanguage(orig.fLanguage),
-	fSource(B_EMPTY_STRING),
-	fEncoding(orig.fEncoding),
-	fRating(orig.fRating),
-	fBitRate(orig.fBitRate),
-	fSampleRate(orig.fSampleRate),
-	fUniqueIdentifier(orig.fUniqueIdentifier),
-	fMetaInterval(orig.fMetaInterval),
-	fChannels(orig.fChannels)
+	: fName(orig.fName),
+	  fStreamUrl(orig.fStreamUrl),
+	  fStationUrl(orig.fStationUrl),
+	  fGenre(orig.fGenre),
+	  fCountry(orig.fCountry),
+	  fLanguage(orig.fLanguage),
+	  fSource(B_EMPTY_STRING),
+	  fEncoding(orig.fEncoding),
+	  fRating(orig.fRating),
+	  fBitRate(orig.fBitRate),
+	  fSampleRate(orig.fSampleRate),
+	  fUniqueIdentifier(orig.fUniqueIdentifier),
+	  fMetaInterval(orig.fMetaInterval),
+	  fChannels(orig.fChannels)
 {
 	fMime.SetTo(orig.fMime.Type());
 	fLogo = (orig.fLogo) ? new BBitmap(orig.fLogo) : NULL;
@@ -116,8 +114,7 @@ Station::~Station()
 status_t
 Station::InitCheck()
 {
-	return (fFlags & STATION_HAS_NAME && fFlags & STATION_HAS_URI) ? B_OK
-																   : B_ERROR;
+	return (fFlags & STATION_HAS_NAME && fFlags & STATION_HAS_URI) ? B_OK : B_ERROR;
 }
 
 
@@ -150,39 +147,31 @@ Station::Save()
 
 	BString content;
 	content << "[playlist]\nNumberOfEntries=1\nFile1=" << fStreamUrl << "\n";
-	stationFile.Write(
-		content.LockBuffer(-1), content.CountBytes(0, content.CountChars()));
+	stationFile.Write(content.LockBuffer(-1), content.CountBytes(0, content.CountChars()));
 	content.UnlockBuffer();
 
 	status = stationFile.Lock();
 
 	status = stationFile.WriteAttrString("META:url", &fStreamUrl.UrlString());
-	status = stationFile.WriteAttr(
-		"BEOS:TYPE", B_MIME_TYPE, 0, kMimePls, strlen(kMimePls));
-	status = stationFile.WriteAttr(
-		"META:bitrate", B_INT32_TYPE, 0, &fBitRate, sizeof(fBitRate));
+	status = stationFile.WriteAttr("BEOS:TYPE", B_MIME_TYPE, 0, kMimePls, strlen(kMimePls));
+	status = stationFile.WriteAttr("META:bitrate", B_INT32_TYPE, 0, &fBitRate, sizeof(fBitRate));
 	status = stationFile.WriteAttr(
 		"META:samplerate", B_INT32_TYPE, 0, &fSampleRate, sizeof(fSampleRate));
+	status = stationFile.WriteAttr("META:channels", B_INT32_TYPE, 0, &fChannels, sizeof(fChannels));
+	status =
+		stationFile.WriteAttr("META:framesize", B_INT32_TYPE, 0, &fFrameSize, sizeof(fFrameSize));
+	status = stationFile.WriteAttr("META:rating", B_INT32_TYPE, 0, &fRating, sizeof(fRating));
 	status = stationFile.WriteAttr(
-		"META:channels", B_INT32_TYPE, 0, &fChannels, sizeof(fChannels));
-	status = stationFile.WriteAttr(
-		"META:framesize", B_INT32_TYPE, 0, &fFrameSize, sizeof(fFrameSize));
-	status = stationFile.WriteAttr(
-		"META:rating", B_INT32_TYPE, 0, &fRating, sizeof(fRating));
-	status = stationFile.WriteAttr("META:interval", B_INT32_TYPE, 0,
-		&fMetaInterval, sizeof(fMetaInterval));
+		"META:interval", B_INT32_TYPE, 0, &fMetaInterval, sizeof(fMetaInterval));
 	status = stationFile.WriteAttrString("META:genre", &fGenre);
 	status = stationFile.WriteAttrString("META:country", &fCountry);
 	status = stationFile.WriteAttrString("META:language", &fLanguage);
 	status = stationFile.WriteAttrString("META:source", &fSource.UrlString());
-	status = stationFile.WriteAttrString(
-		"META:stationurl", &fStationUrl.UrlString());
+	status = stationFile.WriteAttrString("META:stationurl", &fStationUrl.UrlString());
 	BString mimeType(fMime.Type());
 	status = stationFile.WriteAttrString("META:mime", &mimeType);
-	status = stationFile.WriteAttr(
-		"META:encoding", B_INT32_TYPE, 0, &fEncoding, sizeof(fEncoding));
-	status = stationFile.WriteAttrString("META:uniqueidentifier",
-		&fUniqueIdentifier);
+	status = stationFile.WriteAttr("META:encoding", B_INT32_TYPE, 0, &fEncoding, sizeof(fEncoding));
+	status = stationFile.WriteAttrString("META:uniqueidentifier", &fUniqueIdentifier);
 	status = stationFile.Unlock();
 
 	BNodeInfo stationInfo;
@@ -196,8 +185,7 @@ Station::Save()
 		stationFile.WriteAttr("logo", 'BBMP', 0LL, archiveBuffer, archiveSize);
 		free(archiveBuffer);
 
-		BBitmap* icon = new BBitmap(
-			BRect(0, 0, B_LARGE_ICON - 1, B_LARGE_ICON - 1), B_RGB32, true);
+		BBitmap* icon = new BBitmap(BRect(0, 0, B_LARGE_ICON - 1, B_LARGE_ICON - 1), B_RGB32, true);
 		BView* canvas = new BView(icon->Bounds(), "canvas", B_FOLLOW_NONE, 0);
 
 		icon->AddChild(canvas);
@@ -213,8 +201,7 @@ Station::Save()
 		canvas->ResizeTo(16, 16);
 		icon->AddChild(canvas);
 		canvas->LockLooper();
-		canvas->DrawBitmap(
-			fLogo, fLogo->Bounds(), icon->Bounds(), B_FILTER_BITMAP_BILINEAR);
+		canvas->DrawBitmap(fLogo, fLogo->Bounds(), icon->Bounds(), B_FILTER_BITMAP_BILINEAR);
 		canvas->UnlockLooper();
 		icon->RemoveChild(canvas);
 		stationInfo.SetIcon(icon, B_MINI_ICON);
@@ -239,10 +226,9 @@ Station::RetrieveStreamUrl()
 	status_t status = B_ERROR;
 	BString contentType("*/*");
 
-	BMallocIO* plsData = HttpUtils::GetAll(fSource, NULL, 100000, &contentType,
-		2000);
+	BMallocIO* plsData = HttpUtils::GetAll(fSource, NULL, 100000, &contentType, 2000);
 	if (plsData != NULL) {
-		status = ParseUrlReference((const char*) plsData->Buffer(), fSource);
+		status = ParseUrlReference((const char*)plsData->Buffer(), fSource);
 		delete plsData;
 	}
 
@@ -287,16 +273,14 @@ Station::Probe()
 	// IP's should be small, anyway.
 
 	if (fStreamUrl.Protocol() == "https") {
-		buffer = HttpUtils::GetAll(fStreamUrl, &headers, 2 * 1000 * 1000,
-			&contentType, 4096);
+		buffer = HttpUtils::GetAll(fStreamUrl, &headers, 2 * 1000 * 1000, &contentType, 4096);
 	} else {
 		BUrl resolvedUrl;
 		status_t resolveStatus = HttpUtils::CheckPort(fStreamUrl, &resolvedUrl);
 		if (resolveStatus != B_OK)
 			return B_ERROR;
 
-		buffer = HttpUtils::GetAll(
-			resolvedUrl, &headers, 2 * 1000 * 1000, &contentType, 4096);
+		buffer = HttpUtils::GetAll(resolvedUrl, &headers, 2 * 1000 * 1000, &contentType, 4096);
 	}
 
 #ifdef DEBUGGING
@@ -329,8 +313,7 @@ Station::Probe()
 	if ((index = headers.HasHeader("Icy-Genre")) >= 0)
 		fGenre = headers[index].Value();
 
-	if ((index = headers.HasHeader("Icy-Url")) >= 0
-		&& strlen(headers[index].Value()) > 0)
+	if ((index = headers.HasHeader("Icy-Url")) >= 0 && strlen(headers[index].Value()) > 0)
 		fStationUrl.SetUrlString(headers[index].Value());
 
 	if ((index = headers.HasHeader("Ice-Audio-Info")) >= 0) {
@@ -408,10 +391,10 @@ Station::ProbeBuffer(BPositionIO* buffer)
 status_t
 Station::ParseUrlReference(const char* body, const BUrl& baseUrl)
 {
-	const char* patterns[4] = {"^file[0-9]+=([^\r\n]*)[\r\n$]+", // ShoutcastUrl
-		"^(http://[^\r\n]*)[\r\n]+$", // Mpeg Url;
-		"^([^#]+[^\r\n]*)[\r\n]+$", // Mpeg Url;
-		"^title[0-9]+=([^\r\n]*)[\r\n$]+"}; // Shoutcast alternativ;
+	const char* patterns[4] = {"^file[0-9]+=([^\r\n]*)[\r\n$]+",  // ShoutcastUrl
+		"^(http://[^\r\n]*)[\r\n]+$",							  // Mpeg Url;
+		"^([^#]+[^\r\n]*)[\r\n]+$",								  // Mpeg Url;
+		"^title[0-9]+=([^\r\n]*)[\r\n$]+"};						  // Shoutcast alternativ;
 
 	for (int32 i = 0; i < 3; i++) {
 		char* match = RegFind(body, patterns[i]);
@@ -460,26 +443,26 @@ Station::Load(BString name, BEntry* entry)
 
 	status = file.ReadAttrString("META:language", &station->fLanguage);
 
-	status = file.ReadAttr("META:bitrate", B_INT32_TYPE, 0, &station->fBitRate,
-		sizeof(station->fBitRate));
+	status = file.ReadAttr(
+		"META:bitrate", B_INT32_TYPE, 0, &station->fBitRate, sizeof(station->fBitRate));
 
-	status = file.ReadAttr("META:rating", B_INT32_TYPE, 0, &station->fRating,
-		sizeof(station->fRating));
+	status =
+		file.ReadAttr("META:rating", B_INT32_TYPE, 0, &station->fRating, sizeof(station->fRating));
 
-	status = file.ReadAttr("META:interval", B_INT32_TYPE, 0,
-		&station->fMetaInterval, sizeof(station->fMetaInterval));
+	status = file.ReadAttr(
+		"META:interval", B_INT32_TYPE, 0, &station->fMetaInterval, sizeof(station->fMetaInterval));
 
-	status = file.ReadAttr("META:samplerate", B_INT32_TYPE, 0,
-		&station->fSampleRate, sizeof(station->fSampleRate));
+	status = file.ReadAttr(
+		"META:samplerate", B_INT32_TYPE, 0, &station->fSampleRate, sizeof(station->fSampleRate));
 
-	status = file.ReadAttr("META:channels", B_INT32_TYPE, 0,
-		&station->fChannels, sizeof(station->fChannels));
+	status = file.ReadAttr(
+		"META:channels", B_INT32_TYPE, 0, &station->fChannels, sizeof(station->fChannels));
 
-	status = file.ReadAttr("META:encoding", B_INT32_TYPE, 0,
-		&station->fEncoding, sizeof(station->fEncoding));
+	status = file.ReadAttr(
+		"META:encoding", B_INT32_TYPE, 0, &station->fEncoding, sizeof(station->fEncoding));
 
-	status = file.ReadAttr("META:framesize", B_INT32_TYPE, 0,
-		&station->fFrameSize, sizeof(station->fFrameSize));
+	status = file.ReadAttr(
+		"META:framesize", B_INT32_TYPE, 0, &station->fFrameSize, sizeof(station->fFrameSize));
 
 	status = file.ReadAttrString("META:mime", &readString);
 	station->fMime.SetTo(readString);
@@ -496,12 +479,12 @@ Station::Load(BString name, BEntry* entry)
 	attr_info attrInfo;
 	status = file.GetAttrInfo("logo", &attrInfo);
 	if (status == B_OK) {
-		char* archiveBuffer = (char*) malloc(attrInfo.size);
+		char* archiveBuffer = (char*)malloc(attrInfo.size);
 		file.ReadAttr("logo", attrInfo.type, 0LL, archiveBuffer, attrInfo.size);
 		BMessage archive;
 		archive.Unflatten(archiveBuffer);
 		free(archiveBuffer);
-		station->fLogo = (BBitmap*) BBitmap::Instantiate(&archive);
+		station->fLogo = (BBitmap*)BBitmap::Instantiate(&archive);
 	} else {
 		station->fLogo = new BBitmap(BRect(0, 0, 32, 32), B_RGB32);
 		status = stationInfo.GetIcon(station->fLogo, B_LARGE_ICON);
@@ -558,12 +541,10 @@ Station::RegFind(const char* text, const char* pattern)
 	memset(&patternBuffer, 0, sizeof(patternBuffer));
 	memset(matchBuffer, 0, sizeof(matchBuffer));
 
-	result = regcomp(
-		&patternBuffer, pattern, REG_EXTENDED | REG_NEWLINE | REG_ICASE);
+	result = regcomp(&patternBuffer, pattern, REG_EXTENDED | REG_NEWLINE | REG_ICASE);
 	result = regexec(&patternBuffer, text, 20, matchBuffer, 0);
 	if (result == 0 && matchBuffer[1].rm_eo > -1) {
-		match = strndup(text + matchBuffer[1].rm_so,
-			matchBuffer[1].rm_eo - matchBuffer[1].rm_so);
+		match = strndup(text + matchBuffer[1].rm_so, matchBuffer[1].rm_eo - matchBuffer[1].rm_so);
 	}
 	regfree(&patternBuffer);
 
@@ -580,8 +561,7 @@ Station::LoadIndirectUrl(BString& shoutCastUrl)
 
 	status_t status;
 	const char* patternTitle = "<title[^>]*>(.*?)</title[^>]*>";
-	const char* patternIcon
-		= "<link\\s*rel=\"shortcut icon\"\\s*href=\"([^\"]*?)\".*?";
+	const char* patternIcon = "<link\\s*rel=\"shortcut icon\"\\s*href=\"([^\"]*?)\".*?";
 
 	BString contentType("*/*");
 
@@ -620,9 +600,8 @@ Station::LoadIndirectUrl(BString& shoutCastUrl)
 	 */
 
 	BUrl finalUrl = station->fStationUrl;
-	if ((!finalUrl.HasPort() || finalUrl.Port() == 80)
-		&& (!finalUrl.HasPath() || finalUrl.Path().IsEmpty()
-			|| finalUrl.Path() == "/")) {
+	if ((!finalUrl.HasPort() || finalUrl.Port() == 80) &&
+		(!finalUrl.HasPath() || finalUrl.Path().IsEmpty() || finalUrl.Path() == "/")) {
 		if (station->fName.IsEmpty())
 			station->SetName("New Station");
 	} else
@@ -639,7 +618,7 @@ Station::LoadIndirectUrl(BString& shoutCastUrl)
 	dataIO = HttpUtils::GetAll(finalUrl);
 	if (dataIO != NULL) {
 		dataIO->Write(&"", 1);
-		body = (char*) dataIO->Buffer();
+		body = (char*)dataIO->Buffer();
 		char* title = RegFind(body, patternTitle);
 		if (title != NULL) {
 			station->fName.SetTo(title);
@@ -654,8 +633,7 @@ Station::LoadIndirectUrl(BString& shoutCastUrl)
 
 		contentType = "image/*";
 
-		BMallocIO* iconIO
-			= HttpUtils::GetAll(finalUrl, NULL, 10000, &contentType, 2000);
+		BMallocIO* iconIO = HttpUtils::GetAll(finalUrl, NULL, 10000, &contentType, 2000);
 		if (iconIO != NULL) {
 			iconIO->Seek(0, SEEK_SET);
 			station->fLogo = BTranslationUtils::GetBitmap(iconIO);
@@ -701,9 +679,8 @@ Station::SetName(BString name)
 void
 Station::CleanName()
 {
-	if (fName.Compare("(#", 2) == 0
-		&& fName.FindFirst(')') >= 0
-		&& fName.FindFirst(')') < fName.Length())
+	if (fName.Compare("(#", 2) == 0 && fName.FindFirst(')') >= 0 &&
+		fName.FindFirst(')') < fName.Length())
 		fName.Remove(0, fName.FindFirst(')') + 1).Trim();
 
 	fName.RemoveCharsSet("\\/#?");
@@ -763,10 +740,9 @@ Station::StationDirectory()
 		configDir.CreateDirectory(kSubDirStations, sStationsDirectory);
 
 		BAlert* alert = new BAlert(B_TRANSLATE("Stations directory created"),
-			B_TRANSLATE(
-				"A directory for saving stations has been created in your "
-				"settings folder. Link this directory to your deskbar menu "
-				"to play stations directly."),
+			B_TRANSLATE("A directory for saving stations has been created in your "
+						"settings folder. Link this directory to your deskbar menu "
+						"to play stations directly."),
 			B_TRANSLATE("OK"));
 		alert->Go();
 	}

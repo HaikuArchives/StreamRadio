@@ -31,30 +31,29 @@
 #undef DEBUG
 #undef MSG
 
-//#define TRACING
-//#define DEBUGGING
-//#define PROFILING
+// #define TRACING
+// #define DEBUGGING
+// #define PROFILING
 
 #ifdef DEBUGGING
 #define DEBUG(x...) fprintf(stderr, __FILE__ " - " x)
 #else
 #define DEBUG(x...)
-#endif // DEBUGGING
+#endif	// DEBUGGING
 #ifdef TRACING
 #define TRACE(x...) fprintf(stderr, __FILE__ " - " x)
 #else
 #define TRACE(x...)
-#endif // TRACING
+#endif	// TRACING
 #define MSG(x...) fprintf(stderr, __FILE__ " - " x)
 #ifdef PROFILING
 #define PROFILE_START bigtime_t timer = system_time()
 #define PROFILE_MEASURE(action) \
-	TRACE("%s took %2.6f seconds\r\n", action, \
-		(system_time() - timer) / 1000000.0f)
+	TRACE("%s took %2.6f seconds\r\n", action, (system_time() - timer) / 1000000.0f)
 #else
 #define PROFILE_START
 #define PROFILE_MEASURE(action)
-#endif // PROFILING
+#endif	// PROFILING
 
 
-#endif // _DEBUG_H
+#endif	// _DEBUG_H

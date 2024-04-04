@@ -29,17 +29,10 @@
 #define B_TRANSLATION_CONTEXT "RadioApp"
 
 
-RadioApp::RadioApp()
-	:
-	BApplication(kAppSignature),
-	fArgvMessage(NULL)
-{
-}
+RadioApp::RadioApp() : BApplication(kAppSignature), fArgvMessage(NULL) {}
 
 
-RadioApp::~RadioApp()
-{
-}
+RadioApp::~RadioApp() {}
 
 
 void
@@ -78,10 +71,11 @@ RadioApp::ArgvReceived(int32 argc, char** argv)
 	for (int32 i = 1; i < argc; i++) {
 		char* arg = argv[i];
 		if (strncmp(arg, "--help", 7) == 0) {
-			printf(B_TRANSLATE("Usage: StreamRadio <filename>\n"
-				"<filename> should be a Shoutcast playlist file.\n"
-				"If the station already exists, it is made to play "
-				"otherwise it is added.\n"));
+			printf(
+				B_TRANSLATE("Usage: StreamRadio <filename>\n"
+							"<filename> should be a Shoutcast playlist file.\n"
+							"If the station already exists, it is made to play "
+							"otherwise it is added.\n"));
 			exit(1);
 		}
 
@@ -107,16 +101,9 @@ RadioApp::ArgvReceived(int32 argc, char** argv)
 void
 RadioApp::AboutRequested()
 {
-	BAboutWindow * about = new BAboutWindow(
-		B_TRANSLATE_SYSTEM_NAME("StreamRadio"), kAppSignature);
+	BAboutWindow* about = new BAboutWindow(B_TRANSLATE_SYSTEM_NAME("StreamRadio"), kAppSignature);
 
-	const char* kAuthors[] = {
-		"Fishpond",
-		"Humdinger",
-		"Jacob Secunda",
-		"Javier Steinaker",
-		NULL
-	};
+	const char* kAuthors[] = {"Fishpond", "Humdinger", "Jacob Secunda", "Javier Steinaker", NULL};
 
 	const char* kCopyright = "The HaikuArchives team";
 

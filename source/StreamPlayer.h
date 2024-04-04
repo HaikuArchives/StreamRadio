@@ -28,10 +28,9 @@
 
 
 // Notification Messages
-#define MSG_PLAYER_STATE_CHANGED \
-	'mPSC' // "player" = StreamPlayer*, "state" = int32(playState)
+#define MSG_PLAYER_STATE_CHANGED 'mPSC'	 // "player" = StreamPlayer*, "state" = int32(playState)
 #define MSG_PLAYER_BUFFER_LEVEL \
-	'mPBL' // "player" = StreamPlayer*, "level" = float percent buffer filled
+	'mPBL'	// "player" = StreamPlayer*, "level" = float percent buffer filled
 
 
 class Station;
@@ -39,45 +38,49 @@ class Station;
 
 class StreamPlayer : private BLocker {
 public:
-								StreamPlayer(Station* station,
-									BLooper* notify = NULL);
-	virtual						~StreamPlayer();
+	StreamPlayer(Station* station, BLooper* notify = NULL);
+	virtual ~StreamPlayer();
 
-	inline	status_t			InitCheck() { return fInitStatus; }
-	inline	Station*			GetStation() { return fStation; }
-			status_t			Play();
-			status_t			Stop();
-			float				Volume();
-			void				SetVolume(float volume);
+	inline status_t InitCheck() { return fInitStatus; }
+	inline Station* GetStation() { return fStation; }
+	status_t Play();
+	status_t Stop();
+	float Volume();
+	void SetVolume(float volume);
 
-	enum	PlayState 			{ InActive = -1, Stopped, Playing, Buffering };
-	inline	PlayState 			State() { return fState; }
-
-private:
-			void				_SetState(PlayState state);
-
-	static	status_t			_StartPlayThreadFunc(StreamPlayer* _this);
-	static	void				_GetDecodedChunk(void* cookie, void* buffer,
-									size_t size,
-									const media_raw_audio_format& format);
+	enum PlayState
+	{
+		InActive = -1,
+		Stopped,
+		Playing,
+		Buffering
+	};
+	inline PlayState State() { return fState; }
 
 private:
-			Station*			fStation;
-			BLooper*			fNotify;
-			BMediaFile*			fMediaFile;
-			StreamIO*			fStream;
-			BSoundPlayer*		fPlayer;
-			PlayState			fState;
+	void _SetState(PlayState state);
 
-			status_t			fInitStatus;
-			bool				fStopRequested;
+	static status_t _StartPlayThreadFunc(StreamPlayer* _this);
+	static void _GetDecodedChunk(
+		void* cookie, void* buffer, size_t size, const media_raw_audio_format& format);
 
-			media_codec_info	fCodecInfo;
-			media_format		fDecodedFormat;
-			media_header		fHeader;
-			media_decode_info	fInfo;
-			int32				fFlushCount;
+private:
+	Station* fStation;
+	BLooper* fNotify;
+	BMediaFile* fMediaFile;
+	StreamIO* fStream;
+	BSoundPlayer* fPlayer;
+	PlayState fState;
+
+	status_t fInitStatus;
+	bool fStopRequested;
+
+	media_codec_info fCodecInfo;
+	media_format fDecodedFormat;
+	media_header fHeader;
+	media_decode_info fInfo;
+	int32 fFlushCount;
 };
 
 
-#endif // _STREAM_PLAYER_H
+#endif	// _STREAM_PLAYER_H
