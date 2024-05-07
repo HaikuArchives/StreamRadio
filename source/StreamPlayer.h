@@ -48,8 +48,7 @@ public:
 	float Volume();
 	void SetVolume(float volume);
 
-	enum PlayState
-	{
+	enum PlayState {
 		InActive = -1,
 		Stopped,
 		Playing,

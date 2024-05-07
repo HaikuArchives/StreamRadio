@@ -11,9 +11,10 @@ IndentWidth: 4
 UseTab: Always
 BraceWrapping:
   AfterCaseLabel: true
-  AfterEnum: true
+  AfterEnum: false
   AfterFunction: true
 BreakBeforeBraces: Custom
+AllowShortEnumsOnASingleLine: false
 SeparateDefinitionBlocks: Leave
 MaxEmptyLinesToKeep: 2
 

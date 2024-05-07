@@ -112,8 +112,7 @@ private:
 	void _ProcessMeta();
 
 private:
-	enum FrameSync
-	{
+	enum FrameSync {
 		none,
 		first,
 		done
