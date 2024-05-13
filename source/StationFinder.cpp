@@ -60,11 +60,16 @@ StationFinderServices::Name(int i)
 }
 
 
-FindByCapability::FindByCapability(char* name) : fName(name), fKeywords() {}
+FindByCapability::FindByCapability(char* name)
+	: fName(name),
+	  fKeywords()
+{
+}
 
 
 FindByCapability::FindByCapability(char* name, char* keyWords, char* delimiter)
-	: fName(name), fKeywords()
+	: fName(name),
+	  fKeywords()
 {
 	SetKeyWords(keyWords, delimiter);
 }
@@ -106,7 +111,10 @@ FindByCapability::SetKeyWords(char* keyWords, char* delimiter)
 
 
 StationFinderService::StationFinderService()
-	: serviceName("unknown"), serviceHomePage(""), serviceLogo(NULL), findByCapabilities(5, true)
+	: serviceName("unknown"),
+	  serviceHomePage(""),
+	  serviceLogo(NULL),
+	  findByCapabilities(5, true)
 {
 }
 

@@ -38,11 +38,17 @@ const char* StationFinderRadioNetwork::kBaseUrl = "https://all.api.radio-browser
 BString StationFinderRadioNetwork::sCachedServerUrl = B_EMPTY_STRING;
 
 
-IconLookup::IconLookup(Station* station, BUrl iconUrl) : fStation(station), fIconUrl(iconUrl) {}
+IconLookup::IconLookup(Station* station, BUrl iconUrl)
+	: fStation(station),
+	  fIconUrl(iconUrl)
+{
+}
 
 
 StationFinderRadioNetwork::StationFinderRadioNetwork()
-	: StationFinderService(), fIconLookupThread(-1), fIconLookupList(100, true)
+	: StationFinderService(),
+	  fIconLookupThread(-1),
+	  fIconLookupList(100, true)
 {
 	serviceName.SetTo(B_TRANSLATE("Community Radio Browser"));
 	serviceHomePage.SetUrlString("https://www.radio-browser.info");

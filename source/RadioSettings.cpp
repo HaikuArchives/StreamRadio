@@ -28,7 +28,10 @@
 const char* kSettingsFileName = "StreamRadio.settings";
 
 
-StationsList::StationsList() : BObjectList<Station>() {}
+StationsList::StationsList()
+	: BObjectList<Station>()
+{
+}
 
 
 StationsList::~StationsList()
@@ -113,14 +116,16 @@ StationsList::Save()
 }
 
 
-RadioSettings::RadioSettings() : BMessage()
+RadioSettings::RadioSettings()
+	: BMessage()
 {
 	Stations = new StationsList();
 	_Load();
 }
 
 
-RadioSettings::RadioSettings(const RadioSettings& orig) : BMessage(orig)
+RadioSettings::RadioSettings(const RadioSettings& orig)
+	: BMessage(orig)
 {
 	Stations = new StationsList();
 	Stations->AddList(orig.Stations);

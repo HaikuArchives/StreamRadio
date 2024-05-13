@@ -29,7 +29,11 @@
 #define B_TRANSLATION_CONTEXT "RadioApp"
 
 
-RadioApp::RadioApp() : BApplication(kAppSignature), fArgvMessage(NULL) {}
+RadioApp::RadioApp()
+	: BApplication(kAppSignature),
+	  fArgvMessage(NULL)
+{
+}
 
 
 RadioApp::~RadioApp() {}

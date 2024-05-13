@@ -40,7 +40,9 @@ typedef ssize_t (StreamIO::*DataFunc)(const char* data, size_t size, int next);
 
 class DataFuncs {
 public:
-	DataFuncs() : fSize(10), fLast(-1)
+	DataFuncs()
+		: fSize(10),
+		  fLast(-1)
 	{
 		for (int i = 0; i < fSize; i++)
 			fFuncs[i] = NULL;
