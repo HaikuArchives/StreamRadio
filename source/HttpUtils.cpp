@@ -28,7 +28,11 @@
 
 class DataLimit : public BUrlProtocolListener, public BDataIO {
 public:
-	DataLimit(BDataIO* sink, size_t limit) : fSink(sink), fLimit(limit) {}
+	DataLimit(BDataIO* sink, size_t limit)
+		: fSink(sink),
+		  fLimit(limit)
+	{
+	}
 
 	ssize_t Write(const void* buffer, size_t size) override
 	{

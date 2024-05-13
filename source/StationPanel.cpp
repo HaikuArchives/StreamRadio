@@ -34,7 +34,9 @@
 
 
 StationPanel::StationPanel(MainWindow* mainWindow, bool expanded)
-	: BView("stationpanel", B_WILL_DRAW), fStationItem(NULL), fMainWindow(mainWindow)
+	: BView("stationpanel", B_WILL_DRAW),
+	  fStationItem(NULL),
+	  fMainWindow(mainWindow)
 {
 	SetResizingMode(B_FOLLOW_LEFT_RIGHT | B_FOLLOW_BOTTOM);
 	SetExplicitAlignment(BAlignment(B_ALIGN_USE_FULL_WIDTH, B_ALIGN_VERTICAL_UNSET));

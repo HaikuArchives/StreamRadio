@@ -204,7 +204,12 @@ private:
 
 
 BAdapterIO::BAdapterIO(int32 flags, bigtime_t timeout)
-	: fFlags(flags), fBuffer(NULL), fTotalSize(0), fOpened(false), fSeekSem(-1), fInputAdapter(NULL)
+	: fFlags(flags),
+	  fBuffer(NULL),
+	  fTotalSize(0),
+	  fOpened(false),
+	  fSeekSem(-1),
+	  fInputAdapter(NULL)
 {
 	CALLED();
 
@@ -433,7 +438,10 @@ BAdapterIO::_EvaluateWait(off_t pos, off_t size)
 }
 
 
-BInputAdapter::BInputAdapter(BAdapterIO* io) : fIO(io) {}
+BInputAdapter::BInputAdapter(BAdapterIO* io)
+	: fIO(io)
+{
+}
 
 
 BInputAdapter::~BInputAdapter() {}
