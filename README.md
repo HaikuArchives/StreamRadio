@@ -1,4 +1,4 @@
-#![icon](docs/icon.png)  StreamRadio
+# ![icon](docs/icon.png)  StreamRadio
 
 ![Screenshot](docs/screenshots/05_Station_Info.png)
 
