@@ -45,7 +45,8 @@
 
 
 MainWindow::MainWindow()
-	: BWindow(BRect(0, 0, 400, 200), B_TRANSLATE_SYSTEM_NAME("StreamRadio"), B_DOCUMENT_WINDOW, B_AUTO_UPDATE_SIZE_LIMITS),
+	: BWindow(BRect(0, 0, 400, 200), B_TRANSLATE_SYSTEM_NAME("StreamRadio"), B_DOCUMENT_WINDOW,
+		  B_AUTO_UPDATE_SIZE_LIMITS),
 	  fStationFinder(NULL)
 {
 	fSettings = &((RadioApp*)be_app)->Settings;
