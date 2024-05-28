@@ -337,4 +337,5 @@ StationListView::MouseUp(BPoint where)
 	}
 
 	fWhereDown = BPoint(-1, -1);
+	BListView::MouseUp(where);
 }
