@@ -393,8 +393,8 @@ StreamIO::_ProcessMeta()
 	msg->AddString("station", fStation->Name()->String());
 
 	int res = regcomp(&regex, "([^=]*)='(([^']|'[^;])*)';",
-		RE_ICASE | RE_DOT_NEWLINE | RE_DOT_NOT_NULL | RE_NO_BK_PARENS | RE_NO_BK_VBAR |
-			RE_BACKSLASH_ESCAPE_IN_LISTS);
+		RE_ICASE | RE_DOT_NEWLINE | RE_DOT_NOT_NULL | RE_NO_BK_PARENS | RE_NO_BK_VBAR
+			| RE_BACKSLASH_ESCAPE_IN_LISTS);
 
 	char* text = fMetaBuffer;
 	while ((res = regexec(&regex, text, 3, matches, 0)) == 0) {

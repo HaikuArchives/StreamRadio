@@ -175,8 +175,8 @@ StreamPlayer::_GetDecodedChunk(
 	StreamPlayer* player = (StreamPlayer*)cookie;
 	BMediaFile* fMediaFile = player->fMediaFile;
 
-	int64 reqFrames =
-		size / format.channel_count / (format.format & media_raw_audio_format::B_AUDIO_SIZE_MASK);
+	int64 reqFrames
+		= size / format.channel_count / (format.format & media_raw_audio_format::B_AUDIO_SIZE_MASK);
 	fMediaFile->TrackAt(0)->ReadFrames(buffer, &reqFrames, &player->fHeader, &player->fInfo);
 
 	if (player->fFlushCount++ > 1000) {

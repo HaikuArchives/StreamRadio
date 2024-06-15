@@ -30,8 +30,8 @@
 #define B_TRANSLATION_CONTEXT "StationFinderListenLive"
 
 
-const char* kGenreList =
-	"Top 40|top40\r\
+const char* kGenreList
+	= "Top 40|top40\r\
 Hot Adult Contemporary|hotac\r\
 Adult Contemporary|ac\r\
 Oldies/80s/90s|oldies\r\
@@ -42,8 +42,8 @@ Rock/Classic Rock|rock\r\
 Alternative|alternative\r\
 Chillout/Lounge|chillout";
 
-const char* kCountryList =
-	"Andorra|andorra\r\
+const char* kCountryList
+	= "Andorra|andorra\r\
 Armenia|armenia\r\
 Austria|austria\r\
 Azerbaijan|azerbaijan\r\
@@ -169,8 +169,8 @@ StationFinderListenLive::FindBy(
 	BString urlString(kBaseUrl);
 	strlwr((char*)searchFor);
 	int keywordIndex = Capability(capabilityIndex)->KeyWords()->IndexOf(searchFor);
-	BStringList* keywordAndPaths =
-		capabilityIndex ? &fGenreKeywordAndPath : &fCountryKeywordAndPath;
+	BStringList* keywordAndPaths
+		= capabilityIndex ? &fGenreKeywordAndPath : &fCountryKeywordAndPath;
 	BString path(keywordAndPaths->StringAt(keywordIndex));
 	path.Remove(0, path.FindFirst('|') + 1);
 	urlString << path << ".html";
@@ -230,8 +230,8 @@ StationFinderListenLive::ParseCountryReturn(BMallocIO* data, const char* searchF
 		"<td>\\s*<a\\s+href=\"([^\"]*)\">([^<]*)</a>([^<]|<[^/]|</[^t]|</"
 		"t[^d])*</td>\\s*"
 		"<td>([^<]*)</td>\\s*</tr>",
-		RE_ICASE | RE_DOT_NEWLINE | RE_DOT_NOT_NULL | RE_NO_BK_PARENS | RE_NO_BK_VBAR |
-			RE_BACKSLASH_ESCAPE_IN_LISTS);
+		RE_ICASE | RE_DOT_NEWLINE | RE_DOT_NOT_NULL | RE_NO_BK_PARENS | RE_NO_BK_VBAR
+			| RE_BACKSLASH_ESCAPE_IN_LISTS);
 
 	char* doc = (char*)data->Buffer();
 	off_t size;
@@ -324,8 +324,8 @@ StationFinderListenLive::ParseGenreReturn(BMallocIO* data, const char* searchFor
 		"<td>\\s*<a\\s+href=\"([^\"]*)\">([^<]*)</a>([^<]|<[^/]|</[^t]|</"
 		"t[^d])*</td>\\s*"
 		"</tr>",
-		RE_ICASE | RE_DOT_NEWLINE | RE_DOT_NOT_NULL | RE_NO_BK_PARENS | RE_NO_BK_VBAR |
-			RE_BACKSLASH_ESCAPE_IN_LISTS);
+		RE_ICASE | RE_DOT_NEWLINE | RE_DOT_NOT_NULL | RE_NO_BK_PARENS | RE_NO_BK_VBAR
+			| RE_BACKSLASH_ESCAPE_IN_LISTS);
 
 	char* doc = (char*)data->Buffer();
 	off_t size;

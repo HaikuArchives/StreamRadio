@@ -176,7 +176,7 @@ StationFinderService::RegisterSearchCapability(char* name, char* keywords, char*
 
 StationFinderWindow::StationFinderWindow(BWindow* parent)
 	: BWindow(
-		  BRect(0, 0, 300, 150), B_TRANSLATE("Find stations"), B_TITLED_WINDOW, B_CLOSE_ON_ESCAPE),
+		BRect(0, 0, 300, 150), B_TRANSLATE("Find stations"), B_TITLED_WINDOW, B_CLOSE_ON_ESCAPE),
 	  fCurrentService(NULL)
 {
 	fMessenger = new BMessenger(parent);
@@ -307,8 +307,8 @@ StationFinderWindow::MessageReceived(BMessage* msg)
 					dispatch->AddPointer("station", station);
 
 					if (fMessenger->SendMessage(dispatch) == B_OK) {
-						StationListViewItem* item =
-							(StationListViewItem*)fResultView->RemoveItem(index);
+						StationListViewItem* item
+							= (StationListViewItem*)fResultView->RemoveItem(index);
 						item->ClearStation();
 						delete item;
 					}
@@ -354,8 +354,8 @@ StationFinderWindow::MessageReceived(BMessage* msg)
 
 		case MSG_VISIT_SERVICE:
 		{
-			if (fCurrentService != NULL && fCurrentService->serviceHomePage != NULL &&
-				fCurrentService->serviceHomePage.IsValid())
+			if (fCurrentService != NULL && fCurrentService->serviceHomePage != NULL
+				&& fCurrentService->serviceHomePage.IsValid())
 				fCurrentService->serviceHomePage.OpenWithPreferredApplication(true);
 			break;
 		}

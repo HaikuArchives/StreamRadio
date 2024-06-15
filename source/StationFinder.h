@@ -98,7 +98,8 @@ public:
 	static StationFinderService* Instantiate();
 
 	virtual BObjectList<Station>* FindBy(
-		int capabilityIndex, const char* searchFor, BLooper* resultUpdateTarget) = 0;
+		int capabilityIndex, const char* searchFor, BLooper* resultUpdateTarget)
+		= 0;
 
 	// Provided by ancestor class
 	const char* Name() const { return serviceName.String(); }

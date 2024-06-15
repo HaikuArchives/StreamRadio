@@ -70,8 +70,8 @@ HttpUtils::CheckPort(BUrl url, BUrl* newUrl, uint32 flags)
 	else
 		port = 80;
 
-	BReference<const BNetworkAddressResolver> resolver =
-		BNetworkAddressResolver::Resolve(url.Host(), port, flags);
+	BReference<const BNetworkAddressResolver> resolver
+		= BNetworkAddressResolver::Resolve(url.Host(), port, flags);
 	if (resolver.Get() == NULL)
 		return B_NO_MEMORY;
 	status_t status = resolver->InitCheck();
@@ -97,8 +97,8 @@ HttpUtils::CheckPort(BUrl url, BUrl* newUrl, uint32 flags)
 
 	// If port number is 80, do not add it to the final URL
 	// Then, prepend the appropiate protocol
-	newUrlString =
-		ipAddress.ToString(ipAddress.Port() != 80).Prepend("://").Prepend(url.Protocol());
+	newUrlString
+		= ipAddress.ToString(ipAddress.Port() != 80).Prepend("://").Prepend(url.Protocol());
 	if (url.HasPath())
 		newUrlString.Append(url.Path());
 	newUrl->SetUrlString(newUrlString.String());

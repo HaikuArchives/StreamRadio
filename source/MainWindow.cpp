@@ -46,14 +46,14 @@
 
 MainWindow::MainWindow()
 	: BWindow(BRect(0, 0, 400, 200), B_TRANSLATE_SYSTEM_NAME("StreamRadio"), B_DOCUMENT_WINDOW,
-		  B_AUTO_UPDATE_SIZE_LIMITS),
+		B_AUTO_UPDATE_SIZE_LIMITS),
 	  fStationFinder(NULL)
 {
 	fSettings = &((RadioApp*)be_app)->Settings;
 
 	fAllowParallelPlayback = fSettings->GetAllowParallelPlayback();
-	fMenuParallelPlayback =
-		new BMenuItem(B_TRANSLATE("Allow parallel playback"), new BMessage(MSG_PARALLEL_PLAYBACK));
+	fMenuParallelPlayback = new BMenuItem(
+		B_TRANSLATE("Allow parallel playback"), new BMessage(MSG_PARALLEL_PLAYBACK));
 	fMenuParallelPlayback->SetMarked(fAllowParallelPlayback);
 
 	fMainMenu = new BMenuBar(Bounds(), "MainMenu");
@@ -194,8 +194,8 @@ MainWindow::MessageReceived(BMessage* message)
 
 		case MSG_CHECK:
 		{
-			StationListViewItem* stationItem =
-				fStationList->ItemAt(fStationList->CurrentSelection(0));
+			StationListViewItem* stationItem
+				= fStationList->ItemAt(fStationList->CurrentSelection(0));
 			if (stationItem != NULL) {
 				Station* station = stationItem->GetStation();
 				status_t stationStatus = station->Probe();

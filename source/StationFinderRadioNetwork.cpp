@@ -148,8 +148,8 @@ StationFinderRadioNetwork::FindBy(
 
 	BMessage parsedData;
 	BMallocIO* data = HttpUtils::GetAll(finalUrl);
-	if (data != NULL &&
-		BJson::Parse((const char*)data->Buffer(), data->BufferLength(), parsedData) == B_OK) {
+	if (data != NULL
+		&& BJson::Parse((const char*)data->Buffer(), data->BufferLength(), parsedData) == B_OK) {
 		delete data;
 
 		char* name;
@@ -248,8 +248,8 @@ StationFinderRadioNetwork::_CheckServer()
 {
 	// Just a quick check up on our cached server...if it exists.
 	BUrl cachedServerUrl(sCachedServerUrl);
-	if (!sCachedServerUrl.IsEmpty() &&
-		HttpUtils::CheckPort(cachedServerUrl, &cachedServerUrl, 0) == B_OK) {
+	if (!sCachedServerUrl.IsEmpty()
+		&& HttpUtils::CheckPort(cachedServerUrl, &cachedServerUrl, 0) == B_OK) {
 		// It's still there!
 		return B_OK;
 	}

@@ -51,8 +51,8 @@ StationPanel::StationPanel(MainWindow* mainWindow, bool expanded)
 
 	fGenre = new BTextControl("genre", B_TRANSLATE("Genre"), "-", new BMessage(MSG_CHG_GENRE));
 
-	fStationUrl =
-		new BTextControl("surl", B_TRANSLATE("Station URL"), "-", new BMessage(MSG_CHG_STATIONURL));
+	fStationUrl = new BTextControl(
+		"surl", B_TRANSLATE("Station URL"), "-", new BMessage(MSG_CHG_STATIONURL));
 
 	fVisitStation = new BButton("bnVisitStation", "", new BMessage(MSG_VISIT_STATION));
 	fVisitStation->SetIcon(Utils::ResourceBitmap(RES_BN_WEB));
@@ -118,8 +118,8 @@ StationPanel::SetStation(StationListViewItem* stationItem)
 
 		fStationItem = NULL;
 	} else {
-		if (stationItem->Player() != NULL &&
-			stationItem->Player()->State() == StreamPlayer::Playing) {
+		if (stationItem->Player() != NULL
+			&& stationItem->Player()->State() == StreamPlayer::Playing) {
 			fVolume->SetEnabled(true);
 			fVolume->SetValue(stationItem->Player()->Volume() * 100);
 		} else
@@ -154,8 +154,8 @@ StationPanel::SetStation(StationListViewItem* stationItem)
 void
 StationPanel::StateChanged(StreamPlayer::PlayState newState)
 {
-	if (fStationItem != NULL && fStationItem->Player() != NULL &&
-		fStationItem->Player()->State() == StreamPlayer::Playing) {
+	if (fStationItem != NULL && fStationItem->Player() != NULL
+		&& fStationItem->Player()->State() == StreamPlayer::Playing) {
 		fVolume->SetEnabled(true);
 		fVolume->SetValue(fStationItem->Player()->Volume() * 100);
 	} else {

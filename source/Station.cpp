@@ -158,8 +158,8 @@ Station::Save()
 	status = stationFile.WriteAttr(
 		"META:samplerate", B_INT32_TYPE, 0, &fSampleRate, sizeof(fSampleRate));
 	status = stationFile.WriteAttr("META:channels", B_INT32_TYPE, 0, &fChannels, sizeof(fChannels));
-	status =
-		stationFile.WriteAttr("META:framesize", B_INT32_TYPE, 0, &fFrameSize, sizeof(fFrameSize));
+	status
+		= stationFile.WriteAttr("META:framesize", B_INT32_TYPE, 0, &fFrameSize, sizeof(fFrameSize));
 	status = stationFile.WriteAttr("META:rating", B_INT32_TYPE, 0, &fRating, sizeof(fRating));
 	status = stationFile.WriteAttr(
 		"META:interval", B_INT32_TYPE, 0, &fMetaInterval, sizeof(fMetaInterval));
@@ -446,8 +446,8 @@ Station::Load(BString name, BEntry* entry)
 	status = file.ReadAttr(
 		"META:bitrate", B_INT32_TYPE, 0, &station->fBitRate, sizeof(station->fBitRate));
 
-	status =
-		file.ReadAttr("META:rating", B_INT32_TYPE, 0, &station->fRating, sizeof(station->fRating));
+	status = file.ReadAttr(
+		"META:rating", B_INT32_TYPE, 0, &station->fRating, sizeof(station->fRating));
 
 	status = file.ReadAttr(
 		"META:interval", B_INT32_TYPE, 0, &station->fMetaInterval, sizeof(station->fMetaInterval));
@@ -600,8 +600,8 @@ Station::LoadIndirectUrl(BString& shoutCastUrl)
 	 */
 
 	BUrl finalUrl = station->fStationUrl;
-	if ((!finalUrl.HasPort() || finalUrl.Port() == 80) &&
-		(!finalUrl.HasPath() || finalUrl.Path().IsEmpty() || finalUrl.Path() == "/")) {
+	if ((!finalUrl.HasPort() || finalUrl.Port() == 80)
+		&& (!finalUrl.HasPath() || finalUrl.Path().IsEmpty() || finalUrl.Path() == "/")) {
 		if (station->fName.IsEmpty())
 			station->SetName("New Station");
 	} else
@@ -679,8 +679,8 @@ Station::SetName(BString name)
 void
 Station::CleanName()
 {
-	if (fName.Compare("(#", 2) == 0 && fName.FindFirst(')') >= 0 &&
-		fName.FindFirst(')') < fName.Length())
+	if (fName.Compare("(#", 2) == 0 && fName.FindFirst(')') >= 0
+		&& fName.FindFirst(')') < fName.Length())
 		fName.Remove(0, fName.FindFirst(')') + 1).Trim();
 
 	fName.RemoveCharsSet("\\/#?");
