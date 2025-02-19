@@ -50,6 +50,12 @@
 #define RES_BN_SEARCH 10
 
 
+#if B_HAIKU_VERSION > B_HAIKU_VERSION_1_BETA_5
+typedef BObjectList<Station, true>	StationList;
+#else
+typedef BObjectList<Station>	StationList;
+#endif
+
 typedef class StationFinderService* (*InstantiateFunc)();
 
 
@@ -97,7 +103,7 @@ public:
 	static void RegisterSelf();
 	static StationFinderService* Instantiate();
 
-	virtual BObjectList<Station>* FindBy(
+	virtual StationList* FindBy(
 		int capabilityIndex, const char* searchFor, BLooper* resultUpdateTarget)
 		= 0;
 
@@ -114,7 +120,11 @@ protected:
 	BString serviceName;
 	BUrl serviceHomePage;
 	BBitmap* serviceLogo;
+#if B_HAIKU_VERSION > B_HAIKU_VERSION_1_BETA_5
+	BObjectList<FindByCapability, true> findByCapabilities;
+#else
 	BObjectList<FindByCapability> findByCapabilities;
+#endif
 
 	// Helper functions
 	BBitmap* RetrieveLogo(BUrl url);

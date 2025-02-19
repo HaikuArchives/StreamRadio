@@ -48,7 +48,11 @@ IconLookup::IconLookup(Station* station, BUrl iconUrl)
 StationFinderRadioNetwork::StationFinderRadioNetwork()
 	: StationFinderService(),
 	  fIconLookupThread(-1),
+#if B_HAIKU_VERSION > B_HAIKU_VERSION_1_BETA_5
+	  fIconLookupList(100)
+#else
 	  fIconLookupList(100, true)
+#endif
 {
 	serviceName.SetTo(B_TRANSLATE("Community Radio Browser"));
 	serviceHomePage.SetUrlString("https://www.radio-browser.info");
@@ -84,7 +88,7 @@ StationFinderRadioNetwork::RegisterSelf()
 }
 
 
-BObjectList<Station>*
+StationList*
 StationFinderRadioNetwork::FindBy(
 	int capabilityIndex, const char* searchFor, BLooper* resultUpdateTarget)
 {
@@ -93,7 +97,7 @@ StationFinderRadioNetwork::FindBy(
 	fIconLookupList.MakeEmpty(true);
 	fIconLookupNotify = resultUpdateTarget;
 
-	BObjectList<Station>* result = new BObjectList<Station>();
+	StationList* result = new StationList();
 	if (result == NULL)
 		return result;
 

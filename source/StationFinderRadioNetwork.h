@@ -39,7 +39,7 @@ public:
 	static void RegisterSelf();
 	static StationFinderService* Instantiate();
 
-	virtual BObjectList<Station>* FindBy(
+	virtual StationList* FindBy(
 		int capabilityIndex, const char* searchFor, BLooper* resultUpdateTarget);
 
 private:
@@ -52,7 +52,11 @@ private:
 	static BString sCachedServerUrl;
 
 	thread_id fIconLookupThread;
+#if B_HAIKU_VERSION > B_HAIKU_VERSION_1_BETA_5
+	BObjectList<IconLookup, true> fIconLookupList;
+#else
 	BObjectList<IconLookup> fIconLookupList;
+#endif
 	BLooper* fIconLookupNotify;
 };
 
