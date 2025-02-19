@@ -51,9 +51,9 @@
 
 
 #if B_HAIKU_VERSION > B_HAIKU_VERSION_1_BETA_5
-typedef BObjectList<Station, true>	StationList;
+typedef BObjectList<Station, true> StationList;
 #else
-typedef BObjectList<Station>	StationList;
+typedef BObjectList<Station> StationList;
 #endif
 
 typedef class StationFinderService* (*InstantiateFunc)();
