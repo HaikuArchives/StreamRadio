@@ -114,7 +114,11 @@ StationFinderService::StationFinderService()
 	: serviceName("unknown"),
 	  serviceHomePage(""),
 	  serviceLogo(NULL),
+#if B_HAIKU_VERSION > B_HAIKU_VERSION_1_BETA_5
+	  findByCapabilities(5)
+#else
 	  findByCapabilities(5, true)
+#endif
 {
 }
 
@@ -451,7 +455,7 @@ StationFinderWindow::DoSearch(const char* text)
 
 	be_app->SetCursor(new BCursor(B_CURSOR_ID_PROGRESS));
 
-	BObjectList<Station>* result = fCurrentService->FindBy(fDdSearchBy->Value(), text, this);
+	StationList* result = fCurrentService->FindBy(fDdSearchBy->Value(), text, this);
 	if (result != NULL) {
 		for (int32 i = 0; i < result->CountItems(); i++)
 			fResultView->AddItem(new StationListViewItem(result->ItemAt(i)));

@@ -154,7 +154,7 @@ StationFinderListenLive::~StationFinderListenLive()
 }
 
 
-BObjectList<Station>*
+StationList*
 StationFinderListenLive::FindBy(
 	int capabilityIndex, const char* searchFor, BLooper* resultUpdateTarget)
 {
@@ -164,7 +164,7 @@ StationFinderListenLive::FindBy(
 	fPlsLookupList.MakeEmpty(false);
 	fLookupNotify = resultUpdateTarget;
 
-	BObjectList<Station>* result = NULL;
+	StationList* result = NULL;
 
 	BString urlString(kBaseUrl);
 	strlwr((char*)searchFor);
@@ -202,10 +202,14 @@ StationFinderListenLive::FindBy(
 }
 
 
-BObjectList<Station>*
+StationList*
 StationFinderListenLive::ParseCountryReturn(BMallocIO* data, const char* searchFor)
 {
-	BObjectList<Station>* result = new BObjectList<Station>(20, true);
+#if B_HAIKU_VERSION > B_HAIKU_VERSION_1_BETA_5
+	StationList* result = new StationList(20);
+#else
+	StationList* result = new StationList(20, true);
+#endif
 	if (result == NULL)
 		return result;
 
@@ -286,10 +290,14 @@ StationFinderListenLive::ParseCountryReturn(BMallocIO* data, const char* searchF
 }
 
 
-BObjectList<Station>*
+StationList*
 StationFinderListenLive::ParseGenreReturn(BMallocIO* data, const char* searchFor)
 {
-	BObjectList<Station>* result = new BObjectList<Station>(20, true);
+#if B_HAIKU_VERSION > B_HAIKU_VERSION_1_BETA_5
+	StationList* result = new StationList(20);
+#else
+	StationList* result = new StationList(20, true);
+#endif
 	if (result == NULL)
 		return result;
 

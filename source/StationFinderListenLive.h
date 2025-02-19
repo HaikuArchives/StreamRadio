@@ -31,11 +31,11 @@ public:
 	static void RegisterSelf();
 	static StationFinderService* Instantiate();
 
-	virtual BObjectList<Station>* FindBy(
+	virtual StationList* FindBy(
 		int capabilityIndex, const char* searchFor, BLooper* resultUpdateTarget);
 
-	BObjectList<Station>* ParseCountryReturn(BMallocIO* data, const char* country);
-	BObjectList<Station>* ParseGenreReturn(BMallocIO* data, const char* genre);
+	StationList* ParseCountryReturn(BMallocIO* data, const char* country);
+	StationList* ParseGenreReturn(BMallocIO* data, const char* genre);
 
 private:
 	static int32 _PlsLookupFunc(void* data);
