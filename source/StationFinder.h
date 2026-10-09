@@ -23,7 +23,6 @@
 #include <vector>
 
 #include <GridLayout.h>
-#include <private/netservices/HttpRequest.h>
 #include <Messenger.h>
 #include <ObjectList.h>
 #include <OptionPopUp.h>
@@ -31,6 +30,7 @@
 #include <StringList.h>
 #include <TextControl.h>
 #include <Window.h>
+#include <private/netservices/HttpRequest.h>
 
 #include "Station.h"
 #include "StationListView.h"
@@ -60,33 +60,40 @@ typedef class StationFinderService* (*InstantiateFunc)();
 
 class StationFinderEntry {
 public:
-	StationFinderEntry() { };
-	StationFinderEntry(BString* name, InstantiateFunc instantiateFunc) 
+	StationFinderEntry(){};
+	StationFinderEntry(BString* name, InstantiateFunc instantiateFunc)
 		: Name(name->String())
 	{
 		this->instantiate = instantiateFunc;
-	}		
-	BString 				Name;
-	StationFinderService*   Get() { return instance != NULL ? instance : instantiate(); }
+	}
+	BString Name;
+	StationFinderService* Get() { return instance != NULL ? instance : instantiate(); }
+
 private:
-	InstantiateFunc 		instantiate;
-	StationFinderService*	instance = NULL;
+	InstantiateFunc instantiate;
+	StationFinderService* instance = NULL;
 };
 
 
 class StationFinderServices : public BObjectList<StationFinderEntry, true> {
 public:
-	StationFinderServices() : BObjectList<StationFinderEntry, true>(32) {};
+	StationFinderServices()
+		: BObjectList<StationFinderEntry, true>(32){};
 	~StationFinderServices() { MakeEmpty(); };
 
-	void Register(BString* serviceName, InstantiateFunc instantiate) { 
-		AddItem(new StationFinderEntry(serviceName, instantiate)); 
+	void Register(BString* serviceName, InstantiateFunc instantiate)
+	{
+		AddItem(new StationFinderEntry(serviceName, instantiate));
 	}
-	BString* Name(int index)  { return &ItemAt(index)->Name; } 
+	BString* Name(int index) { return &ItemAt(index)->Name; }
 	StationFinderService* Instantiate(int index) { return ItemAt(index)->Get(); }
 	int32 IndexOf(BString* name) { return BinarySearchIndexByKey<BString>(*name, CompareName); }
+
 private:
-	static int CompareName(const BString* name, const StationFinderEntry* entry) { return name->Compare(entry->Name); }
+	static int CompareName(const BString* name, const StationFinderEntry* entry)
+	{
+		return name->Compare(entry->Name);
+	}
 };
 
 static StationFinderServices stationFinderServices;
@@ -112,71 +119,67 @@ class StationFinderService {
 
 public:
 	// Overridden in specific StationFinder implementations
-									StationFinderService();
-	virtual 						~StationFinderService();
+	StationFinderService();
+	virtual ~StationFinderService();
 
-	static void 					RegisterSelf();
-	static StationFinderService* 	Instantiate();
+	static void RegisterSelf();
+	static StationFinderService* Instantiate();
 
-	virtual StationList* 			FindBy(
-			int capabilityIndex, const char* searchFor, BLooper* resultUpdateTarget)
-			= 0;
+	virtual StationList* FindBy(
+		int capabilityIndex, const char* searchFor, BLooper* resultUpdateTarget)
+		= 0;
 
 	// Provided by ancestor class
-	BString* 						Name() 
-									{ return &serviceName; }
+	BString* Name() { return &serviceName; }
 
-	int 							CountCapabilities() const 
-									{ return findByCapabilities.CountItems(); }
-	FindByCapability* 				Capability(int index) const 
-									{ return findByCapabilities.ItemAt(index); }
+	int CountCapabilities() const { return findByCapabilities.CountItems(); }
+	FindByCapability* Capability(int index) const { return findByCapabilities.ItemAt(index); }
 
-	static void 					Register(BString* name, InstantiateFunc instantiate);
+	static void Register(BString* name, InstantiateFunc instantiate);
 
 protected:
 	// To be filled by specific StationFinder implementations
-    BString 						serviceName;
-	BUrl 							serviceHomePage;
-	BBitmap* 						serviceLogo;
+	BString serviceName;
+	BUrl serviceHomePage;
+	BBitmap* serviceLogo;
 #if B_HAIKU_VERSION > B_HAIKU_VERSION_1_BETA_5
-	BObjectList<FindByCapability, true> 
-									findByCapabilities;
+	BObjectList<FindByCapability, true> findByCapabilities;
 #else
-	BObjectList<FindByCapability> 	findByCapabilities;
+	BObjectList<FindByCapability> findByCapabilities;
 #endif
 
 	// Helper functions
-	BBitmap* 						RetrieveLogo(BUrl* url);
-	uint32 							RegisterSearchCapability(const char* name);
-	uint32 							RegisterSearchCapability(const char* name, BStringList* keyWords);
+	BBitmap* RetrieveLogo(BUrl* url);
+	uint32 RegisterSearchCapability(const char* name);
+	uint32 RegisterSearchCapability(const char* name, BStringList* keyWords);
 };
 
 class StationFinderWindow : public BWindow {
 public:
-									StationFinderWindow(BWindow* parent);
-	virtual 						~StationFinderWindow();
+	StationFinderWindow(BWindow* parent);
+	virtual ~StationFinderWindow();
 
-	void 							MessageReceived(BMessage* msg);
-	virtual bool 					QuitRequested();
+	void MessageReceived(BMessage* msg);
+	virtual bool QuitRequested();
 
-	void 							SelectService(int index);
-	void 							SelectCapability(int index);
-	void 							DoSearch(const char* text);
+	void SelectService(int index);
+	void SelectCapability(int index);
+	void DoSearch(const char* text);
 
 private:
-	StationFinderService* 			fCurrentService;
+	StationFinderService* fCurrentService;
 
-	BMessenger*						fMessenger;
-	BTextControl*					fTxSearch;
-	BOptionPopUp*					fKwSearch;
-	BButton*						fBnSearch;
-	BOptionPopUp*					fDdServices;
-	BButton*						fBnVisit;
-	BOptionPopUp*					fDdSearchBy;
-	StationListView* 				fResultView;
-	BButton* 						fBnAdd;
+	BMessenger* fMessenger;
+	BTextControl* fTxSearch;
+	BOptionPopUp* fKwSearch;
+	BButton* fBnSearch;
+	BOptionPopUp* fDdServices;
+	BButton* fBnVisit;
+	BOptionPopUp* fDdSearchBy;
+	StationListView* fResultView;
+	BButton* fBnAdd;
 
-	BGridLayout* 					fSearchGrid;
+	BGridLayout* fSearchGrid;
 };
 
 

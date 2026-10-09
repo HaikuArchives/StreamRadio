@@ -17,12 +17,12 @@
  */
 
 
-#include <DataIO.h>
-#include <NetworkAddressResolver.h>
-#include <private/shared/Json.h>
-#include <Roster.h>
 #include <AppFileInfo.h>
 #include <Application.h>
+#include <DataIO.h>
+#include <NetworkAddressResolver.h>
+#include <Roster.h>
+#include <private/shared/Json.h>
 
 #include "Debug.h"
 #include "HttpUtils.h"
@@ -62,8 +62,7 @@ private:
 };
 
 
-BString
-HttpUtils::jsonType("application/json");
+BString HttpUtils::jsonType("application/json");
 
 
 /**
@@ -110,9 +109,9 @@ HttpUtils::GetAll(BUrl* url, BHttpHeaders* responseHeaders, bigtime_t timeOut, B
 	status_t status;
 	wait_for_thread(threadId, &status);
 
-	const BHttpResult& result	= dynamic_cast<const BHttpResult&>(request->Result());
-	int32 statusCode			= result.StatusCode();
-	size_t bufferLen			= data->BufferLength();
+	const BHttpResult& result = dynamic_cast<const BHttpResult&>(request->Result());
+	int32 statusCode = result.StatusCode();
+	size_t bufferLen = data->BufferLength();
 	if (!(statusCode == 0 || request->IsSuccessStatusCode(statusCode)) || bufferLen == 0) {
 		delete data;
 		data = NULL;
@@ -135,90 +134,83 @@ HttpUtils::GetAll(BUrl* url, BHttpHeaders* responseHeaders, bigtime_t timeOut, B
  */
 class JsonPathExtractor : public BJsonEventListener {
 public:
-
 	/**
-	* Listens to JSON parsing events and extracts specific path
-	* @param path          Dot-separated location of element in JSON hierarchy
-	*					   [].{}.address.{}.street will get street within an
-	*					   address object within the unnamed objects of the array 
-	* @param result        Initialized BStringList to capture all occurrences
-	*/	
-	JsonPathExtractor(BString* path, BStringList* result) : 
-			BJsonEventListener(),
-			pathElements(true) 
+	 * Listens to JSON parsing events and extracts specific path
+	 * @param path          Dot-separated location of element in JSON hierarchy
+	 *					   [].{}.address.{}.street will get street within an
+	 *					   address object within the unnamed objects of the array
+	 * @param result        Initialized BStringList to capture all occurrences
+	 */
+	JsonPathExtractor(BString* path, BStringList* result)
+		: BJsonEventListener(),
+		  pathElements(true)
 	{
 		path->Split(".", true, pathElements);
 		this->result = result;
 	}
-	
-	~JsonPathExtractor() {
-		pathElements.MakeEmpty();
-	}
-	
-	virtual bool Handle(const BJsonEvent& event) {
+
+	~JsonPathExtractor() { pathElements.MakeEmpty(); }
+
+	virtual bool Handle(const BJsonEvent& event)
+	{
 		switch (event.EventType()) {
-			case B_JSON_NUMBER :
-		    case B_JSON_TRUE :
-			case B_JSON_FALSE :
-			case B_JSON_NULL	 :
-				if (awaitValue) 
+			case B_JSON_NUMBER:
+			case B_JSON_TRUE:
+			case B_JSON_FALSE:
+			case B_JSON_NULL:
+				if (awaitValue)
 					awaitValue = false;
 				if (offIndex > 0)
 					offIndex--;
 				else
 					index--;
 				break;
-				
-			case B_JSON_STRING :
+
+			case B_JSON_STRING:
 				if (awaitValue) {
 					result->Add(event.Content());
 					awaitValue = false;
-				} 
+				}
 				if (offIndex > 0)
 					offIndex--;
-				else 
+				else
 					index--;
 				break;
-			
-			case B_JSON_OBJECT_START :
-				if (index < pathElements.CountStrings() && 
-					pathElements.StringAt(index) == "{}" &&
-					offIndex == 0)
+
+			case B_JSON_OBJECT_START:
+				if (index < pathElements.CountStrings() && pathElements.StringAt(index) == "{}"
+					&& offIndex == 0)
 					index++;
-				else 
+				else
 					offIndex++;
 				break;
-				
-			case B_JSON_OBJECT_END :
+
+			case B_JSON_OBJECT_END:
 				if (offIndex > 0)
 					offIndex--;
-				else 
+				else
 					index--;
 				break;
-				
-			case B_JSON_OBJECT_NAME :
-				if (index < pathElements.CountStrings() && 
-					pathElements.StringAt(index) == event.Content() &&
-					offIndex == 0)
-				{
+
+			case B_JSON_OBJECT_NAME:
+				if (index < pathElements.CountStrings()
+					&& pathElements.StringAt(index) == event.Content() && offIndex == 0) {
 					index++;
 					if (index == pathElements.CountStrings())
 						awaitValue = true;
-				}
-				else 
+				} else
 					offIndex++;
 				break;
-				
-			case B_JSON_ARRAY_START :
-				if (index < pathElements.CountStrings() && 
-					pathElements.StringAt(index) == "[]" &&
-					offIndex == 0)
+
+			case B_JSON_ARRAY_START:
+				if (index < pathElements.CountStrings() && pathElements.StringAt(index) == "[]"
+					&& offIndex == 0)
 					index++;
-				else 
+				else
 					offIndex++;
 				break;
-				
-			case B_JSON_ARRAY_END :
+
+			case B_JSON_ARRAY_END:
 				if (offIndex > 0)
 					offIndex--;
 				else {
@@ -228,21 +220,22 @@ public:
 		}
 		return true;
 	}
-	
-	virtual void HandleError(status_t status, int32 line, const char* message) { 
+
+	virtual void HandleError(status_t status, int32 line, const char* message)
+	{
 		printf("JsonParser line %d: %s", line, message);
 	}
-	virtual void Complete() { }
-	
+	virtual void Complete() {}
+
 private:
-	int index 					= 0;
-	int offIndex 				= 0;
-	bool awaitValue				= false;
+	int index = 0;
+	int offIndex = 0;
+	bool awaitValue = false;
 	BString name;
-	BStringList* result 		= NULL;
-	
+	BStringList* result = NULL;
+
 	// path like "[].{}.name" extracts all elements called "name" in root array of unnamed objects
-	BStringList pathElements;		
+	BStringList pathElements;
 };
 
 /**
@@ -250,58 +243,60 @@ private:
  * @param url           REST-Url to request
  * @param path          Dot-separated location of element in JSON hierarchy
  * 						[].{}.address.{}.street will get street within an
- *						address object within the unnamed objects of the array 
+ *						address object within the unnamed objects of the array
  * @param contentType   In/Out: Received headers
  * @param timeout		Timeout of request in ms, default set to 3 seconds
  * @return              BStringList* filled with all occurrences of element described by path
  */
-BMessage* 
-HttpUtils::GetMsgFromREST(BUrl* url, BHttpHeaders* responseHeaders, bigtime_t timeOut) {
+BMessage*
+HttpUtils::GetMsgFromREST(BUrl* url, BHttpHeaders* responseHeaders, bigtime_t timeOut)
+{
 	BMallocIO* json = GetAll(url, responseHeaders, timeOut, &jsonType, 0);
 	if (json == NULL)
 		return NULL;
-		
+
 	BMessage* data = new BMessage();
-	
+
 	status_t status = BJson::Parse((const char*)json->Buffer(), json->BufferLength(), *data);
 	delete json;
-	
+
 	if (status != B_OK) {
 		delete data;
 		data = NULL;
 	}
 
 	return data;
-} 
+}
 
 /**
  * Helper to make retrieve list of occurrences of specific element in JSON
  * @param url            	REST-Url to request
  * @param path           	Dot-separated location of element in JSON hierarchy
  * 							[].{}.address.{}.street will get street within an
- *							address object within the unnamed objects of the root array 
+ *							address object within the unnamed objects of the root array
  * @param responseHeaders	Unless NULL, populated with HTTP headers of response
  * @param contentType   	In/Out: Received headers
  * @param timeout			Timeout of request in ms, default set to 3 seconds
  * @return              	BStringList* filled with all occurrences of element described by path
  */
-BStringList* 
-HttpUtils::GetStringsFromREST(BUrl* url, BString* path, BHttpHeaders* responseHeaders, 
-		bigtime_t timeout) {
+BStringList*
+HttpUtils::GetStringsFromREST(
+	BUrl* url, BString* path, BHttpHeaders* responseHeaders, bigtime_t timeout)
+{
 	BMallocIO* json = GetAll(url, responseHeaders, timeout, &jsonType, 0);
 	if (json == NULL)
 		return NULL;
-		
+
 	if (json->BufferLength() == 0) {
 		delete json;
 		return NULL;
 	}
-		
+
 	BStringList* result = new BStringList();
 	JsonPathExtractor extractor(path, result);
 	BJson::Parse(json, &extractor);
 	delete json;
-	
+
 	if (result->IsEmpty()) {
 		delete result;
 		result = NULL;
@@ -337,8 +332,3 @@ HttpUtils::UserAgent()
 
 	return sUserAgent;
 }
-
-
-
-
-

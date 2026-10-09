@@ -26,7 +26,6 @@
 #include <NetworkAddressResolver.h>
 
 
-
 #include "HttpUtils.h"
 
 
@@ -46,7 +45,8 @@ IconLookup::IconLookup(Station* station, BUrl iconUrl)
 
 
 BStringList*
-StationFinderRadioNetwork::_GetKeywords(const char* path, int32 minStations) {
+StationFinderRadioNetwork::_GetKeywords(const char* path, int32 minStations)
+{
 	BString keywordUrlString(sBaseUrl);
 	keywordUrlString.Append(path);
 	BUrl keywordUrl(keywordUrlString, false);
@@ -57,7 +57,8 @@ StationFinderRadioNetwork::_GetKeywords(const char* path, int32 minStations) {
 		char* name;
 		uint32 type;
 		int32 count;
-		for (int32 index = 0; parsedData->GetInfo(B_MESSAGE_TYPE, index, &name, &type, &count) == B_OK; index++) {
+		for (int32 index = 0;
+			 parsedData->GetInfo(B_MESSAGE_TYPE, index, &name, &type, &count) == B_OK; index++) {
 			BMessage keywordMessage;
 			if (parsedData->FindMessage(name, &keywordMessage) == B_OK) {
 				const char* keyword = keywordMessage.FindString("name");
@@ -88,33 +89,33 @@ StationFinderRadioNetwork::StationFinderRadioNetwork()
 
 	// Register different search capabilities
 	searchCapabilityName = RegisterSearchCapability("Name");
-	
+
 	// Tag Search (dropdown)
 	keywords = _GetKeywords("json/tags?limit=1000000&hidebroken=true", 20);
 	if (keywords != NULL) {
 		searchCapabilityTag = RegisterSearchCapability("Tag", keywords);
 		delete keywords;
 	}
-	
+
 	// Language Search (dropdown)
 	keywords = _GetKeywords("json/languages?limit=1000000&hidebroken=true", 20);
 	if (keywords != NULL) {
 		searchCapabilityLanguage = RegisterSearchCapability("Language", keywords);
 		delete keywords;
 	}
-	
+
 	keywords = _GetKeywords("json/countries?limit=1000000&hidebroken=true", 10);
 	if (keywords != NULL) {
 		searchCapabilityCountry = RegisterSearchCapability("Country", keywords);
 		delete keywords;
 	}
-	
+
 	keywords = _GetKeywords("json/codecs?limit=1000000&hidebroken=true", 10);
 	if (keywords != NULL && !keywords->IsEmpty()) {
 		searchCapabilityCodec = RegisterSearchCapability("Codec", keywords);
 		delete keywords;
 	}
-	
+
 	searchCapabilityUuid = RegisterSearchCapability("Unique identifier");
 }
 
@@ -136,7 +137,8 @@ StationFinderRadioNetwork::Instantiate()
 void
 StationFinderRadioNetwork::RegisterSelf()
 {
-	Register(new BString(B_TRANSLATE(serviceNameInternal)), &StationFinderRadioNetwork::Instantiate);
+	Register(
+		new BString(B_TRANSLATE(serviceNameInternal)), &StationFinderRadioNetwork::Instantiate);
 }
 
 
@@ -152,7 +154,7 @@ StationFinderRadioNetwork::FindBy(
 	StationList* result = new StationList();
 	if (result == NULL)
 		return result;
-	
+
 	BString urlString(sBaseUrl);
 
 	// Add the format and station section...
@@ -160,15 +162,15 @@ StationFinderRadioNetwork::FindBy(
 
 	if (capabilityIndex == searchCapabilityName)  // Name search
 		urlString.Append("byname/");
-	else if (capabilityIndex == searchCapabilityTag) // Tag search
+	else if (capabilityIndex == searchCapabilityTag)  // Tag search
 		urlString.Append("bytag/");
-	else if (capabilityIndex == searchCapabilityLanguage) // Language search
+	else if (capabilityIndex == searchCapabilityLanguage)  // Language search
 		urlString.Append("bylanguage/");
-	else if (capabilityIndex == searchCapabilityCountry) // Country search
+	else if (capabilityIndex == searchCapabilityCountry)  // Country search
 		urlString.Append("bycountry/");
-	else if (capabilityIndex == searchCapabilityCodec) // Codec search
+	else if (capabilityIndex == searchCapabilityCodec)	// Codec search
 		urlString.Append("bycodec/");
-	else if (capabilityIndex == searchCapabilityUuid) // Unique identifier search
+	else if (capabilityIndex == searchCapabilityUuid)  // Unique identifier search
 		urlString.Append("byuuid/");
 	else  // A very bad kind of search? Just do a name search...
 		urlString.Append("byname/");
@@ -185,7 +187,7 @@ StationFinderRadioNetwork::FindBy(
 		uint32 type;
 		int32 count;
 		for (int32 index = 0;
-			parsedData->GetInfo(B_MESSAGE_TYPE, index, &name, &type, &count) == B_OK; index++) {
+			 parsedData->GetInfo(B_MESSAGE_TYPE, index, &name, &type, &count) == B_OK; index++) {
 			BMessage stationMessage;
 			if (parsedData->FindMessage(name, &stationMessage) == B_OK) {
 				Station* station = new Station("unknown");

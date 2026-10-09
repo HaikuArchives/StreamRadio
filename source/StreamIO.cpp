@@ -79,8 +79,8 @@ StreamIO::StreamIO(Station* station, BLooper* metaListener)
 	// IP's should be small, anyway.
 
 	// if (url.Protocol() == "https") {
-		fReq = dynamic_cast<BHttpRequest*>(
-			BUrlProtocolRoster::MakeRequest(url.UrlString().String(), this, this));
+	fReq = dynamic_cast<BHttpRequest*>(
+		BUrlProtocolRoster::MakeRequest(url.UrlString().String(), this, this));
 	/*
 		} else {
 		BUrl* newUrl = new BUrl();

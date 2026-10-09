@@ -23,15 +23,15 @@ FindByCapability::FindByCapability(const char* name)
 
 
 FindByCapability::FindByCapability(const char* name, BStringList* keyWords)
-    : FindByCapability(name)
+	: FindByCapability(name)
 {
 	fKeywords.Add(*keyWords);
 }
 
-FindByCapability::FindByCapability(const char* name, char* keyWords, char* delimiter) 
-    : FindByCapability(name)
+FindByCapability::FindByCapability(const char* name, char* keyWords, char* delimiter)
+	: FindByCapability(name)
 {
-    BString tmp(keyWords);
+	BString tmp(keyWords);
 	tmp.Split(delimiter, true, fKeywords);
 }
 
@@ -84,7 +84,7 @@ StationFinderService::RetrieveLogo(BUrl* url)
 }
 
 
-uint32 
+uint32
 StationFinderService::RegisterSearchCapability(const char* name)
 {
 	FindByCapability* newCapability = new FindByCapability(name);
@@ -96,7 +96,7 @@ StationFinderService::RegisterSearchCapability(const char* name)
 
 
 uint32
-StationFinderService::RegisterSearchCapability(const char* name, BStringList* keywords) 
+StationFinderService::RegisterSearchCapability(const char* name, BStringList* keywords)
 {
 	FindByCapability* newCapability = new FindByCapability(name, keywords);
 	if (findByCapabilities.AddItem(newCapability))

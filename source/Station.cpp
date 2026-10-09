@@ -272,8 +272,8 @@ Station::Probe()
 	// of streams using HTTPS and load balancing between two or more different
 	// IP's should be small, anyway.
 
-	//if (fStreamUrl.Protocol() == "https") {
-		buffer = HttpUtils::GetAll(&fStreamUrl, &headers, 2 * 1000 * 1000, &contentType, 4096);
+	// if (fStreamUrl.Protocol() == "https") {
+	buffer = HttpUtils::GetAll(&fStreamUrl, &headers, 2 * 1000 * 1000, &contentType, 4096);
 	/*
 	} else {
 		BUrl resolvedUrl;

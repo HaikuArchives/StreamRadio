@@ -20,10 +20,10 @@
 
 #include <DataIO.h>
 #include <HttpRequest.h>
+#include <ObjectList.h>
 #include <Socket.h>
 #include <StringList.h>
 #include <Url.h>
-#include <ObjectList.h>
 
 using namespace BPrivate::Network;
 
@@ -31,18 +31,18 @@ using namespace BPrivate::Network;
 
 class HttpUtils {
 public:
-	static BString			jsonType;
-	static BMallocIO* 		GetAll(BUrl* url, BHttpHeaders* responseHeaders = NULL, 
-								    bigtime_t timeOut = HTTP_DEFAULT_TIMEOUT,
-								    BString* contentType = NULL, size_t sizeLimit = 0);
-	static BMessage*		GetMsgFromREST(BUrl* url, BHttpHeaders* responseHeaders = NULL, 
-									bigtime_t timeOut = HTTP_DEFAULT_TIMEOUT);
-	static BStringList* 	GetStringsFromREST(BUrl* url, BString* path, 
-									BHttpHeaders* responseHeaders = NULL, 
-									bigtime_t timeout = HTTP_DEFAULT_TIMEOUT); 
-	static const char*		UserAgent();
+	static BString jsonType;
+	static BMallocIO* GetAll(BUrl* url, BHttpHeaders* responseHeaders = NULL,
+		bigtime_t timeOut = HTTP_DEFAULT_TIMEOUT, BString* contentType = NULL,
+		size_t sizeLimit = 0);
+	static BMessage* GetMsgFromREST(
+		BUrl* url, BHttpHeaders* responseHeaders = NULL, bigtime_t timeOut = HTTP_DEFAULT_TIMEOUT);
+	static BStringList* GetStringsFromREST(BUrl* url, BString* path,
+		BHttpHeaders* responseHeaders = NULL, bigtime_t timeout = HTTP_DEFAULT_TIMEOUT);
+	static const char* UserAgent();
+
 private:
-	static char				sUserAgent[50];
+	static char sUserAgent[50];
 };
 
 

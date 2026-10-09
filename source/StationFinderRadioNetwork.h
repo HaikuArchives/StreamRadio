@@ -43,8 +43,8 @@ public:
 		int capabilityIndex, const char* searchFor, BLooper* resultUpdateTarget);
 
 private:
-    static const char* serviceNameInternal;
-	
+	static const char* serviceNameInternal;
+
 	static BStringList* _GetKeywords(const char* path, int32 minStations);
 	static int32 _IconLookupFunc(void* data);
 	void _WaitForIconLookupThread();
@@ -53,14 +53,14 @@ private:
 	static BString sBaseUrl;
 
 	thread_id fIconLookupThread;
-	
-	int searchCapabilityName 		= -1;
-	int searchCapabilityTag  		= -1;
-	int searchCapabilityLanguage	= -1;
-	int searchCapabilityCountry		= -1;
-	int searchCapabilityCodec 		= -1;
-	int searchCapabilityUuid		= -1;
-	
+
+	int searchCapabilityName = -1;
+	int searchCapabilityTag = -1;
+	int searchCapabilityLanguage = -1;
+	int searchCapabilityCountry = -1;
+	int searchCapabilityCodec = -1;
+	int searchCapabilityUuid = -1;
+
 #if B_HAIKU_VERSION > B_HAIKU_VERSION_1_BETA_5
 	BObjectList<IconLookup, true> fIconLookupList;
 #else

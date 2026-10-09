@@ -106,9 +106,8 @@ RadioApp::AboutRequested()
 {
 	BAboutWindow* about = new BAboutWindow(B_TRANSLATE_SYSTEM_NAME("StreamRadio"), kAppSignature);
 
-	const char* kAuthors[] = {"Fishpond", "Humdinger", "Jacob Secunda", 
-							  "Javier Steinaker", "Adrien Destugues", 
-							  "Máximo Castañeda", "Korli", "Jérôme Duval", NULL};
+	const char* kAuthors[] = {"Fishpond", "Humdinger", "Jacob Secunda", "Javier Steinaker",
+		"Adrien Destugues", "Máximo Castañeda", "Korli", "Jérôme Duval", NULL};
 
 	const char* kCopyright = "The HaikuArchives team";
 
