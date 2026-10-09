@@ -30,11 +30,7 @@
 
 class Utils {
 public:
-	Utils(){};
-	virtual ~Utils(){};
-
 	static BBitmap* ResourceBitmap(int32 id);
-	static const char* UserAgent();
 };
 
 

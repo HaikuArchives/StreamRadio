@@ -21,7 +21,6 @@
 
 #include "RadioApp.h"
 #include "StationFinder.h"
-#include "StationFinderListenLive.h"
 #include "StationFinderRadioNetwork.h"
 
 
@@ -107,7 +106,9 @@ RadioApp::AboutRequested()
 {
 	BAboutWindow* about = new BAboutWindow(B_TRANSLATE_SYSTEM_NAME("StreamRadio"), kAppSignature);
 
-	const char* kAuthors[] = {"Fishpond", "Humdinger", "Jacob Secunda", "Javier Steinaker", NULL};
+	const char* kAuthors[] = {"Fishpond", "Humdinger", "Jacob Secunda", 
+							  "Javier Steinaker", "Adrien Destugues", 
+							  "Máximo Castañeda", "Korli", "Jérôme Duval", NULL};
 
 	const char* kCopyright = "The HaikuArchives team";
 
@@ -127,13 +128,7 @@ main(int argc, char* argv[])
 {
 	StationFinderRadioNetwork::RegisterSelf();
 
-	// FIXME: "listenlive.eu" no longer seems to exist, though it looks like
-	// "radiomap.eu" might be its successor? This plugin crashes after searching
-	// anyway...
-	// StationFinderListenLive::RegisterSelf();
-
 	new RadioApp();
 	be_app->Run();
-
 	delete be_app;
 }

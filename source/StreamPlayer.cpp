@@ -46,6 +46,8 @@ StreamPlayer::StreamPlayer(Station* station, BLooper* notify)
 	if (fInitStatus != B_OK) {
 		MSG("Error retrieving stream from %s - %s\n", station->StreamUrl().UrlString().String(),
 			strerror(fInitStatus));
+		delete fStream;
+		fStream = NULL;
 		return;
 	}
 }
@@ -181,7 +183,8 @@ StreamPlayer::_GetDecodedChunk(
 
 	if (player->fFlushCount++ > 1000) {
 		player->fFlushCount = 0;
-		player->fStream->FlushRead();
+		if (player->fStream)
+			player->fStream->FlushRead();
 	}
 }
 
@@ -189,6 +192,8 @@ StreamPlayer::_GetDecodedChunk(
 status_t
 StreamPlayer::_StartPlayThreadFunc(StreamPlayer* _this)
 {
+	if (!_this->fStream) return B_ERROR;
+	
 	_this->Lock();
 
 	_this->_SetState(StreamPlayer::Buffering);

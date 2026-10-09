@@ -7,7 +7,6 @@
 #include <StringView.h>
 #include <TranslationUtils.h>
 #include <View.h>
-#include "HttpUtils.h"
 #include "RadioApp.h"
 #include "Utils.h"
 
@@ -16,99 +15,30 @@
 #define B_TRANSLATION_CONTEXT "StationFinder"
 
 
-std::vector<std::pair<char*, InstantiateFunc> > StationFinderServices::sServices;
-
-
-StationFinderServices::~StationFinderServices()
+FindByCapability::FindByCapability(const char* name)
+	: fKeywords(true)
 {
-	sServices.clear();
+	fName.SetTo(name);
 }
 
 
-void
-StationFinderServices::Register(char* serviceName, InstantiateFunc instantiate)
+FindByCapability::FindByCapability(const char* name, BStringList* keyWords)
+    : FindByCapability(name)
 {
-	std::pair<char*, InstantiateFunc> service(serviceName, instantiate);
-	sServices.push_back(service);
+	fKeywords.Add(*keyWords);
 }
 
-
-int32
-StationFinderServices::CountItems()
+FindByCapability::FindByCapability(const char* name, char* keyWords, char* delimiter) 
+    : FindByCapability(name)
 {
-	return sServices.size();
+    BString tmp(keyWords);
+	tmp.Split(delimiter, true, fKeywords);
 }
-
-
-StationFinderService*
-StationFinderServices::Instantiate(char* name)
-{
-	for (uint32 i = 0; i < sServices.size(); i++) {
-		std::pair<char*, InstantiateFunc> service = sServices[i];
-		if (!strcmp(service.first, name))
-			return service.second();
-	}
-
-	return NULL;
-}
-
-
-char*
-StationFinderServices::Name(int i)
-{
-	return sServices[i].first;
-}
-
-
-FindByCapability::FindByCapability(char* name)
-	: fName(name),
-	  fKeywords()
-{
-}
-
-
-FindByCapability::FindByCapability(char* name, char* keyWords, char* delimiter)
-	: fName(name),
-	  fKeywords()
-{
-	SetKeyWords(keyWords, delimiter);
-}
-
 
 FindByCapability::~FindByCapability()
 {
 	fKeywords.MakeEmpty();
 }
-
-
-bool
-FindByCapability::HasKeyWords()
-{
-	return !fKeywords.IsEmpty();
-}
-
-
-const BStringList*
-FindByCapability::KeyWords()
-{
-	return &fKeywords;
-}
-
-
-const char*
-FindByCapability::Name()
-{
-	return fName.String();
-}
-
-
-void
-FindByCapability::SetKeyWords(char* keyWords, char* delimiter)
-{
-	BString tmp(keyWords);
-	tmp.Split(delimiter, true, fKeywords);
-}
-
 
 StationFinderService::StationFinderService()
 	: serviceName("unknown"),
@@ -127,14 +57,14 @@ StationFinderService::~StationFinderService()
 
 
 void
-StationFinderService::Register(char* name, InstantiateFunc instantiate)
+StationFinderService::Register(BString* name, InstantiateFunc instantiate)
 {
-	StationFinderServices::Register(name, instantiate);
+	stationFinderServices.Register(name, instantiate);
 }
 
 
 BBitmap*
-StationFinderService::RetrieveLogo(BUrl url)
+StationFinderService::RetrieveLogo(BUrl* url)
 {
 	BBitmap* bm = NULL;
 	BString contentType("image/*");
@@ -142,7 +72,7 @@ StationFinderService::RetrieveLogo(BUrl url)
 	BMallocIO* bmData = HttpUtils::GetAll(url, NULL, 3000, &contentType);
 	if (bmData != NULL) {
 		bm = BTranslationUtils::GetBitmap(bmData);
-		if (bm != NULL && bm->InitCheck() != B_OK) {
+		if (bm != NULL && (bm->InitCheck() != B_OK || !bm->IsValid())) {
 			delete bm;
 			bm = NULL;
 		}
@@ -154,23 +84,25 @@ StationFinderService::RetrieveLogo(BUrl url)
 }
 
 
-FindByCapability*
-StationFinderService::RegisterSearchCapability(char* name)
+uint32 
+StationFinderService::RegisterSearchCapability(const char* name)
 {
 	FindByCapability* newCapability = new FindByCapability(name);
-	findByCapabilities.AddItem(newCapability);
-
-	return newCapability;
+	if (findByCapabilities.AddItem(newCapability))
+		return findByCapabilities.IndexOf(newCapability);
+	else
+		return -1;
 }
 
 
-FindByCapability*
-StationFinderService::RegisterSearchCapability(char* name, char* keywords, char* delimiter)
+uint32
+StationFinderService::RegisterSearchCapability(const char* name, BStringList* keywords) 
 {
-	FindByCapability* newCapability = new FindByCapability(name, keywords, delimiter);
-	findByCapabilities.AddItem(newCapability);
-
-	return newCapability;
+	FindByCapability* newCapability = new FindByCapability(name, keywords);
+	if (findByCapabilities.AddItem(newCapability))
+		return findByCapabilities.IndexOf(newCapability);
+	else
+		return -1;
 }
 
 
@@ -193,11 +125,11 @@ StationFinderWindow::StationFinderWindow(BWindow* parent)
 	fDdServices = new BOptionPopUp("fDdServices", NULL, new BMessage(MSG_SELECT_SERVICE));
 	int currentServiceIndex = 0;
 	const char* settingsServiceName = ((RadioApp*)be_app)->Settings.StationFinderName();
-	for (int32 i = 0; i < StationFinderServices::CountItems(); i++) {
-		const char* serviceName = StationFinderServices::Name(i);
-		if (settingsServiceName && !strcmp(serviceName, settingsServiceName))
+	for (int32 i = 0; i < stationFinderServices.CountItems(); i++) {
+		BString* serviceName = stationFinderServices.Name(i);
+		if (settingsServiceName && serviceName->Compare(settingsServiceName))
 			currentServiceIndex = i;
-		fDdServices->AddOption(serviceName, i);
+		fDdServices->AddOption(serviceName->String(), i);
 	}
 
 	fBnVisit = new BButton("fBnVisit", "", new BMessage(MSG_VISIT_SERVICE));
@@ -378,22 +310,21 @@ StationFinderWindow::MessageReceived(BMessage* msg)
 void
 StationFinderWindow::SelectService(int index)
 {
-	char* serviceName = StationFinderServices::Name(index);
+	BString* serviceName = stationFinderServices.Name(index);
 	if (serviceName == NULL)
 		return;
 
-	StationFinderService* selectedService = StationFinderServices::Instantiate(serviceName);
+	if (fCurrentService != NULL && *fCurrentService->Name() == *serviceName)
+		return;
+
+	StationFinderService* selectedService = stationFinderServices.Instantiate(index);
 	if (selectedService == NULL)
 		return;
 
-	if (fCurrentService != NULL) {
-		delete fCurrentService;
-		fCurrentService = NULL;
-	}
-
+	delete fCurrentService;
 	fCurrentService = selectedService;
 
-	((RadioApp*)be_app)->Settings.SetStationFinderName(serviceName);
+	((RadioApp*)be_app)->Settings.SetStationFinderName(serviceName->String());
 
 	while (fDdSearchBy->CountOptions() > 0)
 		fDdSearchBy->RemoveOptionAt(0);

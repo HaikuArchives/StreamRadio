@@ -23,16 +23,26 @@
 #include <Socket.h>
 #include <StringList.h>
 #include <Url.h>
+#include <ObjectList.h>
 
 using namespace BPrivate::Network;
 
+#define HTTP_DEFAULT_TIMEOUT 3000
 
 class HttpUtils {
 public:
-	static status_t CheckPort(BUrl url, BUrl* newUrl, uint32 flags = 0);
-
-	static BMallocIO* GetAll(BUrl url, BHttpHeaders* returnHeaders = NULL, bigtime_t timeOut = 3000,
-		BString* contentType = NULL, size_t sizeLimit = 0);
+	static BString			jsonType;
+	static BMallocIO* 		GetAll(BUrl* url, BHttpHeaders* responseHeaders = NULL, 
+								    bigtime_t timeOut = HTTP_DEFAULT_TIMEOUT,
+								    BString* contentType = NULL, size_t sizeLimit = 0);
+	static BMessage*		GetMsgFromREST(BUrl* url, BHttpHeaders* responseHeaders = NULL, 
+									bigtime_t timeOut = HTTP_DEFAULT_TIMEOUT);
+	static BStringList* 	GetStringsFromREST(BUrl* url, BString* path, 
+									BHttpHeaders* responseHeaders = NULL, 
+									bigtime_t timeout = HTTP_DEFAULT_TIMEOUT); 
+	static const char*		UserAgent();
+private:
+	static char				sUserAgent[50];
 };
 
 

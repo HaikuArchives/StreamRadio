@@ -1,0 +1,38 @@
+name			streamradio
+version			1.0.1-1
+architecture	x86_64
+summary			"Find and listen to internet radio stations"
+description		"StreamRadio helps you find and listen to internet radio streams."
+packager		"Builder mmlr_x86_64 <hpkg-builder@haiku-os.org>"
+vendor			"Haiku Project"
+licenses {
+	"GNU GPL v3"
+}
+copyrights {
+	"2017, 2026 Kai Niessen"
+	"2018-2026 HaikuArchives Team"
+}
+provides {
+	streamradio = 1.0.1
+	app:streamradio = 1.0.1
+}
+requires {
+	haiku >= r1~beta6_hrev59866_79-1
+	lib:libstdc++ >= 6.0.32
+	lib:libxml2 >= 16
+}
+urls {
+	"https://github.com/HaikuArchives/StreamRadio"
+}
+global-writable-files {
+	"settings/Stations"
+}
+user-settings-files {
+	"settings/StreamRadio.settings"
+}
+source-urls {
+# Download
+	"https://github.com/HaikuArchives/StreamRadio/archive/56a6422bc2a9148fb15b61342a29e9fa0d34efc1.tar.gz"
+# Location 2
+	"https://ports-mirror.haiku-os.org/streamradio/56a6422bc2a9148fb15b61342a29e9fa0d34efc1.tar.gz"
+}

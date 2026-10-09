@@ -1,23 +1,23 @@
 /*
-	Copyright (C) 2008-2010 Lukas Sommer < SommerLuk at gmail dot com >
-	Copyright (C) 2017 Kai Niessen <kai.niessen@online.de>
-	Copyright (C) 2020 Jacob Secunda
+    Copyright (C) 2008-2010 Lukas Sommer < SommerLuk at gmail dot com >
+    Copyright (C) 2008-2026 Kai Niessen
+    Copyright (C) 2020 Jacob Secunda
 
-	This program is free software; you can redistribute it and/or
-	modify it under the terms of the GNU General Public License as
-	published by the Free Software Foundation; either version 2 of
-	the License or (at your option) version 3 or any later version
-	accepted by the membership of KDE e.V. (or its successor approved
-	by the membership of KDE e.V.), which shall act as a proxy
-	defined in Section 14 of version 3 of the license.
+    This program is free software; you can redistribute it and/or
+    modify it under the terms of the GNU General Public License as
+    published by the Free Software Foundation; either version 2 of
+    the License or (at your option) version 3 or any later version
+    accepted by the membership of KDE e.V. (or its successor approved
+    by the membership of KDE e.V.), which shall act as a proxy
+    defined in Section 14 of version 3 of the license.
 
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
-	You should have received a copy of the GNU General Public License
-	along with this program.  If not, see <https://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 
@@ -36,7 +36,6 @@
 #include <Url.h>
 #include <View.h>
 
-#include "Debug.h"
 #include "RadioApp.h"
 
 
@@ -45,8 +44,8 @@
 
 
 MainWindow::MainWindow()
-	: BWindow(BRect(0, 0, 400, 200), B_TRANSLATE_SYSTEM_NAME("StreamRadio"), B_DOCUMENT_WINDOW,
-		B_AUTO_UPDATE_SIZE_LIMITS),
+	: BWindow(BRect(0, 0, 400, 200), B_TRANSLATE_SYSTEM_NAME("StreamRadio"), B_DOCUMENT_WINDOW, 
+	    B_AUTO_UPDATE_SIZE_LIMITS),
 	  fStationFinder(NULL)
 {
 	fSettings = &((RadioApp*)be_app)->Settings;
@@ -59,21 +58,21 @@ MainWindow::MainWindow()
 	fMainMenu = new BMenuBar(Bounds(), "MainMenu");
 	BLayoutBuilder::Menu<>(fMainMenu)
 		.AddMenu(B_TRANSLATE("App"))
-		.AddItem(fMenuParallelPlayback)
-		.AddItem(B_TRANSLATE("Help" B_UTF8_ELLIPSIS), MSG_HELP)
-		.AddItem(B_TRANSLATE("About"), B_ABOUT_REQUESTED)
-		.AddSeparator()
-		.AddItem(B_TRANSLATE("Quit"), B_QUIT_REQUESTED, 'Q')
+			.AddItem(fMenuParallelPlayback)
+			.AddItem(B_TRANSLATE("Help" B_UTF8_ELLIPSIS), MSG_HELP)
+			.AddItem(B_TRANSLATE("About"), B_ABOUT_REQUESTED)
+			.AddSeparator()
+			.AddItem(B_TRANSLATE("Quit"), B_QUIT_REQUESTED, 'Q')
 		.End()
 		.AddMenu(B_TRANSLATE("Station"))
-		.AddItem(B_TRANSLATE("Paste Shoutcast URL"), MSG_PASTE_URL, 'V')
-		.AddItem(B_TRANSLATE("Check station"), MSG_CHECK)
-		.AddItem(B_TRANSLATE("Remove station"), MSG_REMOVE, 'R')
+			.AddItem(B_TRANSLATE("Paste Shoutcast URL"), MSG_PASTE_URL, 'V')
+			.AddItem(B_TRANSLATE("Check station"), MSG_CHECK)
+			.AddItem(B_TRANSLATE("Remove station"), MSG_REMOVE, 'R')
 		.End()
 		.AddMenu(B_TRANSLATE("Search"))
-		.AddItem(B_TRANSLATE("Find stations" B_UTF8_ELLIPSIS), MSG_SEARCH, 'S')
+			.AddItem(B_TRANSLATE("Find stations" B_UTF8_ELLIPSIS), MSG_SEARCH, 'S')
 		.End()
-		.End();
+	.End();
 
 	fStationList = new StationListView(true);
 	BScrollView* stationScroll = new BScrollView("scrollStation", fStationList, 0, false, true);
@@ -84,16 +83,16 @@ MainWindow::MainWindow()
 
 	BLayoutBuilder::Group<>(this, B_VERTICAL)
 		.Add(fMainMenu)
-		.AddGroup(B_VERTICAL)
-		.SetInsets(B_USE_WINDOW_INSETS, 0, B_USE_WINDOW_INSETS, B_USE_WINDOW_INSETS)
-		.AddSplit(B_VERTICAL, 2)
-		.Add(stationScroll, 1.0f)
-		.Add(fStationPanel)
-		.SetCollapsible(1, true)
+			.AddGroup(B_VERTICAL)
+				.SetInsets(B_USE_WINDOW_INSETS, 0, B_USE_WINDOW_INSETS, B_USE_WINDOW_INSETS)
+				.AddSplit(B_VERTICAL, 2)
+				.Add(stationScroll, 1.0f)
+				.Add(fStationPanel)
+				.SetCollapsible(1, true)
+			.End()
+			.Add(fStatusBar)
 		.End()
-		.Add(fStatusBar)
-		.End()
-		.End();
+	.End();
 
 	fStationList->Sync(fSettings->Stations);
 	fStationList->SetInvocationMessage(new BMessage(MSG_INVOKE_STATION));
@@ -130,8 +129,9 @@ MainWindow::MessageReceived(BMessage* message)
 			StationListViewItem* stationItem;
 			BString result;
 			while (message->FindRef("refs", index++, &ref) == B_OK) {
-				Station* station = Station::Load(ref.name, new BEntry(&ref));
-				if ((station = Station::Load(ref.name, new BEntry(&ref)))) {
+				BEntry entry(&ref);
+				Station* station = Station::Load(ref.name, &entry);
+				if (station) {
 					Station* existingStation = fSettings->Stations->FindItem(station->Name());
 					if (existingStation) {
 						delete station;
@@ -145,7 +145,8 @@ MainWindow::MessageReceived(BMessage* message)
 							B_TRANSLATE("Added station %s to list"), station->Name()->String());
 					}
 				} else
-					result.SetToFormat(B_TRANSLATE("File %s could not be loaded as a station"));
+					result.SetToFormat(B_TRANSLATE("File %s could not be loaded as a station"), 
+						ref.name);
 				fStatusBar->SetText(result.String());
 			}
 
@@ -153,13 +154,11 @@ MainWindow::MessageReceived(BMessage* message)
 		}
 
 		case MSG_SEARCH:
-		{
 			if (fStationFinder == NULL)
 				fStationFinder = new StationFinderWindow(this);
 			fStationFinder->Show();
 
 			break;
-		}
 
 		case MSG_PASTE_URL:
 		{
@@ -212,10 +211,8 @@ MainWindow::MessageReceived(BMessage* message)
 				fStationList->Invalidate();
 				fStationPanel->SetStation(stationItem);
 			}
-
 			break;
 		}
-
 		case MSG_REMOVE:
 		{
 			Station* station = fStationList->StationAt(fStationList->CurrentSelection(0));
@@ -322,17 +319,18 @@ MainWindow::MessageReceived(BMessage* message)
 
 		case MSG_HELP:
 		{
-			BUrl userguide = BUrl(
+			BUrl userguide(
 				"https://github.com/HaikuArchives/"
 				"StreamRadio/blob/master/docs/userguide.md",
-				true);
+				true
+			);
+
 			userguide.OpenWithPreferredApplication(true);
 
 			break;
 		}
 
 		case MSG_PARALLEL_PLAYBACK:
-		{
 			fAllowParallelPlayback = !fAllowParallelPlayback;
 			fSettings->SetAllowParallelPlayback(fAllowParallelPlayback);
 			fMenuParallelPlayback->SetMarked(fAllowParallelPlayback);
@@ -342,7 +340,6 @@ MainWindow::MessageReceived(BMessage* message)
 					_TogglePlay(fActiveStations.LastItem());
 			}
 			break;
-		}
 
 		case B_ABOUT_REQUESTED:
 			be_app->AboutRequested();

@@ -190,7 +190,7 @@ Station::Save()
 
 		icon->AddChild(canvas);
 		canvas->LockLooper();
-		canvas->DrawBitmap(fLogo, fLogo->Bounds(), icon->Bounds());
+		canvas->DrawBitmap(fLogo, fLogo->Bounds(), canvas->Bounds(), B_FILTER_BITMAP_BILINEAR);
 		canvas->UnlockLooper();
 		icon->RemoveChild(canvas);
 		stationInfo.SetIcon(icon, B_LARGE_ICON);
@@ -226,7 +226,7 @@ Station::RetrieveStreamUrl()
 	status_t status = B_ERROR;
 	BString contentType("*/*");
 
-	BMallocIO* plsData = HttpUtils::GetAll(fSource, NULL, 100000, &contentType, 2000);
+	BMallocIO* plsData = HttpUtils::GetAll(&fSource, NULL, 100000, &contentType, 2000);
 	if (plsData != NULL) {
 		status = ParseUrlReference((const char*)plsData->Buffer(), fSource);
 		delete plsData;
@@ -272,8 +272,9 @@ Station::Probe()
 	// of streams using HTTPS and load balancing between two or more different
 	// IP's should be small, anyway.
 
-	if (fStreamUrl.Protocol() == "https") {
-		buffer = HttpUtils::GetAll(fStreamUrl, &headers, 2 * 1000 * 1000, &contentType, 4096);
+	//if (fStreamUrl.Protocol() == "https") {
+		buffer = HttpUtils::GetAll(&fStreamUrl, &headers, 2 * 1000 * 1000, &contentType, 4096);
+	/*
 	} else {
 		BUrl resolvedUrl;
 		status_t resolveStatus = HttpUtils::CheckPort(fStreamUrl, &resolvedUrl);
@@ -282,7 +283,7 @@ Station::Probe()
 
 		buffer = HttpUtils::GetAll(resolvedUrl, &headers, 2 * 1000 * 1000, &contentType, 4096);
 	}
-
+	*/
 #ifdef DEBUGGING
 	for (int32 i = 0; i < headers.CountHeaders(); i++)
 		TRACE("Header: %s\r\n", headers.HeaderAt(i).Header());
@@ -565,7 +566,7 @@ Station::LoadIndirectUrl(BString& shoutCastUrl)
 
 	BString contentType("*/*");
 
-	BMallocIO* dataIO = HttpUtils::GetAll(url, NULL, 10000, &contentType, 2000);
+	BMallocIO* dataIO = HttpUtils::GetAll(&url, NULL, 10000, &contentType, 2000);
 	if (dataIO == NULL)
 		return NULL;
 
@@ -615,7 +616,7 @@ Station::LoadIndirectUrl(BString& shoutCastUrl)
 	shoutCastUrl.RemoveCharsSet("#?");
 	finalUrl.SetUrlString(shoutCastUrl, true);
 
-	dataIO = HttpUtils::GetAll(finalUrl);
+	dataIO = HttpUtils::GetAll(&finalUrl);
 	if (dataIO != NULL) {
 		dataIO->Write(&"", 1);
 		body = (char*)dataIO->Buffer();
@@ -633,7 +634,7 @@ Station::LoadIndirectUrl(BString& shoutCastUrl)
 
 		contentType = "image/*";
 
-		BMallocIO* iconIO = HttpUtils::GetAll(finalUrl, NULL, 10000, &contentType, 2000);
+		BMallocIO* iconIO = HttpUtils::GetAll(&finalUrl, NULL, 10000, &contentType, 2000);
 		if (iconIO != NULL) {
 			iconIO->Seek(0, SEEK_SET);
 			station->fLogo = BTranslationUtils::GetBitmap(iconIO);

@@ -18,7 +18,6 @@
 
 #include "Utils.h"
 
-#include <AppFileInfo.h>
 #include <Application.h>
 #include <Bitmap.h>
 #include <Message.h>
@@ -28,14 +27,11 @@
 #include <stdio.h>
 
 
-static char sUserAgent[32] = {0};
-
-
 BBitmap*
 Utils::ResourceBitmap(int32 id)
 {
 	size_t size;
-	const char* data = (const char*)be_app->AppResources()->FindResource('BBMP', id, &size);
+	const char* data = (const char*)be_app->AppResources()->LoadResource('BBMP', id, &size);
 	if (size != 0 && data != NULL) {
 		BMessage msg;
 		if (msg.Unflatten(data) == B_OK)
@@ -43,31 +39,4 @@ Utils::ResourceBitmap(int32 id)
 	}
 
 	return NULL;
-}
-
-
-const char*
-Utils::UserAgent()
-{
-	if (sUserAgent[0] != 0)
-		return sUserAgent;
-
-	app_info appInfo;
-	be_app->GetAppInfo(&appInfo);
-	BFile file(&appInfo.ref, B_READ_ONLY);
-	if (file.InitCheck() == B_OK) {
-		BAppFileInfo appFileInfo(&file);
-		struct version_info version;
-		if (appFileInfo.GetVersionInfo(&version, B_APP_VERSION_KIND) == B_OK)
-			snprintf(sUserAgent, sizeof(sUserAgent),
-				"StreamRadio/%" B_PRIu32 ".%" B_PRIu32 ".%" B_PRIu32, version.major, version.middle,
-				version.minor);
-	}
-
-	if (sUserAgent[0] == 0) {
-		// There was an error trying to get the version info
-		sprintf(sUserAgent, "StreamRadio");
-	}
-
-	return sUserAgent;
 }

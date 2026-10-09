@@ -78,10 +78,11 @@ StreamIO::StreamIO(Station* station, BLooper* metaListener)
 	// of streams using HTTPS and load balancing between two or more different
 	// IP's should be small, anyway.
 
-	if (url.Protocol() == "https") {
+	// if (url.Protocol() == "https") {
 		fReq = dynamic_cast<BHttpRequest*>(
 			BUrlProtocolRoster::MakeRequest(url.UrlString().String(), this, this));
-	} else {
+	/*
+		} else {
 		BUrl* newUrl = new BUrl();
 		if (newUrl == NULL)
 			return;
@@ -94,7 +95,7 @@ StreamIO::StreamIO(Station* station, BLooper* metaListener)
 			BUrlProtocolRoster::MakeRequest(newUrl->UrlString().String(), this, this));
 		delete newUrl;
 	}
-
+	*/
 	if (fReq == NULL)
 		return;
 
@@ -150,7 +151,7 @@ StreamIO::WriteAt(off_t position, const void* buffer, size_t size)
 ssize_t
 StreamIO::ReadAt(off_t position, void* buffer, size_t size)
 {
-	if (fLimit == 0 || position < fLimit) {
+	if (fLimit == 0 || (size_t)position < fLimit) {
 		ssize_t read = BAdapterIO::ReadAt(position, buffer, size);
 		if (read > 0) {
 			TRACE("Read %" B_PRIdSSIZE " of %" B_PRIuSIZE " bytes from position %" B_PRIdOFF
@@ -256,7 +257,7 @@ StreamIO::_DataWithMetaReceived(const char* data, size_t size, int next)
 	while (size > 0) {
 		if (fUntilMetaEnd != 0) {
 			// We are reading metadata
-			if (fUntilMetaEnd <= size) {
+			if ((size_t)fUntilMetaEnd <= size) {
 				// The metadata ends before the buffer
 				memcpy(fMetaBuffer + fMetaSize, (void*)data, fUntilMetaEnd);
 
@@ -283,7 +284,7 @@ StreamIO::_DataWithMetaReceived(const char* data, size_t size, int next)
 		} else {
 			// No metadata right now, feed content to consumer
 			DataFunc nextFunc = fDataFuncs.Item(next);
-			if (size <= fUntilMetaStart) {
+			if (size <= (size_t)fUntilMetaStart) {
 				written += (*this.*nextFunc)(data, size, next + 1);
 
 				fUntilMetaStart -= size;
@@ -324,7 +325,7 @@ ssize_t
 StreamIO::_DataUnsyncedReceived(const char* data, size_t size, int next)
 {
 	off_t frameStart;
-	for (frameStart = 0; frameStart < size; frameStart++) {
+	for (frameStart = 0; frameStart < (off_t)size; frameStart++) {
 		if (fFrameSync == none) {
 			if (data[frameStart] == kMpegHeader1) {
 				fFrameSync = first;
@@ -401,7 +402,7 @@ StreamIO::_ProcessMeta()
 		text[matches[1].rm_eo] = 0;
 		text[matches[2].rm_eo] = 0;
 
-		if (text + matches[2].rm_so && !(text + matches[2].rm_so)[0])
+		if (text[matches[2].rm_so] == 0)
 			msg->AddString(strlwr(text + matches[1].rm_so), fIcyName);
 		else
 			msg->AddString(strlwr(text + matches[1].rm_so), text + matches[2].rm_so);

@@ -8,7 +8,7 @@
 ## file:///system/develop/documentation/makefile-engine.html
 
 # The name of the binary.
-NAME = ../../dist/StreamRadio
+NAME = StreamRadio
 
 # The type of binary, must be one of:
 #	APP:	Application
@@ -16,6 +16,10 @@ NAME = ../../dist/StreamRadio
 #	STATIC:	Static library archive
 #	DRIVER: Kernel driver
 TYPE = APP
+
+ARCHITECTURES="all !x86_gcc2"
+SECONDARY_ARCHITECTURES="x86"
+ARCH=$(shell uname -m)
 
 # If you plan to use localization, specify the application's MIME signature.
 APP_MIME_SIG = application/x-vnd.Fishpond-StreamRadio
@@ -39,15 +43,12 @@ SRCS = \
 	 RadioSettings.cpp  \
 	 Station.cpp  \
 	 StationFinder.cpp  \
-	 StationFinderListenLive.cpp  \
 	 StationFinderRadioNetwork.cpp  \
 	 StationListView.cpp  \
 	 StationPanel.cpp  \
 	 StreamIO.cpp  \
 	 StreamPlayer.cpp  \
-	 Utils.cpp  \
-
-
+	 Utils.cpp  
 
 #	Specify the resource definition files to use. Full or relative paths can be
 #	used.
@@ -124,7 +125,7 @@ SYMBOLS :=
 
 #	Includes debug information, which allows the binary to be debugged easily.
 #	If set to "TRUE", debug info will be created.
-DEBUGGER :=
+DEBUGGER := TRUE
 
 #	Specify any additional compiler flags to be used.
 COMPILER_FLAGS =
@@ -135,15 +136,23 @@ LINKER_FLAGS =
 #	Specify the version of this binary. Example:
 #		-app 3 4 0 d 0 -short 340 -long "340 "`echo -n -e '\302\251'`"1999 GNU GPL"
 #	This may also be specified in a resource.
-APP_VERSION :=
+APP_VERSION := 1.0.1-1
 
-#	(Only used when "TYPE" is "DRIVER"). Specify the desired driver install
-#	location in the /dev hierarchy. Example:
-#		DRIVER_PATH = video/usb
-#	will instruct the "driverinstall" rule to place a symlink to your driver's
-#	binary in ~/add-ons/kernel/drivers/dev/video/usb, so that your driver will
-#	appear at /dev/video/usb when loaded. The default is "misc".
-DRIVER_PATH =
+
+TARGET_DIR := ../dist
+PACKAGE_DIR = $(TARGET_DIR)/package
+PACKAGE_NAME = $(TARGET_DIR)/$(NAME)-$(APP_VERSION)-$(ARCH).hpkg
+
+package:: default
+	
+	rm -rf $(PACKAGE_DIR)
+	mkdir -p $(PACKAGE_DIR)/apps
+	mkdir -p $(PACKAGE_DIR)/data/deskbar/menu/Applications
+	cp $(TARGET) $(PACKAGE_DIR)/apps
+	ln -s ../../../../apps/$(NAME) $(PACKAGE_DIR)/data/deskbar/menu/Applications/$(NAME)
+	cat ./PackageInfo | sed 's/$$VERSION/$(APP_VERSION)/' | sed 's/$$ARCH/$(ARCH)/' > $(TARGET_DIR)/PackageInfo_$(ARCH)
+	package create -C $(PACKAGE_DIR) -i $(TARGET_DIR)/PackageInfo_$(ARCH) $(PACKAGE_NAME)
+	copyattr -n BEOS:ICON $(TARGET) $(PACKAGE_NAME)
 
 ## Include the Makefile-Engine
 DEVEL_DIRECTORY := \
