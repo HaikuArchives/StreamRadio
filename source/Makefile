@@ -106,7 +106,7 @@ OPTIMIZE = FULL
 # 	will recreate only the "locales/en.catkeys" file. Use it as a template
 # 	for creating catkeys for other languages. All localization files must be
 # 	placed in the "locales" subdirectory.
-LOCALES = ca de en_GB en es fr fur id it nl pt ro sv tr uk
+LOCALES = ca cs de en_AU en_GB en es_419 es fr fur id it ko nb nl pt_BR pt ro ru sv tr uk
 
 #	Specify all the preprocessor symbols to be defined. The symbols will not
 #	have their values set automatically; you must supply the value (if any) to
@@ -125,7 +125,7 @@ SYMBOLS :=
 
 #	Includes debug information, which allows the binary to be debugged easily.
 #	If set to "TRUE", debug info will be created.
-DEBUGGER := TRUE
+DEBUGGER :=
 
 #	Specify any additional compiler flags to be used.
 COMPILER_FLAGS =
@@ -136,7 +136,7 @@ LINKER_FLAGS =
 #	Specify the version of this binary. Example:
 #		-app 3 4 0 d 0 -short 340 -long "340 "`echo -n -e '\302\251'`"1999 GNU GPL"
 #	This may also be specified in a resource.
-APP_VERSION := 1.0.1-1
+APP_VERSION =
 
 
 TARGET_DIR := ../dist

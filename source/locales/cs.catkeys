@@ -1,0 +1,44 @@
+1	Czech	application/x-vnd.Fishpond-StreamRadio	1780791103
+%station% now plays %title%	MainWindow		%station% nyní hraje %title%
+About	MainWindow		O
+Add station failed	MainWindow		Pridání stanice selhalo
+Added station %s to list	MainWindow		Přidat stanici %s na seznam
+Allow parallel playback	MainWindow		Povolit paralelní přehrávání
+App	MainWindow		Aplikace
+Check station	MainWindow		Zkontrolujte stanici
+Failed playing station %s: %s	MainWindow		Přehrávání stanice %s: %s se nezdařilo
+File %s could not be loaded as a station	MainWindow		Soubor %s nelze načíst jako stanici
+Find stations…	MainWindow		Vyhledat stanice...
+Help…	MainWindow		Pomoc…
+Now playing %s	MainWindow		Nyní hraje %s
+OK	MainWindow		OK
+Paste Shoutcast URL	MainWindow		Vložte adresu URL Shoutcast
+Probing station %station% failed	MainWindow		Probing station %station% Snímací stanice %station% selhala
+Probing station %station% successful	MainWindow		Snímací stanice %station% úspěšná
+Quit	MainWindow		Ukončit
+Remove station	MainWindow		Odstraňte stanici
+Search	MainWindow		Hledat
+Station	MainWindow		Stanice
+Station %s did not respond correctly and could not be added	MainWindow		Stanice %s neodpověděla správně a nelze ji přidat
+Unknown station	MainWindow		Neznámá stanice
+unknown title	MainWindow		neznámý titul
+A directory for saving stations has been created in your settings folder. Link this directory to your deskbar menu to play stations directly.	Station		Ve vaší složce nastavení byl vytvořen adresář pro ukládání stanic. Chcete-li stanice přehrávat přímo, propojte tento adresář s nabídkou na panelu desky.
+OK	Station		OK
+Stations directory created	Station		Byl vytvořen adresář stanic
+A player for online radio.	RadioApp		Přehrávač pro online rádio.
+Usage: StreamRadio <filename>\n<filename> should be a Shoutcast playlist file.\nIf the station already exists, it is made to play otherwise it is added.\n	RadioApp		Použití: StreamRadio <název_souboru>\n<název_souboru> by měl být soubor seznamu skladeb Shoutcast.\nPokud stanice již existuje, je připravena hrát, jinak je přidána.\n
+Add	StationFinder		Přidat
+Add station failed	StationFinder		Přidání stanice se nezdařilo
+Find stations	StationFinder		Najděte stanice
+OK	StationFinder		OK
+Search by	StationFinder		Hledat podle
+Search for	StationFinder		Hledat
+Service	StationFinder		Servis
+Station %s did not respond correctly and could not be added	StationFinder		Stanice %s neodpověděla správně a nelze ji přidat
+Community Radio Browser	StationFinderRadioNetwork		Komunitní Radio Prohlížeč
+Genre	StationPanel		Žánr
+Name	StationPanel		Název
+Station URL	StationPanel		URL stanice
+Stream URL	StationPanel		URL streamu
+listenlive.eu [experimental]	StationFinderListenLive		listenlive.eu [experimentální]
+StreamRadio	System name		StreamRadio

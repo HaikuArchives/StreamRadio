@@ -1,0 +1,44 @@
+1	English (Australian)	application/x-vnd.Fishpond-StreamRadio	1780791103
+%station% now plays %title%	MainWindow		%station% now plays %title%
+About	MainWindow		About
+Add station failed	MainWindow		Add station failed
+Added station %s to list	MainWindow		Added station %s to list
+Allow parallel playback	MainWindow		Allow parallel playback
+App	MainWindow		App
+Check station	MainWindow		Check station
+Failed playing station %s: %s	MainWindow		Failed playing station %s: %s
+File %s could not be loaded as a station	MainWindow		File %s could not be loaded as a station
+Find stations…	MainWindow		Find stations…
+Help…	MainWindow		Help…
+Now playing %s	MainWindow		Now playing %s
+OK	MainWindow		OK
+Paste Shoutcast URL	MainWindow		Paste Shoutcast URL
+Probing station %station% failed	MainWindow		Probing station %station% failed
+Probing station %station% successful	MainWindow		Probing station %station% successful
+Quit	MainWindow		Quit
+Remove station	MainWindow		Remove station
+Search	MainWindow		Search
+Station	MainWindow		Station
+Station %s did not respond correctly and could not be added	MainWindow		Station %s did not respond correctly and could not be added
+Unknown station	MainWindow		Unknown station
+unknown title	MainWindow		unknown title
+A directory for saving stations has been created in your settings folder. Link this directory to your deskbar menu to play stations directly.	Station		A directory for saving stations has been created in your settings folder. Link this directory to your deskbar menu to play stations directly.
+OK	Station		OK
+Stations directory created	Station		Stations directory created
+A player for online radio.	RadioApp		A player for online radio.
+Usage: StreamRadio <filename>\n<filename> should be a Shoutcast playlist file.\nIf the station already exists, it is made to play otherwise it is added.\n	RadioApp		Usage: StreamRadio <filename>\n<filename> should be a Shoutcast playlist file.\nIf the station already exists, it is made to play otherwise it is added.\n
+Add	StationFinder		Add
+Add station failed	StationFinder		Add station failed
+Find stations	StationFinder		Find stations
+OK	StationFinder		OK
+Search by	StationFinder		Search by
+Search for	StationFinder		Search for
+Service	StationFinder		Service
+Station %s did not respond correctly and could not be added	StationFinder		Station %s did not respond correctly and could not be added
+Community Radio Browser	StationFinderRadioNetwork		Community Radio Browser
+Genre	StationPanel		Genre
+Name	StationPanel		Name
+Station URL	StationPanel		Station URL
+Stream URL	StationPanel		Stream URL
+listenlive.eu [experimental]	StationFinderListenLive		listenlive.eu [experimental]
+StreamRadio	System name		StreamRadio

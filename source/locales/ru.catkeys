@@ -1,0 +1,44 @@
+1	Russian	application/x-vnd.Fishpond-StreamRadio	1780791103
+%station% now plays %title%	MainWindow		%station% сейчас играет %title%
+About	MainWindow		Про StreamRadio
+Add station failed	MainWindow		Не удалось добавить станцию
+Added station %s to list	MainWindow		Станция %s добавлена в список
+Allow parallel playback	MainWindow		Разрешить параллельное воспроизведение
+App	MainWindow		Приложение
+Check station	MainWindow		Проверить станцию
+Failed playing station %s: %s	MainWindow		Не удалось воспроизвести станцию ​​%s: %s
+File %s could not be loaded as a station	MainWindow		Не удалось загрузить файл %s как станцию
+Find stations…	MainWindow		Найти станции…
+Help…	MainWindow		Помощь…
+Now playing %s	MainWindow		Сейчас играет %s
+OK	MainWindow		OK
+Paste Shoutcast URL	MainWindow		Вставить Shoutcast URL
+Probing station %station% failed	MainWindow		Зондирующая станция %station% не удалась
+Probing station %station% successful	MainWindow		Зондирующая станция %station% прошла успешно
+Quit	MainWindow		Выйти
+Remove station	MainWindow		Удалить станцию
+Search	MainWindow		Найти
+Station	MainWindow		Станция
+Station %s did not respond correctly and could not be added	MainWindow		Станция %s ответила неправильно и не может быть добавлена
+Unknown station	MainWindow		Неизвестная станция
+unknown title	MainWindow		неизвестное название
+A directory for saving stations has been created in your settings folder. Link this directory to your deskbar menu to play stations directly.	Station		В папке настроек создана директория для сохранения станций. Свяжите этот каталог с меню панели рабочего стола, чтобы напрямую воспроизводить станции.
+OK	Station		ОК
+Stations directory created	Station		Каталог станций создан
+A player for online radio.	RadioApp		Проигрыватель онлайн-радио.
+Usage: StreamRadio <filename>\n<filename> should be a Shoutcast playlist file.\nIf the station already exists, it is made to play otherwise it is added.\n	RadioApp		Использование: StreamRadio <filename>\n<filename> должен быть файлом списка воспроизведения Shoutcast.\nЕсли станция уже существует, она воспроизводится, в противном случае она добавляется.\n
+Add	StationFinder		Добавить
+Add station failed	StationFinder		Не удалось добавить станцию
+Find stations	StationFinder		Найти станции
+OK	StationFinder		OK
+Search by	StationFinder		Искать по
+Search for	StationFinder		Искать
+Service	StationFinder		Служба
+Station %s did not respond correctly and could not be added	StationFinder		Станция %s ответила неправильно и не может быть добавлена
+Community Radio Browser	StationFinderRadioNetwork		Community Radio Browser
+Genre	StationPanel		Жанр
+Name	StationPanel		Имя
+Station URL	StationPanel		URL станции
+Stream URL	StationPanel		URL потока
+listenlive.eu [experimental]	StationFinderListenLive		listenlive.eu [experimental]
+StreamRadio	System name		StreamRadio

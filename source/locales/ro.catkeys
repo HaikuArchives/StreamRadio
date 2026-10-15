@@ -8,7 +8,7 @@ App	MainWindow		Aplicație
 Check station	MainWindow		Verifică stația
 Failed playing station %s: %s	MainWindow		Nu s-a putut reda stația %s: %s
 File %s could not be loaded as a station	MainWindow		Fișierul %s nu a putut fi încărcat ca o stație
-Find stations…	MainWindow		Find stations…
+Find stations…	MainWindow		Caută stații…
 Help…	MainWindow		Ajutor…
 Now playing %s	MainWindow		Se redă acum %s
 OK	MainWindow		OK
@@ -16,16 +16,16 @@ Paste Shoutcast URL	MainWindow		Lipește URL-ul Shoutcast
 Probing station %station% failed	MainWindow		Testarea stației %station% a eșuat
 Probing station %station% successful	MainWindow		Testarea stației %station% a reușit
 Quit	MainWindow		Ieșire
-Remove station	MainWindow		Remove station
+Remove station	MainWindow		Elimină stația
 Search	MainWindow		Caută
-Station	MainWindow		Station
+Station	MainWindow		Stație
 Station %s did not respond correctly and could not be added	MainWindow		Stația %s nu a răspuns corect și nu a putut fi adăugată
 Unknown station	MainWindow		Stație necunoscută
 unknown title	MainWindow		titlu necunoscut
 A directory for saving stations has been created in your settings folder. Link this directory to your deskbar menu to play stations directly.	Station		Un director pentru salvarea stațiilor a fost creat în dosarul de configurări. Legați acest director de meniul deskbar-ului pentru a reda stații direct.
 OK	Station		OK
 Stations directory created	Station		Director de stații creat
-A player for online radio.	RadioApp		A player for online radio.
+A player for online radio.	RadioApp		Un player pentru radio online.
 Usage: StreamRadio <filename>\n<filename> should be a Shoutcast playlist file.\nIf the station already exists, it is made to play otherwise it is added.\n	RadioApp		Utilizare: StreamRadio <filename>\n<filename> ar trebui să fie un fișier listă de redare Shoutcast.\nDacă stația deja există, este redată, altfel este adăugată.\n
 Add	StationFinder		Adaugă
 Add station failed	StationFinder		Adăugarea stației a eșuat

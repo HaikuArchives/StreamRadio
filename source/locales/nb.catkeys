@@ -1,0 +1,44 @@
+1	Norwegian	application/x-vnd.Fishpond-StreamRadio	1780791103
+%station% now plays %title%	MainWindow		%station% spiller nå %title%
+About	MainWindow		Om
+Add station failed	MainWindow		Kunne ikke legge til stasjon
+Added station %s to list	MainWindow		Legg til stasjonen %s i listen
+Allow parallel playback	MainWindow		Tillat parallell avspilling
+App	MainWindow		App
+Check station	MainWindow		Sjekk stasjon
+Failed playing station %s: %s	MainWindow		Kunne ikke spille av stasjonen %s: %s
+File %s could not be loaded as a station	MainWindow		Filen %s kunne ikke lastes som stasjon
+Find stations…	MainWindow		Finn stasjoner…
+Help…	MainWindow		Hjelp…
+Now playing %s	MainWindow		Spiller av %s
+OK	MainWindow		OK
+Paste Shoutcast URL	MainWindow		Lim inn Shoutcast-URL
+Probing station %station% failed	MainWindow		Tilkobling til stasjonen %station% mislyktes
+Probing station %station% successful	MainWindow		Tilkobling til stasjonen %station% var vellykket
+Quit	MainWindow		Avslutt
+Remove station	MainWindow		Fjern stasjon
+Search	MainWindow		Søk
+Station	MainWindow		Stasjon
+Station %s did not respond correctly and could not be added	MainWindow		Stasjonen %s svarte ikke riktig og kunne ikke bli lagt til
+Unknown station	MainWindow		Ukjent stasjon
+unknown title	MainWindow		ukjent tittel
+A directory for saving stations has been created in your settings folder. Link this directory to your deskbar menu to play stations directly.	Station		En mappe for lagring av stasjoner er opprettet i innstillingsmappen. Koble denne mappen til Deskbar-menyen for å spille av stasjoner direkte.
+OK	Station		OK
+Stations directory created	Station		Stasjonsmappe opprettet
+A player for online radio.	RadioApp		En spiller for nettradio.
+Usage: StreamRadio <filename>\n<filename> should be a Shoutcast playlist file.\nIf the station already exists, it is made to play otherwise it is added.\n	RadioApp		Bruk: StreamRadio <filnavn>\n<filnavn> skal være en Shoutcast-spillelistefil.\nHvis stasjonen allerede eksisterer, spilles den av, ellers legges den til.\n
+Add	StationFinder		Legg til
+Add station failed	StationFinder		Kunne ikke legge til stasjon
+Find stations	StationFinder		Finn stasjoner
+OK	StationFinder		OK
+Search by	StationFinder		Søk etter
+Search for	StationFinder		Søk etter
+Service	StationFinder		Tjeneste
+Station %s did not respond correctly and could not be added	StationFinder		Stasjonen %s svarte ikke riktig og kunne ikke legges til
+Community Radio Browser	StationFinderRadioNetwork		Community Radio Browser
+Genre	StationPanel		Sjanger
+Name	StationPanel		Navn
+Station URL	StationPanel		Stasjons-URL
+Stream URL	StationPanel		Strømme-URL
+listenlive.eu [experimental]	StationFinderListenLive		listenlive.eu [eksperimentell]
+StreamRadio	System name		StreamRadio

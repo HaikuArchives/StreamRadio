@@ -1,0 +1,44 @@
+1	Korean	application/x-vnd.Fishpond-StreamRadio	1780791103
+%station% now plays %title%	MainWindow		%station% 채널에서 %title% 재생 중
+About	MainWindow		대하여
+Add station failed	MainWindow		채널 추가 실패
+Added station %s to list	MainWindow		%s 채널을 목록에 추가
+Allow parallel playback	MainWindow		동시 재생 허용
+App	MainWindow		앱
+Check station	MainWindow		채널 확인
+Failed playing station %s: %s	MainWindow		%s 채널 재생 실패: %s
+File %s could not be loaded as a station	MainWindow		%s 파일은 채널로서 열 수 없습니다.
+Find stations…	MainWindow		채널 찾기…
+Help…	MainWindow		도움…
+Now playing %s	MainWindow		%s 재생 중
+OK	MainWindow		확인
+Paste Shoutcast URL	MainWindow		Shoutcast URL 붙여넣기
+Probing station %station% failed	MainWindow		%station% 채널 통신에 실패했습니다
+Probing station %station% successful	MainWindow		%station% 채널 통신에 성공했습니다
+Quit	MainWindow		종료
+Remove station	MainWindow		채널 삭제
+Search	MainWindow		찾기
+Station	MainWindow		채널
+Station %s did not respond correctly and could not be added	MainWindow		%s 채널이 정상적으로 응답하지 않아 추가할 수 없습니다
+Unknown station	MainWindow		알 수 없는 채널
+unknown title	MainWindow		알 수 없는 제목
+A directory for saving stations has been created in your settings folder. Link this directory to your deskbar menu to play stations directly.	Station		채널을 저장하기 위한 디렉터리가 설정 폴더에 생성되었습니다. 채널을 바로 재생하려면 해당 디렉터리를 데스크바에 연결하세요.
+OK	Station		확인
+Stations directory created	Station		채널 디렉터리가 생성되었습니다
+A player for online radio.	RadioApp		온라인 라디오 재생기.
+Usage: StreamRadio <filename>\n<filename> should be a Shoutcast playlist file.\nIf the station already exists, it is made to play otherwise it is added.\n	RadioApp		사용법: StreamRadio <파일명>\n<파일명>은 Shoutcast 재생목록 파일이어야 합니다.\n이미 존재하는 채널이라면 재생이 시작되며, 아닌경우 목록에 추가됩니다.\n
+Add	StationFinder		추가
+Add station failed	StationFinder		채널 추가 실패
+Find stations	StationFinder		채널 찾기
+OK	StationFinder		확인
+Search by	StationFinder		다음으로 찾기
+Search for	StationFinder		Search for
+Service	StationFinder		서비스
+Station %s did not respond correctly and could not be added	StationFinder		%s 채널이 정상적으로 응답하지 않아 추가할 수 없습니다
+Community Radio Browser	StationFinderRadioNetwork		커뮤니티 라디오 브라우저
+Genre	StationPanel		장르
+Name	StationPanel		이름
+Station URL	StationPanel		채널 URL
+Stream URL	StationPanel		스트림 URL
+listenlive.eu [experimental]	StationFinderListenLive		listenlive.eu [실험적]
+StreamRadio	System name		StreamRadio

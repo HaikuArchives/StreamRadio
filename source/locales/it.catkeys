@@ -25,7 +25,7 @@ unknown title	MainWindow		titolo sconosciuto
 A directory for saving stations has been created in your settings folder. Link this directory to your deskbar menu to play stations directly.	Station		Una directory di salvataggio stazioni è stata creta nella tua cartella delle impostazioni. Crea un collegamento al menu della deskbar per riprodurre direttamente le stazioni.
 OK	Station		OK
 Stations directory created	Station		Cartella stazioni creata
-A player for online radio.	RadioApp		A player for online radio.
+A player for online radio.	RadioApp		Un riproduttore di radio online
 Usage: StreamRadio <filename>\n<filename> should be a Shoutcast playlist file.\nIf the station already exists, it is made to play otherwise it is added.\n	RadioApp		Utliizzo: StreamRadio <nome file>\n<fone file> dovrebbe essere un file di playlist  Shoutcast.\nSe la stazione non esiste viene aggiunta altrimenti viene riprodotta.\n
 Add	StationFinder		Aggiungi
 Add station failed	StationFinder		Impossibile aggiungere stazione

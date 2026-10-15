@@ -8,7 +8,7 @@ App	MainWindow		App
 Check station	MainWindow		Kontrollera stationen
 Failed playing station %s: %s	MainWindow		Det gick inte att spela station %s: %s
 File %s could not be loaded as a station	MainWindow		Filen %s kunde inte laddas som en station
-Find stations…	MainWindow		Find stations…
+Find stations…	MainWindow		Hitta stationer...
 Help…	MainWindow		Hjälp…
 Now playing %s	MainWindow		Spelar nu %s
 OK	MainWindow		OK
@@ -16,7 +16,7 @@ Paste Shoutcast URL	MainWindow		Klistra in URL för Shoutcast
 Probing station %station% failed	MainWindow		Probande station %station% misslyckades
 Probing station %station% successful	MainWindow		Sonderande station %station% lyckad
 Quit	MainWindow		Avsluta
-Remove station	MainWindow		Remove station
+Remove station	MainWindow		Ta bort stationen
 Search	MainWindow		Sök
 Station	MainWindow		Station
 Station %s did not respond correctly and could not be added	MainWindow		Station %s svarade inte korrekt och kunde inte läggas till
@@ -25,8 +25,8 @@ unknown title	MainWindow		Okänd titel
 A directory for saving stations has been created in your settings folder. Link this directory to your deskbar menu to play stations directly.	Station		En katalog för att spara stationer har skapats i din inställningsmapp. Länka den här katalogen till din skrivbordsmeny för att spela stationer direkt.
 OK	Station		OK
 Stations directory created	Station		Stationskatalog skapad
-A player for online radio.	RadioApp		A player for online radio.
-Usage: StreamRadio <filename>\n<filename> should be a Shoutcast playlist file.\nIf the station already exists, it is made to play otherwise it is added.\n	RadioApp		Användning: StreamRadio <filnamn>\n<filnamn> bör vara en Shoutcast-spellistfil. \n Om stationen redan finns görs den för att spela annars läggs den till.\n
+A player for online radio.	RadioApp		En spelare för onlineradio.
+Usage: StreamRadio <filename>\n<filename> should be a Shoutcast playlist file.\nIf the station already exists, it is made to play otherwise it is added.\n	RadioApp		\nAnvändning: StreamRadio <filnamn>\n<filnamn> bör vara en Shoutcast-spellistfil. \n Om stationen redan finns görs den för att spela annars läggs den till.\n
 Add	StationFinder		Lägg till
 Add station failed	StationFinder		Det gick inte att lägga till station
 Find stations	StationFinder		Hitta stationer

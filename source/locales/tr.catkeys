@@ -12,7 +12,7 @@ Find stations…	MainWindow		İstasyon bul…
 Help…	MainWindow		Yardım…
 Now playing %s	MainWindow		Şimdi çalınıyor: %s
 OK	MainWindow		Tamam
-Paste Shoutcast URL	MainWindow		Shoutcast URL'si yapıştır
+Paste Shoutcast URL	MainWindow		Shoutcast URL’si yapıştır
 Probing station %station% failed	MainWindow		%station% istasyonu aranamadı
 Probing station %station% successful	MainWindow		%station% başarıyla arandı
 Quit	MainWindow		Çık
@@ -38,7 +38,7 @@ Station %s did not respond correctly and could not be added	StationFinder		%s d�
 Community Radio Browser	StationFinderRadioNetwork		Topluluk Radyo Tarayıcısı
 Genre	StationPanel		Tür
 Name	StationPanel		Ad
-Station URL	StationPanel		İstasyon URL'si
-Stream URL	StationPanel		Akış URL'si
+Station URL	StationPanel		İstasyon URL’si
+Stream URL	StationPanel		Akış URL’si
 listenlive.eu [experimental]	StationFinderListenLive		listenlive.eu [deneysel]
 StreamRadio	System name		StreamRadio

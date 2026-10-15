@@ -38,7 +38,7 @@ Station %s did not respond correctly and could not be added	StationFinder		La es
 Community Radio Browser	StationFinderRadioNetwork		Community Radio Browser
 Genre	StationPanel		Género
 Name	StationPanel		Nombre
-Station URL	StationPanel		URL de la estación
+Station URL	StationPanel		URL de la transmisión
 Stream URL	StationPanel		URL del stream
 listenlive.eu [experimental]	StationFinderListenLive		listenlive.eu [experimental]
 StreamRadio	System name		StreamRadio
