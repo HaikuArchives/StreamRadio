@@ -2,4 +2,3 @@ dist/*
 source/objects*/
 nbproject/*
 .genio.yaml
-.clang-format
