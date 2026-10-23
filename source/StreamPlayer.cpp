@@ -180,12 +180,6 @@ StreamPlayer::_GetDecodedChunk(
 	int64 reqFrames
 		= size / format.channel_count / (format.format & media_raw_audio_format::B_AUDIO_SIZE_MASK);
 	fMediaFile->TrackAt(0)->ReadFrames(buffer, &reqFrames, &player->fHeader, &player->fInfo);
-
-	if (player->fFlushCount++ > 1000) {
-		player->fFlushCount = 0;
-		if (player->fStream)
-			player->fStream->FlushRead();
-	}
 }
 
 
@@ -268,7 +262,7 @@ StreamPlayer::_StartPlayThreadFunc(StreamPlayer* _this)
 		return _this->fInitStatus;
 	}
 
-	TRACE("Found stream with %ld channels with %f Hz\n",
+	TRACE("Found stream with %d channels with %f Hz\n",
 		_this->fDecodedFormat.u.raw_audio.channel_count,
 		_this->fDecodedFormat.u.raw_audio.frame_rate);
 
@@ -277,7 +271,7 @@ StreamPlayer::_StartPlayThreadFunc(StreamPlayer* _this)
 
 	_this->fInitStatus = _this->fPlayer->InitCheck();
 	if (_this->fInitStatus != B_OK) {
-		MSG("Sound Player failed to initialize (%s)\r\n", strerror(_this->fInitStatus));
+		MSG("Sound Player failed to initialize (%s)\n", strerror(_this->fInitStatus));
 	}
 
 	if (_this->fInitStatus != B_OK || _this->fStopRequested) {
@@ -295,7 +289,7 @@ StreamPlayer::_StartPlayThreadFunc(StreamPlayer* _this)
 
 	_this->fInitStatus = _this->fPlayer->Start();
 	if (_this->fInitStatus != B_OK) {
-		MSG("Sound Player failed to start (%s)\r\n", strerror(_this->fInitStatus));
+		MSG("Sound Player failed to start (%s)\n", strerror(_this->fInitStatus));
 	}
 
 	if (_this->fInitStatus != B_OK || _this->fStopRequested) {
