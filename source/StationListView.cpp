@@ -19,19 +19,15 @@
 #include "StationListView.h"
 
 #include <Application.h>
+#include <IconUtils.h>
 #include <Resources.h>
 #include <TranslationUtils.h>
 
 #include "StreamPlayer.h"
-#include "Utils.h"
 
 
 #define SLV_INSET 2
 #define SLV_PADDING 6
-#define SLV_HEIGHT 50
-#define SLV_MAIN_FONT_SIZE 13
-#define SLV_SMALL_FONT_SIZE 10
-#define SLV_BUTTON_SIZE 20
 
 
 StationListViewItem::StationListViewItem(Station* station)
@@ -40,7 +36,10 @@ StationListViewItem::StationListViewItem(Station* station)
 	  fStation(station),
 	  fList(NULL)
 {
-	SetHeight(SLV_HEIGHT);
+	BFont font(be_plain_font);
+	fItemHeight = ceilf(font.Size() * 4);
+
+	SetHeight(fItemHeight);
 }
 
 
@@ -80,41 +79,43 @@ StationListViewItem::DrawItem(BView* owner, BRect frame, bool complete)
 		IsSelected() ? B_MENU_SELECTION_BACKGROUND_COLOR
 					 : ((index % 2) ? B_MENU_BACKGROUND_COLOR : B_DOCUMENT_BACKGROUND_COLOR)));
 
-	if (fStation->Logo() != NULL) {
-		BRect target(SLV_INSET, SLV_INSET, SLV_HEIGHT - 2 * SLV_INSET, SLV_HEIGHT - 2 * SLV_INSET);
-		target.OffsetBy(frame.LeftTop());
+	BRect target(SLV_INSET, SLV_INSET, fItemHeight - 2 * SLV_INSET, fItemHeight - 2 * SLV_INSET);
+	target.OffsetBy(frame.LeftTop());
 
+	if (fStation->Logo() != NULL) {
 		owner->DrawBitmap(
 			fStation->Logo(), fStation->Logo()->Bounds(), target, B_FILTER_BITMAP_BILINEAR);
 	}
 
-	owner->SetFontSize(SLV_MAIN_FONT_SIZE);
+	BFont font(be_plain_font);
 	font_height fontHeight;
-	owner->GetFontHeight(&fontHeight);
+	font.GetHeight(&fontHeight);
 	float baseline = SLV_INSET + fontHeight.ascent + fontHeight.leading;
 
+	owner->SetFontSize(font.Size());
 	owner->DrawString(fStation->Name()->String(),
-		frame.LeftTop() + BPoint(SLV_HEIGHT - SLV_INSET + SLV_PADDING, SLV_INSET + baseline));
+		frame.LeftTop() + BPoint(fItemHeight - SLV_INSET + SLV_PADDING, SLV_INSET + baseline));
 
-	owner->SetFontSize(SLV_SMALL_FONT_SIZE);
+	owner->SetFontSize(ceilf(font.Size() * 0.8));
 	owner->GetFontHeight(&fontHeight);
 	baseline += fontHeight.ascent + fontHeight.descent + fontHeight.leading;
 	owner->DrawString(fStation->Source().UrlString(),
-		frame.LeftTop() + BPoint(SLV_HEIGHT - SLV_INSET + SLV_PADDING, baseline));
+		frame.LeftTop() + BPoint(fItemHeight - SLV_INSET + SLV_PADDING, baseline));
 	baseline += fontHeight.ascent + fontHeight.descent + fontHeight.leading;
 
 	owner->DrawString(
 		BString("") << fStation->BitRate() / 1000.0 << " kbps " << fStation->Mime()->Type(),
-		frame.LeftTop() + BPoint(SLV_HEIGHT - SLV_INSET + SLV_PADDING, baseline));
+		frame.LeftTop() + BPoint(fItemHeight - SLV_INSET + SLV_PADDING, baseline));
 
-	frame = ownerList->ItemFrame(ownerList->StationIndex(fStation));
 	if (ownerList->CanPlay() && fStation->Flags(STATION_URI_VALID)) {
-		BBitmap* bnBitmap = _GetButtonBitmap(State());
+		BBitmap* bnBitmap = _GetButtonBitmap(ownerList, State());
 		if (bnBitmap != NULL) {
-			owner->SetDrawingMode(B_OP_ALPHA);
-			owner->DrawBitmap(bnBitmap,
-				frame.LeftTop() + BPoint(SLV_INSET, SLV_HEIGHT - SLV_INSET - SLV_BUTTON_SIZE));
-			owner->SetDrawingMode(B_OP_COPY);
+			owner->PushState();
+			owner->SetDrawingMode(B_OP_OVER);
+			owner->SetBlendingMode(B_PIXEL_ALPHA, B_ALPHA_OVERLAY);
+			owner->DrawBitmap(bnBitmap, bnBitmap->Bounds(), target);
+			owner->PopState();
+
 		}
 	}
 }
@@ -125,7 +126,7 @@ StationListViewItem::DrawBufferFillBar(BView* owner, BRect frame)
 {
 	if (State() == StreamPlayer::Playing || State() == StreamPlayer::Buffering) {
 		frame.bottom -= SLV_INSET;
-		frame.left = SLV_HEIGHT - SLV_INSET + SLV_PADDING;
+		frame.left = fItemHeight - SLV_INSET + SLV_PADDING;
 		frame.top = frame.bottom - 5;
 		frame.right -= SLV_PADDING;
 
@@ -142,7 +143,7 @@ StationListViewItem::DrawBufferFillBar(BView* owner, BRect frame)
 void
 StationListViewItem::Update(BView* owner, const BFont* font)
 {
-	SetHeight(SLV_HEIGHT);
+	SetHeight(fItemHeight);
 }
 
 
@@ -156,18 +157,13 @@ StationListViewItem::StateChanged(StreamPlayer::PlayState newState)
 }
 
 
-BBitmap* StationListViewItem::sButtonBitmap[3] = {NULL, NULL, NULL};
-
 BBitmap*
-StationListViewItem::_GetButtonBitmap(StreamPlayer::PlayState state)
+StationListViewItem::_GetButtonBitmap(StationListView* owner, StreamPlayer::PlayState state)
 {
 	if (state < 0)
 		return NULL;
 
-	if (sButtonBitmap[state] == NULL)
-		sButtonBitmap[state] = Utils::ResourceBitmap(RES_BN_STOPPED + state);
-
-	return sButtonBitmap[state];
+	return owner->fStateOverlay[state];
 }
 
 
@@ -189,12 +185,27 @@ StationListView::StationListView(bool canPlay)
 	  fCanPlay(canPlay)
 {
 	SetResizingMode(B_FOLLOW_ALL_SIDES);
-	SetExplicitMinSize(BSize(300, 2 * SLV_HEIGHT));
+	BFont font(be_plain_font);
+	float height = ceilf(font.Size() * 4);
+	SetExplicitMinSize(BSize(B_SIZE_UNSET, 3 * height));
+
+	// cache stop/play/buffering state icons
+	size_t size;
+	for (uint32 i = 0; i < StreamPlayer::COUNT; i++) {
+		const void* buf = be_app->AppResources()->LoadResource(B_VECTOR_ICON_TYPE, i + 1, &size);
+		if (buf != NULL) {
+			fStateOverlay[i] = new BBitmap(BRect(0, 0, height * 4, height * 4), B_RGBA32);
+			BIconUtils::GetVectorIcon((const uint8*)buf, size, fStateOverlay[i]);
+		}
+	}
 }
 
 
 StationListView::~StationListView()
 {
+	for (uint32 i = 0; i < StreamPlayer::COUNT; i++)
+		delete fStateOverlay[i];
+
 	delete fPlayMsg;
 	MakeEmpty();
 }
@@ -323,11 +334,11 @@ StationListView::MouseUp(BPoint where)
 	fWhereDown -= where;
 	if (fWhereDown.x * fWhereDown.x + fWhereDown.y * fWhereDown.y < 5 && fPlayMsg != NULL) {
 		int stationIndex = IndexOf(where);
-
 		BRect playFrame = ItemFrame(stationIndex);
+		float height = ItemAt(stationIndex)->Height();
 		playFrame.InsetBy(SLV_INSET, SLV_INSET);
-		playFrame.right = playFrame.left + SLV_BUTTON_SIZE;
-		playFrame.top = playFrame.bottom - SLV_BUTTON_SIZE;
+		playFrame.right = playFrame.left + height / 2;
+		playFrame.top = playFrame.bottom - height / 2;
 
 		if (playFrame.Contains(where)) {
 			BMessage* clone = new BMessage(fPlayMsg->what);

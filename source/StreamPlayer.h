@@ -52,7 +52,8 @@ public:
 		InActive = -1,
 		Stopped,
 		Playing,
-		Buffering
+		Buffering,
+		COUNT
 	};
 	inline PlayState State() { return fState; }
 

@@ -72,6 +72,7 @@ StreamPlayer::Play()
 		case StreamPlayer::Playing:
 		case StreamPlayer::Buffering:
 		case StreamPlayer::InActive:
+		case StreamPlayer::COUNT:
 			break;
 
 		case StreamPlayer::Stopped:
@@ -120,6 +121,7 @@ StreamPlayer::Stop()
 
 		case StreamPlayer::Stopped:
 		case StreamPlayer::InActive:
+		case StreamPlayer::COUNT:
 			break;
 	}
 	return B_OK;
