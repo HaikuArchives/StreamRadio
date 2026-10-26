@@ -45,7 +45,7 @@
 
 MainWindow::MainWindow()
 	: BWindow(BRect(0, 0, 400, 200), B_TRANSLATE_SYSTEM_NAME("StreamRadio"), B_DOCUMENT_WINDOW,
-		B_QUIT_ON_WINDOW_CLOSE),
+		B_QUIT_ON_WINDOW_CLOSE | B_AUTO_UPDATE_SIZE_LIMITS),
 	  fStationFinder(NULL)
 {
 	fSettings = &((RadioApp*)be_app)->Settings;
@@ -80,6 +80,7 @@ MainWindow::MainWindow()
 	fStationPanel = new StationPanel(this);
 
 	fStatusBar = new BStringView("status", B_EMPTY_STRING);
+	fStatusBar->SetExplicitMaxSize(BSize(B_SIZE_UNLIMITED, B_SIZE_UNSET));
 
 	BLayoutBuilder::Group<>(this, B_VERTICAL)
 		.Add(fMainMenu)
