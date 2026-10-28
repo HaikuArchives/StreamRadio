@@ -334,16 +334,18 @@ StationListView::MouseUp(BPoint where)
 	fWhereDown -= where;
 	if (fWhereDown.x * fWhereDown.x + fWhereDown.y * fWhereDown.y < 5 && fPlayMsg != NULL) {
 		int stationIndex = IndexOf(where);
-		BRect playFrame = ItemFrame(stationIndex);
-		float height = ItemAt(stationIndex)->Height();
-		playFrame.InsetBy(SLV_INSET, SLV_INSET);
-		playFrame.right = playFrame.left + height / 2;
-		playFrame.top = playFrame.bottom - height / 2;
+		if (stationIndex >= 0) {
+			BRect playFrame = ItemFrame(stationIndex);
+			float height = ItemAt(stationIndex)->Height();
+			playFrame.InsetBy(SLV_INSET, SLV_INSET);
+			playFrame.right = playFrame.left + height / 2;
+			playFrame.top = playFrame.bottom - height / 2;
 
-		if (playFrame.Contains(where)) {
-			BMessage* clone = new BMessage(fPlayMsg->what);
-			clone->AddInt32("index", stationIndex);
-			InvokeNotify(clone);
+			if (playFrame.Contains(where)) {
+				BMessage* clone = new BMessage(fPlayMsg->what);
+				clone->AddInt32("index", stationIndex);
+				InvokeNotify(clone);
+			}
 		}
 	}
 
