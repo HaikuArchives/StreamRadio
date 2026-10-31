@@ -103,7 +103,8 @@ MainWindow::MainWindow()
 	fStatusBar->SetExplicitAlignment(BAlignment(B_ALIGN_USE_FULL_WIDTH, B_ALIGN_VERTICAL_UNSET));
 	fStatusBar->SetExplicitMinSize(BSize(10, B_SIZE_UNSET));
 
-	ResizeToPreferred();
+	float width = be_plain_font->StringWidth("W");
+	ResizeTo(width * 47, width * 25);
 	CenterOnScreen();
 }
 

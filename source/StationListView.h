@@ -55,7 +55,7 @@ public:
 	void SetPlayer(StreamPlayer* player) { fPlayer = player; }
 
 private:
-	static BBitmap* _GetButtonBitmap(StreamPlayer::PlayState state);
+	BBitmap* _GetButtonBitmap(StreamPlayer::PlayState state);
 
 private:
 	static BBitmap* sButtonBitmap[3];
@@ -65,6 +65,7 @@ private:
 	StationListView* fList;
 
 	float fFillRatio;
+	float fItemHeight;
 };
 
 
@@ -87,6 +88,9 @@ public:
 
 	void SetPlayMessage(BMessage* playMsg);
 	bool CanPlay() { return fCanPlay; }
+
+public:
+	BBitmap* fStateOverlay[StreamPlayer::COUNT];
 
 private:
 	virtual void MouseDown(BPoint where);

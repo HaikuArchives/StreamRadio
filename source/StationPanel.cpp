@@ -19,6 +19,7 @@
 #include "StationPanel.h"
 
 #include <Catalog.h>
+#include <ControlLook.h>
 #include <Layout.h>
 #include <LayoutBuilder.h>
 #include <LayoutItem.h>
@@ -42,36 +43,47 @@ StationPanel::StationPanel(MainWindow* mainWindow, bool expanded)
 	SetExplicitAlignment(BAlignment(B_ALIGN_USE_FULL_WIDTH, B_ALIGN_VERTICAL_UNSET));
 
 	fLogo = new BView("logo", B_WILL_DRAW);
-	fLogo->SetExplicitSize(BSize(96, 96));
+	float height = ceilf(be_plain_font->BoundingBox().Height() * 5);
+	fLogo->SetExplicitSize(BSize(height, height));
 	fLogo->SetViewColor(tint_color(ui_color(B_PANEL_BACKGROUND_COLOR), B_DARKEN_2_TINT));
 
-	fName = new BTextControl("name", B_TRANSLATE("Name"), "-", new BMessage(MSG_CHG_NAME));
-
-	fUrl = new BTextControl("url", B_TRANSLATE("Stream URL"), "-", new BMessage(MSG_CHG_STREAMURL));
-
-	fGenre = new BTextControl("genre", B_TRANSLATE("Genre"), "-", new BMessage(MSG_CHG_GENRE));
-
+	fName = new BTextControl("name", B_TRANSLATE("Name:"), "-", new BMessage(MSG_CHG_NAME));
+	fUrl = new BTextControl("url", B_TRANSLATE("Stream:"), "-", new BMessage(MSG_CHG_STREAMURL));
+	fGenre = new BTextControl("genre", B_TRANSLATE("Genre:"), "-", new BMessage(MSG_CHG_GENRE));
+	fGenre->TextView()->SetExplicitMinSize(BSize(StringWidth("long-genre-name"), B_SIZE_UNSET));
 	fStationUrl = new BTextControl(
-		"surl", B_TRANSLATE("Station URL"), "-", new BMessage(MSG_CHG_STATIONURL));
+		"surl", B_TRANSLATE("Website:"), "-", new BMessage(MSG_CHG_STATIONURL));
 
 	fVisitStation = new BButton("bnVisitStation", "", new BMessage(MSG_VISIT_STATION));
-	fVisitStation->SetIcon(Utils::ResourceBitmap(RES_BN_WEB));
+	fVisitStation->SetIcon(
+		Utils::ResourceBitmap(RES_BN_WEB, be_control_look->ComposeIconSize(B_MINI_ICON).Height()));
 
 	fVolume = new BSlider("volume", NULL, new BMessage(MSG_CHG_VOLUME), 0, 100, B_VERTICAL);
 	fVolume->SetModificationMessage(new BMessage(MSG_CHG_VOLUME));
 
-	BLayoutBuilder::Grid<>(this, B_USE_SMALL_SPACING, B_USE_SMALL_SPACING)
+	BLayoutBuilder::Grid<>(this, 0, 0)
 		.SetInsets(B_USE_SMALL_INSETS)
-		.SetSpacing(B_USE_ITEM_SPACING, B_USE_SMALL_SPACING)
-		.Add(fLogo, 0, 0, 1, 4)
-		.AddTextControl(fName, 1, 0, B_ALIGN_LEFT)
-		.AddTextControl(fGenre, 3, 0, B_ALIGN_RIGHT, 1, 2)
-		.AddTextControl(fUrl, 1, 1, B_ALIGN_LEFT, 1, 4)
-		.AddTextControl(fStationUrl, 1, 2, B_ALIGN_LEFT, 1, 3)
-		.Add(fVisitStation, 5, 2)
-		.Add(fVolume, 6, 0, 1, 3)
-		.AddGlue(1, 3, 5, 1)
+		.SetSpacing(B_USE_SMALL_SPACING, B_USE_SMALL_SPACING)
+		.SetColumnWeight(2, 4.0)
+		.AddGlue(1, 0, 5, 1)
+		.Add(fLogo, 0, 0, 1, 5)
+		.Add(fName->CreateLabelLayoutItem(), 1, 1)
+		.Add(fName->CreateTextViewLayoutItem(), 2, 1)
+		.Add(fGenre->CreateLabelLayoutItem(), 3, 1)
+		.Add(fGenre->CreateTextViewLayoutItem(), 4, 1, 2, 1)
+		.Add(fUrl->CreateLabelLayoutItem(), 1, 2)
+		.Add(fUrl->CreateTextViewLayoutItem(), 2, 2, 4, 1)
+		.Add(fStationUrl->CreateLabelLayoutItem(), 1, 3)
+		.Add(fStationUrl->CreateTextViewLayoutItem(), 2, 3, 3, 1)
+		.Add(fVisitStation, 5, 3)
+		.Add(fVolume, 6, 0, 1, 4)
+		.AddGlue(1, 4, 5, 1)
 		.End();
+
+	fName->SetAlignment(B_ALIGN_RIGHT, B_ALIGN_LEFT);
+	fGenre->SetAlignment(B_ALIGN_RIGHT, B_ALIGN_LEFT);
+	fUrl->SetAlignment(B_ALIGN_RIGHT, B_ALIGN_LEFT);
+	fStationUrl->SetAlignment(B_ALIGN_RIGHT, B_ALIGN_LEFT);
 }
 
 
