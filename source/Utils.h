@@ -21,16 +21,14 @@
 #include <Bitmap.h>
 
 
-#define RES_BANNER 100
 #define RES_BN_SEARCH 10
 #define RES_BN_STOPPED 1
-#define RES_BN_SEARCH 10
 #define RES_BN_WEB 11
 
 
 class Utils {
 public:
-	static BBitmap* ResourceBitmap(int32 id);
+	static BBitmap* ResourceBitmap(int32 id, float height);
 };
 
 

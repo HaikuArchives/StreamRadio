@@ -55,9 +55,11 @@ public:
 	void SetPlayer(StreamPlayer* player) { fPlayer = player; }
 
 private:
-	BBitmap* _GetButtonBitmap(StationListView* owner, StreamPlayer::PlayState state);
+	BBitmap* _GetButtonBitmap(StreamPlayer::PlayState state);
 
 private:
+	static BBitmap* sButtonBitmap[3];
+
 	StreamPlayer* fPlayer;
 	class Station* fStation;
 	StationListView* fList;

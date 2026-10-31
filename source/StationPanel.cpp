@@ -19,6 +19,7 @@
 #include "StationPanel.h"
 
 #include <Catalog.h>
+#include <ControlLook.h>
 #include <Layout.h>
 #include <LayoutBuilder.h>
 #include <LayoutItem.h>
@@ -54,7 +55,8 @@ StationPanel::StationPanel(MainWindow* mainWindow, bool expanded)
 		"surl", B_TRANSLATE("Website:"), "-", new BMessage(MSG_CHG_STATIONURL));
 
 	fVisitStation = new BButton("bnVisitStation", "", new BMessage(MSG_VISIT_STATION));
-	fVisitStation->SetIcon(Utils::ResourceBitmap(RES_BN_WEB));
+	fVisitStation->SetIcon(
+		Utils::ResourceBitmap(RES_BN_WEB, be_control_look->ComposeIconSize(B_MINI_ICON).Height()));
 
 	fVolume = new BSlider("volume", NULL, new BMessage(MSG_CHG_VOLUME), 0, 100, B_VERTICAL);
 	fVolume->SetModificationMessage(new BMessage(MSG_CHG_VOLUME));

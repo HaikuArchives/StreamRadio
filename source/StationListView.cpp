@@ -24,6 +24,7 @@
 #include <TranslationUtils.h>
 
 #include "StreamPlayer.h"
+#include "Utils.h"
 
 
 #define SLV_INSET 2
@@ -108,7 +109,7 @@ StationListViewItem::DrawItem(BView* owner, BRect frame, bool complete)
 		frame.LeftTop() + BPoint(fItemHeight - SLV_INSET + SLV_PADDING, baseline));
 
 	if (ownerList->CanPlay() && fStation->Flags(STATION_URI_VALID)) {
-		BBitmap* bnBitmap = _GetButtonBitmap(ownerList, State());
+		BBitmap* bnBitmap = _GetButtonBitmap(State());
 		if (bnBitmap != NULL) {
 			owner->PushState();
 			owner->SetDrawingMode(B_OP_OVER);
@@ -157,13 +158,19 @@ StationListViewItem::StateChanged(StreamPlayer::PlayState newState)
 }
 
 
+BBitmap* StationListViewItem::sButtonBitmap[3] = {NULL, NULL, NULL};
+
+
 BBitmap*
-StationListViewItem::_GetButtonBitmap(StationListView* owner, StreamPlayer::PlayState state)
+StationListViewItem::_GetButtonBitmap(StreamPlayer::PlayState state)
 {
 	if (state < 0)
 		return NULL;
 
-	return owner->fStateOverlay[state];
+	if (sButtonBitmap[state] == NULL)
+		sButtonBitmap[state] = Utils::ResourceBitmap(RES_BN_STOPPED + state, fItemHeight);
+
+	return sButtonBitmap[state];
 }
 
 
@@ -188,16 +195,6 @@ StationListView::StationListView(bool canPlay)
 	BFont font(be_plain_font);
 	float height = ceilf(font.Size() * 4);
 	SetExplicitMinSize(BSize(B_SIZE_UNSET, 3 * height));
-
-	// cache stop/play/buffering state icons
-	size_t size;
-	for (uint32 i = 0; i < StreamPlayer::COUNT; i++) {
-		const void* buf = be_app->AppResources()->LoadResource(B_VECTOR_ICON_TYPE, i + 1, &size);
-		if (buf != NULL) {
-			fStateOverlay[i] = new BBitmap(BRect(0, 0, height * 4, height * 4), B_RGBA32);
-			BIconUtils::GetVectorIcon((const uint8*)buf, size, fStateOverlay[i]);
-		}
-	}
 }
 
 
