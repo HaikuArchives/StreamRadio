@@ -20,6 +20,7 @@
 
 #include <Application.h>
 #include <Bitmap.h>
+#include <IconUtils.h>
 #include <Message.h>
 #include <Resources.h>
 #include <Roster.h>
@@ -28,14 +29,15 @@
 
 
 BBitmap*
-Utils::ResourceBitmap(int32 id)
+Utils::ResourceBitmap(int32 id, float height)
 {
 	size_t size;
-	const char* data = (const char*)be_app->AppResources()->LoadResource('BBMP', id, &size);
+	const void* data
+		= (const char*)be_app->AppResources()->LoadResource(B_VECTOR_ICON_TYPE, id, &size);
 	if (size != 0 && data != NULL) {
-		BMessage msg;
-		if (msg.Unflatten(data) == B_OK)
-			return (BBitmap*)BBitmap::Instantiate(&msg);
+		BBitmap* bitmap = new BBitmap(BRect(0, 0, height, height), B_RGBA32);
+		BIconUtils::GetVectorIcon((const uint8*)data, size, bitmap);
+		return (bitmap);
 	}
 
 	return NULL;

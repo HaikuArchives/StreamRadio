@@ -1,6 +1,7 @@
 #include "StationFinder.h"
 #include <Alert.h>
 #include <Catalog.h>
+#include <ControlLook.h>
 #include <Cursor.h>
 #include <LayoutBuilder.h>
 #include <ScrollView.h>
@@ -120,7 +121,8 @@ StationFinderWindow::StationFinderWindow(BWindow* parent)
 	fKwSearch = new BOptionPopUp("fKwSearch", NULL, new BMessage(MSG_KWSEARCH));
 
 	fBnSearch = new BButton("fBnSearch", NULL, new BMessage(MSG_BNSEARCH));
-	fBnSearch->SetIcon(Utils::ResourceBitmap(RES_BN_SEARCH));
+	fBnSearch->SetIcon(Utils::ResourceBitmap(
+		RES_BN_SEARCH, be_control_look->ComposeIconSize(B_MINI_ICON).Height()));
 
 	fDdServices = new BOptionPopUp("fDdServices", NULL, new BMessage(MSG_SELECT_SERVICE));
 	int currentServiceIndex = 0;
@@ -133,7 +135,8 @@ StationFinderWindow::StationFinderWindow(BWindow* parent)
 	}
 
 	fBnVisit = new BButton("fBnVisit", "", new BMessage(MSG_VISIT_SERVICE));
-	fBnVisit->SetIcon(Utils::ResourceBitmap(RES_BN_WEB));
+	fBnVisit->SetIcon(
+		Utils::ResourceBitmap(RES_BN_WEB, be_control_look->ComposeIconSize(B_MINI_ICON).Height()));
 
 	fDdSearchBy = new BOptionPopUp("fDdSearchBy", NULL, new BMessage(MSG_SEARCH_BY));
 

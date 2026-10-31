@@ -47,8 +47,6 @@
 #define MSG_SELECT_STATION 'mSLS'
 #define MSG_UPDATE_STATION 'mUPS'
 
-#define RES_BN_SEARCH 10
-
 
 #if B_HAIKU_VERSION > B_HAIKU_VERSION_1_BETA_5
 typedef BObjectList<Station, true> StationList;
