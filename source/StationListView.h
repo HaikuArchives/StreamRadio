@@ -89,9 +89,6 @@ public:
 	void SetPlayMessage(BMessage* playMsg);
 	bool CanPlay() { return fCanPlay; }
 
-public:
-	BBitmap* fStateOverlay[StreamPlayer::COUNT];
-
 private:
 	virtual void MouseDown(BPoint where);
 	virtual void MouseUp(BPoint where);

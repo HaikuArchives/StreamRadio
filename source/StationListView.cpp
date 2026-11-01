@@ -199,9 +199,6 @@ StationListView::StationListView(bool canPlay)
 
 StationListView::~StationListView()
 {
-	for (uint32 i = 0; i < StreamPlayer::COUNT; i++)
-		delete fStateOverlay[i];
-
 	delete fPlayMsg;
 	MakeEmpty();
 }
