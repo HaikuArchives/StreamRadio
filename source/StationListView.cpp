@@ -116,7 +116,6 @@ StationListViewItem::DrawItem(BView* owner, BRect frame, bool complete)
 			owner->SetBlendingMode(B_PIXEL_ALPHA, B_ALPHA_OVERLAY);
 			owner->DrawBitmap(bnBitmap, bnBitmap->Bounds(), target);
 			owner->PopState();
-
 		}
 	}
 }

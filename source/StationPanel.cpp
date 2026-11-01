@@ -51,8 +51,8 @@ StationPanel::StationPanel(MainWindow* mainWindow, bool expanded)
 	fUrl = new BTextControl("url", B_TRANSLATE("Stream:"), "-", new BMessage(MSG_CHG_STREAMURL));
 	fGenre = new BTextControl("genre", B_TRANSLATE("Genre:"), "-", new BMessage(MSG_CHG_GENRE));
 	fGenre->TextView()->SetExplicitMinSize(BSize(StringWidth("long-genre-name"), B_SIZE_UNSET));
-	fStationUrl = new BTextControl(
-		"surl", B_TRANSLATE("Website:"), "-", new BMessage(MSG_CHG_STATIONURL));
+	fStationUrl
+		= new BTextControl("surl", B_TRANSLATE("Website:"), "-", new BMessage(MSG_CHG_STATIONURL));
 
 	fVisitStation = new BButton("bnVisitStation", "", new BMessage(MSG_VISIT_STATION));
 	fVisitStation->SetIcon(
