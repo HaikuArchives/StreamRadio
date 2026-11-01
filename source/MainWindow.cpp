@@ -55,7 +55,7 @@ MainWindow::MainWindow()
 		B_TRANSLATE("Allow parallel playback"), new BMessage(MSG_PARALLEL_PLAYBACK));
 	fMenuParallelPlayback->SetMarked(fAllowParallelPlayback);
 
-	fMainMenu = new BMenuBar(Bounds(), "MainMenu");
+	fMainMenu = new BMenuBar("MainMenu");
 	BLayoutBuilder::Menu<>(fMainMenu)
 		.AddMenu(B_TRANSLATE("App"))
 		.AddItem(fMenuParallelPlayback)

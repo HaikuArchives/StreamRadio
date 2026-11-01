@@ -39,9 +39,6 @@ StationPanel::StationPanel(MainWindow* mainWindow, bool expanded)
 	  fStationItem(NULL),
 	  fMainWindow(mainWindow)
 {
-	SetResizingMode(B_FOLLOW_LEFT_RIGHT | B_FOLLOW_BOTTOM);
-	SetExplicitAlignment(BAlignment(B_ALIGN_USE_FULL_WIDTH, B_ALIGN_VERTICAL_UNSET));
-
 	fLogo = new BView("logo", B_WILL_DRAW);
 	float height = ceilf(be_plain_font->BoundingBox().Height() * 5);
 	fLogo->SetExplicitSize(BSize(height, height));
@@ -55,8 +52,11 @@ StationPanel::StationPanel(MainWindow* mainWindow, bool expanded)
 		= new BTextControl("surl", B_TRANSLATE("Website:"), "-", new BMessage(MSG_CHG_STATIONURL));
 
 	fVisitStation = new BButton("bnVisitStation", "", new BMessage(MSG_VISIT_STATION));
-	fVisitStation->SetIcon(
-		Utils::ResourceBitmap(RES_BN_WEB, be_control_look->ComposeIconSize(B_MINI_ICON).Height()));
+	fVisitStation->SetIcon(Utils::ResourceBitmap(
+		RES_BN_WEB, be_control_look->ComposeIconSize(B_MINI_ICON).Height() * 0.8));
+	fStationUrl->GetPreferredSize(NULL, &height);
+	BSize size(height, height);
+	fVisitStation->SetExplicitSize(size);
 
 	fVolume = new BSlider("volume", NULL, new BMessage(MSG_CHG_VOLUME), 0, 100, B_VERTICAL);
 	fVolume->SetModificationMessage(new BMessage(MSG_CHG_VOLUME));

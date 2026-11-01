@@ -122,7 +122,11 @@ StationFinderWindow::StationFinderWindow(BWindow* parent)
 
 	fBnSearch = new BButton("fBnSearch", NULL, new BMessage(MSG_BNSEARCH));
 	fBnSearch->SetIcon(Utils::ResourceBitmap(
-		RES_BN_SEARCH, be_control_look->ComposeIconSize(B_MINI_ICON).Height()));
+		RES_BN_SEARCH, be_control_look->ComposeIconSize(B_MINI_ICON).Height() * 0.8));
+	float height;
+	fKwSearch->GetPreferredSize(NULL, &height);
+	BSize size(height, height);
+	fBnSearch->SetExplicitSize(size);
 
 	fDdServices = new BOptionPopUp("fDdServices", NULL, new BMessage(MSG_SELECT_SERVICE));
 	int currentServiceIndex = 0;
@@ -135,8 +139,9 @@ StationFinderWindow::StationFinderWindow(BWindow* parent)
 	}
 
 	fBnVisit = new BButton("fBnVisit", "", new BMessage(MSG_VISIT_SERVICE));
-	fBnVisit->SetIcon(
-		Utils::ResourceBitmap(RES_BN_WEB, be_control_look->ComposeIconSize(B_MINI_ICON).Height()));
+	fBnVisit->SetIcon(Utils::ResourceBitmap(
+		RES_BN_WEB, be_control_look->ComposeIconSize(B_MINI_ICON).Height() * 0.8));
+	fBnVisit->SetExplicitSize(size);
 
 	fDdSearchBy = new BOptionPopUp("fDdSearchBy", NULL, new BMessage(MSG_SEARCH_BY));
 
