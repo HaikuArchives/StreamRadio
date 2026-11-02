@@ -20,12 +20,41 @@
 
 #include <Application.h>
 #include <Bitmap.h>
+#include <ControlLook.h>
 #include <IconUtils.h>
 #include <Message.h>
 #include <Resources.h>
 #include <Roster.h>
 
 #include <stdio.h>
+
+
+BBitmap*
+Utils::GetBrowserIcon()
+{
+	char browserSignatur[B_MIME_TYPE_LENGTH];
+	BMimeType mimeType("application/x-vnd.Be.URL.https");
+	mimeType.GetPreferredApp(browserSignatur);
+
+	BBitmap* icon
+		= new BBitmap(BRect(BPoint(0, 0), be_control_look->ComposeIconSize(B_MINI_ICON)), B_RGBA32);
+	icon_size iconSize = (icon_size)(icon->Bounds().Width() + 1);
+
+	mimeType.SetTo(browserSignatur);
+	status_t status = mimeType.GetIcon(icon, iconSize);
+	if (status == B_OK)
+		return icon;
+
+	BMimeType genericAppType(B_APP_MIME_TYPE);
+	status = genericAppType.GetIcon(icon, iconSize);
+
+	if (status != B_OK) {
+		delete icon;
+		icon = NULL;
+	}
+
+	return icon;
+}
 
 
 BBitmap*

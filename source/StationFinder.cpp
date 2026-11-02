@@ -122,7 +122,7 @@ StationFinderWindow::StationFinderWindow(BWindow* parent)
 
 	fBnSearch = new BButton("fBnSearch", NULL, new BMessage(MSG_BNSEARCH));
 	fBnSearch->SetIcon(Utils::ResourceBitmap(
-		RES_BN_SEARCH, be_control_look->ComposeIconSize(B_MINI_ICON).Height() * 0.8));
+		RES_BN_SEARCH, be_control_look->ComposeIconSize(B_MINI_ICON).Height() - 1));
 	float height;
 	fKwSearch->GetPreferredSize(NULL, &height);
 	BSize size(height, height);
@@ -139,8 +139,7 @@ StationFinderWindow::StationFinderWindow(BWindow* parent)
 	}
 
 	fBnVisit = new BButton("fBnVisit", "", new BMessage(MSG_VISIT_SERVICE));
-	fBnVisit->SetIcon(Utils::ResourceBitmap(
-		RES_BN_WEB, be_control_look->ComposeIconSize(B_MINI_ICON).Height() * 0.8));
+	fBnVisit->SetIcon(Utils::GetBrowserIcon());
 	fBnVisit->SetExplicitSize(size);
 
 	fDdSearchBy = new BOptionPopUp("fDdSearchBy", NULL, new BMessage(MSG_SEARCH_BY));
@@ -150,9 +149,9 @@ StationFinderWindow::StationFinderWindow(BWindow* parent)
 
 	fBnAdd = new BButton("fBnAdd", B_TRANSLATE("Add"), new BMessage(MSG_ADD_STATION));
 
-	BLayoutBuilder::Group<>(this, B_VERTICAL, 0)
-		.AddGrid(3, 3, 0.0)
+	BLayoutBuilder::Group<>(this, B_VERTICAL, B_USE_SMALL_SPACING)
 		.SetInsets(B_USE_WINDOW_INSETS)
+		.AddGrid(3, 3, 0.0)
 		.Add(new BStringView("lbServices", B_TRANSLATE("Service")), 0, 0)
 		.Add(fDdServices, 1, 0)
 		.Add(fBnVisit, 2, 0)
@@ -167,12 +166,11 @@ StationFinderWindow::StationFinderWindow(BWindow* parent)
 		.GetLayout(&fSearchGrid)
 		.End()
 
-		.Add(new BScrollView("srollResult", fResultView, 0, false, true), 0.9)
+		.Add(new BScrollView("scrollResult", fResultView, 0, false, true), 0.9)
 
-		.AddGrid(3, 1, 0.0)
-		.SetInsets(B_USE_WINDOW_INSETS)
-		.Add(fBnAdd, 2, 0)
-		.SetExplicitAlignment(BAlignment(B_ALIGN_RIGHT, B_ALIGN_VERTICAL_UNSET))
+		.AddGroup(B_HORIZONTAL)
+		.AddGlue()
+		.Add(fBnAdd)
 		.End()
 		.End();
 
