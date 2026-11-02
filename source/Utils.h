@@ -28,6 +28,7 @@
 
 class Utils {
 public:
+	static BBitmap* GetBrowserIcon();
 	static BBitmap* ResourceBitmap(int32 id, float height);
 };
 

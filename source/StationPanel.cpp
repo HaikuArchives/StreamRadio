@@ -52,8 +52,7 @@ StationPanel::StationPanel(MainWindow* mainWindow, bool expanded)
 		= new BTextControl("surl", B_TRANSLATE("Website:"), "-", new BMessage(MSG_CHG_STATIONURL));
 
 	fVisitStation = new BButton("bnVisitStation", "", new BMessage(MSG_VISIT_STATION));
-	fVisitStation->SetIcon(Utils::ResourceBitmap(
-		RES_BN_WEB, be_control_look->ComposeIconSize(B_MINI_ICON).Height() * 0.8));
+	fVisitStation->SetIcon(Utils::GetBrowserIcon());
 	fStationUrl->GetPreferredSize(NULL, &height);
 	BSize size(height, height);
 	fVisitStation->SetExplicitSize(size);
