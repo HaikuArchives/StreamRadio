@@ -41,7 +41,7 @@ RadioApp::~RadioApp() {}
 void
 RadioApp::ReadyToRun()
 {
-	mainWindow = new MainWindow();
+	mainWindow = new MainWindow(Settings.WindowPosition());
 	mainWindow->Show();
 	if (fArgvMessage != NULL) {
 		mainWindow->PostMessage(fArgvMessage);
