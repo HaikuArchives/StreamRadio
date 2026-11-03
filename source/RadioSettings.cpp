@@ -188,6 +188,34 @@ RadioSettings::SetStationFinderName(const char* name)
 }
 
 
+BRect
+RadioSettings::WindowPosition()
+{
+	return GetRect("windowposition", BRect(-1, -1, -1, -1));
+}
+
+
+void
+RadioSettings::SetWindowPosition(BRect windowpos)
+{
+	SetRect("windowposition", windowpos);
+}
+
+
+int32
+RadioSettings::LastSelectedStation()
+{
+	return GetInt32("laststation", -1);
+}
+
+
+void
+RadioSettings::SetLastSelectedStation(int32 laststation)
+{
+	SetInt32("laststation", laststation);
+}
+
+
 status_t
 RadioSettings::_Load()
 {

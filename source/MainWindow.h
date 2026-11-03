@@ -47,7 +47,7 @@
 
 class MainWindow : public BWindow {
 public:
-	MainWindow();
+	MainWindow(BRect frame);
 	virtual ~MainWindow();
 
 	virtual void MessageReceived(BMessage* message);

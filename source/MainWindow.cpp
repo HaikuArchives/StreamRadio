@@ -43,12 +43,19 @@
 #define B_TRANSLATION_CONTEXT "MainWindow"
 
 
-MainWindow::MainWindow()
-	: BWindow(BRect(0, 0, 400, 200), B_TRANSLATE_SYSTEM_NAME("StreamRadio"), B_DOCUMENT_WINDOW,
+MainWindow::MainWindow(BRect frame)
+	: BWindow(frame, B_TRANSLATE_SYSTEM_NAME("StreamRadio"), B_DOCUMENT_WINDOW,
 		B_QUIT_ON_WINDOW_CLOSE | B_AUTO_UPDATE_SIZE_LIMITS),
 	  fStationFinder(NULL)
 {
 	fSettings = &((RadioApp*)be_app)->Settings;
+
+	if (frame == BRect(-1, -1, -1, -1)) {
+		CenterOnScreen();
+		ResizeTo(400, 200);
+		fSettings->SetWindowPosition(Frame());
+	} else
+		MoveOnScreen(B_MOVE_IF_PARTIALLY_OFFSCREEN );
 
 	fAllowParallelPlayback = fSettings->GetAllowParallelPlayback();
 	fMenuParallelPlayback = new BMenuItem(
@@ -99,13 +106,11 @@ MainWindow::MainWindow()
 	fStationList->SetInvocationMessage(new BMessage(MSG_INVOKE_STATION));
 	fStationList->SetSelectionMessage(new BMessage(MSG_SELECT_STATION));
 	fStationList->SetPlayMessage(new BMessage(MSG_INVOKE_STATION));
+	fStationList->Select(fSettings->LastSelectedStation());
+	fStationList->ScrollToSelection();
 
 	fStatusBar->SetExplicitAlignment(BAlignment(B_ALIGN_USE_FULL_WIDTH, B_ALIGN_VERTICAL_UNSET));
 	fStatusBar->SetExplicitMinSize(BSize(10, B_SIZE_UNSET));
-
-	float width = be_plain_font->StringWidth("W");
-	ResizeTo(width * 47, width * 25);
-	CenterOnScreen();
 }
 
 
@@ -356,6 +361,9 @@ MainWindow::MessageReceived(BMessage* message)
 bool
 MainWindow::QuitRequested()
 {
+	fSettings->SetWindowPosition(Frame());
+	fSettings->SetLastSelectedStation(fStationList->CurrentSelection());
+
 	fSettings->Save();
 	be_app->PostMessage(B_QUIT_REQUESTED);
 

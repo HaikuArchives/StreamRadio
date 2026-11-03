@@ -53,6 +53,12 @@ public:
 	bool GetAllowParallelPlayback();
 	void SetAllowParallelPlayback(bool set);
 
+	BRect WindowPosition();
+	void SetWindowPosition(BRect windowpos);
+
+	int32 LastSelectedStation();
+	void SetLastSelectedStation(int32 laststation);
+
 	StationsList* Stations;
 
 private:
