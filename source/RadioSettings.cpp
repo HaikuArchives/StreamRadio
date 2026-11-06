@@ -28,6 +28,23 @@
 const char* kSettingsFileName = "StreamRadio.settings";
 
 
+static int
+compare_station_index(const Station* a, const Station* b)
+{
+	int32 aIndex = a->fListIndex;
+	int32 bIndex = b->fListIndex;
+
+	// an index of -1 gets sorted to the end of the list
+	if (aIndex < 0)
+		return 1;
+
+	if (bIndex < 0)
+		return 0;
+
+	return (aIndex > bIndex);
+}
+
+
 StationsList::StationsList()
 	: BObjectList<Station>()
 {
@@ -42,12 +59,15 @@ StationsList::~StationsList()
 
 
 bool
-StationsList::AddItem(Station* station)
+StationsList::AddItem(Station* station, int32 listindex)
 {
 	if (FindItem(station->Name()))
 		return false;
 
-	return BObjectList<Station>::AddItem(station);
+	if (listindex < 0)
+		listindex = CountItems();
+
+	return BObjectList<Station>::AddItem(station, listindex);
 }
 
 
@@ -66,6 +86,13 @@ bool
 StationsList::RemoveItem(Station* station)
 {
 	return BObjectList<Station>::RemoveItem(station, false);
+}
+
+
+void
+StationsList::SortItems()
+{
+	BObjectList<Station>::SortItems(compare_station_index);
 }
 
 
@@ -92,7 +119,7 @@ StationsList::Load()
 	while ((status = stationsDir->GetNextEntry(&stationEntry)) == B_OK) {
 		Station* station = Station::LoadFromPlsFile(stationEntry.Name());
 		if (station != NULL && FindItem(station->Name()) == NULL)
-			AddItem(station);
+			AddItem(station, station->ItemListIndex());
 	}
 
 	return B_OK;
@@ -232,6 +259,7 @@ RadioSettings::_Load()
 	status = configFile.SetTo(&configDir, kSettingsFileName, B_READ_ONLY);
 	status = Unflatten(&configFile);
 	status = Stations->Load();
+	Stations->SortItems();
 
 	return status;
 }

@@ -134,6 +134,15 @@ public:
 		fUnsaved = true;
 	}
 
+	inline int32 ItemListIndex() { return fListIndex; }
+	inline void SetItemListIndex(int32 listIndex)
+	{
+		if (fListIndex != listIndex) {
+			fListIndex = listIndex;
+			fUnsaved = true;
+		}
+	}
+
 	inline int32 Channels() { return fChannels; }
 	inline int32 Encoding() { return fEncoding; }
 	inline size_t FrameSize() { return fFrameSize; }
@@ -141,6 +150,8 @@ public:
 
 	inline int32 Flags() { return fFlags; }
 	inline bool Flags(uint32 flags) { return (fFlags & flags) == flags; }
+
+	int32 fListIndex;
 
 protected:
 	void CheckFlags();
@@ -162,6 +173,7 @@ protected:
 	uint32 fBitRate;
 	uint32 fSampleRate;
 	BString fUniqueIdentifier;
+	int32 fListIndex;
 	uint32 fMetaInterval;
 	uint32 fChannels;
 	uint32 fFlags;
