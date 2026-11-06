@@ -440,7 +440,6 @@ Station::Load(BString name, BEntry* entry)
 		"listindex", B_INT32_TYPE, 0, &station->fListIndex, sizeof(station->fListIndex));
 	if (status == B_ENTRY_NOT_FOUND)
 		station->fListIndex = -1;
-
 	status = file.ReadAttrString("META:url", &readString);
 
 	station->fStreamUrl.SetUrlString(readString, true);

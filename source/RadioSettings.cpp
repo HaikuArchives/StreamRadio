@@ -59,15 +59,12 @@ StationsList::~StationsList()
 
 
 bool
-StationsList::AddItem(Station* station, int32 listindex)
+StationsList::AddItem(Station* station)
 {
 	if (FindItem(station->Name()))
 		return false;
 
-	if (listindex < 0)
-		listindex = CountItems();
-
-	return BObjectList<Station>::AddItem(station, listindex);
+	return BObjectList<Station>::AddItem(station);
 }
 
 
@@ -119,7 +116,7 @@ StationsList::Load()
 	while ((status = stationsDir->GetNextEntry(&stationEntry)) == B_OK) {
 		Station* station = Station::LoadFromPlsFile(stationEntry.Name());
 		if (station != NULL && FindItem(station->Name()) == NULL)
-			AddItem(station, station->ItemListIndex());
+			AddItem(station);
 	}
 
 	return B_OK;

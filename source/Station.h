@@ -173,7 +173,6 @@ protected:
 	uint32 fBitRate;
 	uint32 fSampleRate;
 	BString fUniqueIdentifier;
-	int32 fListIndex;
 	uint32 fMetaInterval;
 	uint32 fChannels;
 	uint32 fFlags;
