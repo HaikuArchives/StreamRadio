@@ -29,12 +29,11 @@ class StationsList : public BObjectList<Station> {
 public:
 	StationsList();
 	virtual ~StationsList();
-
 	virtual bool AddItem(Station* station);
+	virtual void SortItems();
 	bool RemoveItem(Station* station);
 	bool RemoveItem(BString* StationName);
 	Station* FindItem(BString* Name);
-
 	status_t Load();
 	void Save();
 };

@@ -298,7 +298,7 @@ StationListView::Sync(StationsList* stations)
 		if (Item(station) == NULL)
 			AddItem(station);
 	}
-
+	stations->SortItems();
 	Invalidate();
 
 	UnlockLooper();

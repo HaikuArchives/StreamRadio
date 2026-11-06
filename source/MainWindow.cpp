@@ -183,7 +183,7 @@ MainWindow::MessageReceived(BMessage* message)
 			if (station != NULL) {
 				status_t probeStatus = station->Probe();
 				if (probeStatus == B_OK) {
-					fSettings->Stations->AddItem(station);
+					fSettings->Stations->AddItem(station, -1); // add at end
 					fStationList->Sync(fSettings->Stations);
 					fSettings->Stations->Save();
 				} else {
@@ -236,7 +236,7 @@ MainWindow::MessageReceived(BMessage* message)
 		{
 			Station* station = NULL;
 			if (message->FindPointer("station", (void**)&station) == B_OK) {
-				fSettings->Stations->AddItem(station);
+				fSettings->Stations->AddItem(station, -1); // add at end
 				fStationList->Sync(fSettings->Stations);
 				fSettings->Stations->Save();
 			}
@@ -363,6 +363,13 @@ MainWindow::QuitRequested()
 {
 	fSettings->SetWindowPosition(Frame());
 	fSettings->SetLastSelectedStation(fStationList->CurrentSelection());
+
+	// save station order
+	for (int32 i = 0; i < fStationList->CountItems(); i++) {
+		StationListViewItem* stationItem = fStationList->ItemAt(i);
+		Station* station = stationItem->GetStation();
+		station->SetItemListIndex(i);
+	}
 
 	fSettings->Save();
 	be_app->PostMessage(B_QUIT_REQUESTED);
