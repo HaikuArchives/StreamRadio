@@ -22,6 +22,7 @@
 #include <IconUtils.h>
 #include <Resources.h>
 #include <TranslationUtils.h>
+#include <cstdio>
 
 #include "StreamPlayer.h"
 #include "Utils.h"
@@ -66,13 +67,15 @@ StationListViewItem::State()
 void
 StationListViewItem::DrawItem(BView* owner, BRect frame, bool complete)
 {
-	int index = ((BListView*)owner)->IndexOf(this);
+	StationListView* ownerList = dynamic_cast<StationListView*>(owner);
+	int32 index = 0;
+	if (ownerList != nullptr) // it's not a dragged item
+		index = ownerList->IndexOf(this);
 
-	StationListView* ownerList = (StationListView*)owner;
-	ownerList->SetHighColor(ui_color(
+	owner->SetHighColor(ui_color(
 		IsSelected() ? B_MENU_SELECTION_BACKGROUND_COLOR
 					 : ((index % 2) ? B_MENU_BACKGROUND_COLOR : B_DOCUMENT_BACKGROUND_COLOR)));
-	ownerList->FillRect(frame);
+	owner->FillRect(frame);
 
 	owner->SetHighColor(
 		ui_color(IsSelected() ? B_MENU_SELECTED_ITEM_TEXT_COLOR : B_MENU_ITEM_TEXT_COLOR));
@@ -108,7 +111,7 @@ StationListViewItem::DrawItem(BView* owner, BRect frame, bool complete)
 		BString("") << fStation->BitRate() / 1000.0 << " kbps " << fStation->Mime()->Type(),
 		frame.LeftTop() + BPoint(fItemHeight - SLV_INSET + SLV_PADDING, baseline));
 
-	if (ownerList->CanPlay() && fStation->Flags(STATION_URI_VALID)) {
+	if (ownerList != nullptr && ownerList->CanPlay() && fStation->Flags(STATION_URI_VALID)) {
 		BBitmap* bnBitmap = _GetButtonBitmap(State());
 		if (bnBitmap != NULL) {
 			owner->PushState();
@@ -201,6 +204,93 @@ StationListView::~StationListView()
 {
 	delete fPlayMsg;
 	MakeEmpty();
+}
+
+
+bool
+StationListView::InitiateDrag(BPoint point, int32 dragIndex, bool wasSelected)
+{
+	// No drag&drop in "Find station" window
+	if (!CanPlay())
+		return false;
+
+	BPoint pt;
+	uint32 buttons;
+	GetMouse(&pt, &buttons);
+
+	if ((buttons & B_SECONDARY_MOUSE_BUTTON) != 0)
+		return false;
+
+	StationListViewItem* sItem = dynamic_cast<StationListViewItem*>(ItemAt(dragIndex));
+
+	BMessage message;
+	message.what = MSG_STATION_ORDER;
+	message.AddInt32("index", dragIndex);
+
+	BRect dragRect(0.0f, 0.0f, Bounds().Width(), sItem->Height());
+	BBitmap* dragBitmap = new BBitmap(dragRect, B_RGB32, true);
+	if (dragBitmap->IsValid()) {
+		BView* view = new BView(dragBitmap->Bounds(), "dragview", B_FOLLOW_NONE, B_WILL_DRAW);
+		dragBitmap->AddChild(view);
+		dragBitmap->Lock();
+		sItem->DrawItem(view, dragRect, true);
+		view->SetHighColor(0, 0, 0, 255);
+		view->StrokeRect(view->Bounds());
+		view->Sync();
+
+		dragBitmap->Unlock();
+	} else {
+		delete dragBitmap;
+		dragBitmap = NULL;
+	}
+
+	if (dragBitmap != NULL)
+		DragMessage(&message, dragBitmap, B_OP_ALPHA, BPoint(0.0, 0.0));
+	else
+		DragMessage(&message, dragRect.OffsetToCopy(point), this);
+
+	return true;
+}
+
+
+void
+StationListView::MessageReceived(BMessage* message)
+{
+	switch (message->what) {
+		case MSG_STATION_ORDER:
+		{
+			int32 origIndex;
+			int32 dropIndex;
+			BPoint dropPoint;
+
+			origIndex = message->GetInt32("index", CountItems() - 1);
+			dropPoint = message->DropPoint();
+			dropIndex = IndexOf(ConvertFromScreen(dropPoint));
+			if (dropIndex > origIndex)
+				dropIndex--;
+			if (dropIndex < 0)
+				dropIndex = CountItems() - 1; // move to bottom
+
+			MoveItem(origIndex, dropIndex);
+			Select(dropIndex);
+			break;
+		}
+		default:
+			BView::MessageReceived(message);
+			break;
+	}
+}
+
+
+void
+StationListView::Draw(BRect rect)
+{
+	BListView::Draw(rect);
+
+	if (fDropRect.IsValid()) {
+		SetHighColor(255, 0, 0, 255);
+		StrokeRect(fDropRect);
+	}
 }
 
 
@@ -314,6 +404,46 @@ StationListView::SetPlayMessage(BMessage* fPlayMsg)
 
 
 void
+StationListView::MouseMoved(BPoint where, uint32 transit, const BMessage* dragMessage)
+{
+	if (dragMessage != NULL) {
+		switch (transit) {
+			case B_ENTERED_VIEW:
+			case B_INSIDE_VIEW:
+			{
+				int32 index = IndexOf(where);
+				if (index < 0)
+					index = CountItems();
+				fDropRect = ItemFrame(index);
+				if (fDropRect.IsValid()) {
+					fDropRect.top = fDropRect.top - 1;
+					fDropRect.bottom = fDropRect.top + 1;
+				} else {
+					fDropRect = ItemFrame(index - 1);
+					if (fDropRect.IsValid())
+						fDropRect.top = fDropRect.bottom - 1;
+					else {
+						// empty view, show indicator at top
+						fDropRect = Bounds();
+						fDropRect.bottom = fDropRect.top + 1;
+					}
+				}
+				Invalidate();
+				break;
+			}
+			case B_EXITED_VIEW:
+			{
+				fDropRect = BRect(-1, -1, -1, -1);
+				Invalidate();
+				break;
+			}
+		}
+	}
+	BListView::MouseMoved(where, transit, dragMessage);
+}
+
+
+void
 StationListView::MouseDown(BPoint where)
 {
 	fWhereDown = where;
@@ -342,6 +472,7 @@ StationListView::MouseUp(BPoint where)
 		}
 	}
 
+	fDropRect = BRect(-1, -1, -1, -1);
 	fWhereDown = BPoint(-1, -1);
 	BListView::MouseUp(where);
 }

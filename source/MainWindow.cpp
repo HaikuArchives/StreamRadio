@@ -183,7 +183,7 @@ MainWindow::MessageReceived(BMessage* message)
 			if (station != NULL) {
 				status_t probeStatus = station->Probe();
 				if (probeStatus == B_OK) {
-					fSettings->Stations->AddItem(station, -1); // add at end
+					fSettings->Stations->AddItem(station);
 					fStationList->Sync(fSettings->Stations);
 					fSettings->Stations->Save();
 				} else {
@@ -236,7 +236,7 @@ MainWindow::MessageReceived(BMessage* message)
 		{
 			Station* station = NULL;
 			if (message->FindPointer("station", (void**)&station) == B_OK) {
-				fSettings->Stations->AddItem(station, -1); // add at end
+				fSettings->Stations->AddItem(station);
 				fStationList->Sync(fSettings->Stations);
 				fSettings->Stations->Save();
 			}

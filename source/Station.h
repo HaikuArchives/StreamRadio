@@ -134,7 +134,7 @@ public:
 		fUnsaved = true;
 	}
 
-	inline int32 ItemListIndex() { return fListIndex; }
+	inline int32 ItemListIndex() const { return fListIndex; }
 	inline void SetItemListIndex(int32 listIndex)
 	{
 		if (fListIndex != listIndex) {
@@ -150,8 +150,6 @@ public:
 
 	inline int32 Flags() { return fFlags; }
 	inline bool Flags(uint32 flags) { return (fFlags & flags) == flags; }
-
-	int32 fListIndex;
 
 protected:
 	void CheckFlags();

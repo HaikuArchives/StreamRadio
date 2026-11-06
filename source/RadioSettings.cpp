@@ -21,7 +21,6 @@
 #include <FindDirectory.h>
 #include <Path.h>
 
-#include "Debug.h"
 #include "RadioSettings.h"
 
 
@@ -31,17 +30,20 @@ const char* kSettingsFileName = "StreamRadio.settings";
 static int
 compare_station_index(const Station* a, const Station* b)
 {
-	int32 aIndex = a->fListIndex;
-	int32 bIndex = b->fListIndex;
+	int32 aIndex = a->ItemListIndex();
+	int32 bIndex = b->ItemListIndex();
 
 	// an index of -1 gets sorted to the end of the list
+	if (aIndex == bIndex)
+		return 0;
+
 	if (aIndex < 0)
 		return 1;
 
 	if (bIndex < 0)
-		return 0;
+		return -1;
 
-	return (aIndex > bIndex);
+	return (aIndex - bIndex);
 }
 
 
@@ -59,15 +61,12 @@ StationsList::~StationsList()
 
 
 bool
-StationsList::AddItem(Station* station, int32 listindex)
+StationsList::AddItem(Station* station)
 {
 	if (FindItem(station->Name()))
 		return false;
 
-	if (listindex < 0)
-		listindex = CountItems();
-
-	return BObjectList<Station>::AddItem(station, listindex);
+	return BObjectList<Station>::AddItem(station);
 }
 
 
@@ -119,7 +118,7 @@ StationsList::Load()
 	while ((status = stationsDir->GetNextEntry(&stationEntry)) == B_OK) {
 		Station* station = Station::LoadFromPlsFile(stationEntry.Name());
 		if (station != NULL && FindItem(station->Name()) == NULL)
-			AddItem(station, station->ItemListIndex());
+			AddItem(station);
 	}
 
 	return B_OK;

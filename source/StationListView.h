@@ -29,6 +29,7 @@
 
 
 #define MSG_STATION_LIST 'STLS'
+#define MSG_STATION_ORDER 'STOR'
 
 
 class StationListView;
@@ -40,7 +41,6 @@ class StationListViewItem : public BListItem {
 public:
 	StationListViewItem(Station* station);
 	virtual ~StationListViewItem();
-
 	virtual void DrawItem(BView* owner, BRect frame, bool complete);
 
 	void DrawBufferFillBar(BView* owner, BRect frame);
@@ -74,6 +74,11 @@ public:
 	StationListView(bool canPlay = false);
 	virtual ~StationListView();
 
+	virtual bool InitiateDrag(BPoint point, int32 index, bool wasSelected);
+	virtual	void MouseMoved(BPoint where, uint32 transit, const BMessage* dragMessage);
+	virtual void Draw(BRect rect);
+	virtual	void MessageReceived(BMessage* message);
+
 	void Sync(StationsList* stations);
 
 	virtual bool AddItem(Station* station);
@@ -94,7 +99,9 @@ private:
 	virtual void MouseUp(BPoint where);
 
 private:
+	BRect fDropRect;
 	BPoint fWhereDown;
+
 	BMessage* fPlayMsg;
 	bool fCanPlay;
 };
