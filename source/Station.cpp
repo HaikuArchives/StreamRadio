@@ -59,8 +59,7 @@ const char* kMimePls = "audio/x-scpls";
 
 
 Station::Station(BString name, BString uri)
-	: fListIndex(-1),
-	  fName(name),
+	: fName(name),
 	  fStreamUrl(uri, true),
 	  fStationUrl(B_EMPTY_STRING, true),
 	  fGenre(B_EMPTY_STRING),
@@ -74,6 +73,7 @@ Station::Station(BString name, BString uri)
 	  fBitRate(0),
 	  fSampleRate(0),
 	  fUniqueIdentifier(B_EMPTY_STRING),
+	  fListIndex(-1),
 	  fMetaInterval(0),
 	  fChannels(0),
 	  fFlags(0)
@@ -440,7 +440,6 @@ Station::Load(BString name, BEntry* entry)
 		"listindex", B_INT32_TYPE, 0, &station->fListIndex, sizeof(station->fListIndex));
 	if (status == B_ENTRY_NOT_FOUND)
 		station->fListIndex = -1;
-
 	status = file.ReadAttrString("META:url", &readString);
 
 	station->fStreamUrl.SetUrlString(readString, true);
