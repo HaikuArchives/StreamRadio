@@ -76,11 +76,7 @@ StationFinderRadioNetwork::_GetKeywords(const char* path, int32 minStations)
 StationFinderRadioNetwork::StationFinderRadioNetwork()
 	: StationFinderService(),
 	  fIconLookupThread(-1),
-#if B_HAIKU_VERSION > B_HAIKU_VERSION_1_BETA_5
 	  fIconLookupList(100)
-#else
-	  fIconLookupList(100, true)
-#endif
 {
 	serviceName.SetTo(B_TRANSLATE(serviceNameInternal));
 	serviceHomePage.SetUrlString("https://www.radio-browser.info", false);

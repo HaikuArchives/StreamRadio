@@ -48,12 +48,7 @@
 #define MSG_UPDATE_STATION 'mUPS'
 
 
-#if B_HAIKU_VERSION > B_HAIKU_VERSION_1_BETA_5
 typedef BObjectList<Station, true> StationList;
-#else
-typedef BObjectList<Station> StationList;
-#endif
-
 typedef class StationFinderService* (*InstantiateFunc)();
 
 class StationFinderEntry {
@@ -140,11 +135,7 @@ protected:
 	BString serviceName;
 	BUrl serviceHomePage;
 	BBitmap* serviceLogo;
-#if B_HAIKU_VERSION > B_HAIKU_VERSION_1_BETA_5
 	BObjectList<FindByCapability, true> findByCapabilities;
-#else
-	BObjectList<FindByCapability> findByCapabilities;
-#endif
 
 	// Helper functions
 	BBitmap* RetrieveLogo(BUrl* url);

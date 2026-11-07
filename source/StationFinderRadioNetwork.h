@@ -61,11 +61,7 @@ private:
 	int searchCapabilityCodec = -1;
 	int searchCapabilityUuid = -1;
 
-#if B_HAIKU_VERSION > B_HAIKU_VERSION_1_BETA_5
 	BObjectList<IconLookup, true> fIconLookupList;
-#else
-	BObjectList<IconLookup> fIconLookupList;
-#endif
 	BLooper* fIconLookupNotify;
 };
 
