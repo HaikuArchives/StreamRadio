@@ -1,6 +1,6 @@
 name			streamradio
-version			1.0.1-1
-architecture	x86_64
+version			$VERSION-1
+architecture	$ARCH
 summary			"Find and listen to internet radio stations"
 description		"StreamRadio helps you find and listen to internet radio streams."
 packager		"Builder mmlr_x86_64 <hpkg-builder@haiku-os.org>"
@@ -13,8 +13,8 @@ copyrights {
 	"2018-2026 HaikuArchives Team"
 }
 provides {
-	streamradio = 1.0.1
-	app:streamradio = 1.0.1
+	streamradio = $VERSION
+	app:streamradio = $VERSION
 }
 requires {
 	haiku >= r1~beta6_hrev59866_79-1

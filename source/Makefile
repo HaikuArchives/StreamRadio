@@ -136,23 +136,32 @@ LINKER_FLAGS =
 #	Specify the version of this binary. Example:
 #		-app 3 4 0 d 0 -short 340 -long "340 "`echo -n -e '\302\251'`"1999 GNU GPL"
 #	This may also be specified in a resource.
-APP_VERSION =
+APP_VERSION = $(shell sed -n '/major/{s/.*major//;s/[^=]*=\s*\([^,]*\),\?/\1./g;s/\([^.]*\.[^.]*\.[^.]*\).*/\1/p}' $(RDEFS))
 
 
 TARGET_DIR := ../dist
 PACKAGE_DIR = $(TARGET_DIR)/package
-PACKAGE_NAME = $(TARGET_DIR)/$(NAME)-$(APP_VERSION)-$(ARCH).hpkg
+PACKAGE_NAME = $(TARGET_DIR)/$(shell echo $(NAME) | tr A-Z a-z)-$(APP_VERSION)-1-$(ARCH).hpkg
 
-package:: default
-	
+default: $(TARGET_DIR)
+
+package: default bindcatalogs
 	rm -rf $(PACKAGE_DIR)
 	mkdir -p $(PACKAGE_DIR)/apps
 	mkdir -p $(PACKAGE_DIR)/data/deskbar/menu/Applications
 	cp $(TARGET) $(PACKAGE_DIR)/apps
 	ln -s ../../../../apps/$(NAME) $(PACKAGE_DIR)/data/deskbar/menu/Applications/$(NAME)
-	cat ./PackageInfo | sed 's/$$VERSION/$(APP_VERSION)/' | sed 's/$$ARCH/$(ARCH)/' > $(TARGET_DIR)/PackageInfo_$(ARCH)
+	sed 's/$$VERSION/$(APP_VERSION)/;s/$$ARCH/$(ARCH)/' ./PackageInfo > $(TARGET_DIR)/PackageInfo_$(ARCH)
 	package create -C $(PACKAGE_DIR) -i $(TARGET_DIR)/PackageInfo_$(ARCH) $(PACKAGE_NAME)
 	copyattr -n BEOS:ICON $(TARGET) $(PACKAGE_NAME)
+
+$(TARGET_DIR):
+	mkdir -p "$(TARGET_DIR)"
+
+clean: clean_target_dir
+
+clean_target_dir:
+	-rm -rf "$(TARGET_DIR)"
 
 ## Include the Makefile-Engine
 DEVEL_DIRECTORY := \
