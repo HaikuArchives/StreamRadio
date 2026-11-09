@@ -110,7 +110,8 @@ StationFinderService::RegisterSearchCapability(const char* name, BStringList* ke
 StationFinderWindow::StationFinderWindow(BWindow* parent)
 	: BWindow(
 		BRect(0, 0, 300, 150), B_TRANSLATE("Find stations"), B_TITLED_WINDOW, B_CLOSE_ON_ESCAPE),
-	  fCurrentService(NULL)
+	  fCurrentService(NULL),
+	  fCurrentFindByCapability(NULL)
 {
 	fMessenger = new BMessenger(parent);
 
@@ -350,7 +351,7 @@ StationFinderWindow::SelectCapability(int index)
 		return;
 
 	FindByCapability* capability = fCurrentService->Capability(index);
-	if (capability == NULL)
+	if (capability == NULL || capability == fCurrentFindByCapability)
 		return;
 
 	if (capability->HasKeyWords()) {
@@ -376,6 +377,8 @@ StationFinderWindow::SelectCapability(int index)
 
 		Layout(true);
 	}
+
+	fCurrentFindByCapability = capability;
 }
 
 
