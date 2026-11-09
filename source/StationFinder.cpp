@@ -23,16 +23,16 @@ FindByCapability::FindByCapability(const char* name)
 }
 
 
-FindByCapability::FindByCapability(const char* name, BStringList* keyWords)
+FindByCapability::FindByCapability(const char* name, BStringList* keywords)
 	: FindByCapability(name)
 {
-	fKeywords.Add(*keyWords);
+	fKeywords.Add(*keywords);
 }
 
-FindByCapability::FindByCapability(const char* name, char* keyWords, char* delimiter)
+FindByCapability::FindByCapability(const char* name, char* keywords, char* delimiter)
 	: FindByCapability(name)
 {
-	BString tmp(keyWords);
+	BString tmp(keywords);
 	tmp.Split(delimiter, true, fKeywords);
 }
 
@@ -224,7 +224,7 @@ StationFinderWindow::MessageReceived(BMessage* msg)
 				}
 			} else if (fKwSearch->Value() >= 0) {
 				DoSearch(fCurrentService->Capability(fDdSearchBy->Value())
-							 ->KeyWords()
+							 ->Keywords()
 							 ->StringAt(fKwSearch->Value()));
 			}
 
@@ -354,12 +354,12 @@ StationFinderWindow::SelectCapability(int index)
 	if (capability == NULL || capability == fCurrentFindByCapability)
 		return;
 
-	if (capability->HasKeyWords()) {
+	if (capability->HasKeywords()) {
 		while (fKwSearch->CountOptions() > 0)
 			fKwSearch->RemoveOptionAt(0);
 
-		for (int32 i = 0; i < capability->KeyWords()->CountStrings(); i++)
-			fKwSearch->AddOption(capability->KeyWords()->StringAt(i), i);
+		for (int32 i = 0; i < capability->Keywords()->CountStrings(); i++)
+			fKwSearch->AddOption(capability->Keywords()->StringAt(i), i);
 
 		fSearchGrid->RemoveView(fTxSearch);
 		fSearchGrid->AddView(fKwSearch, 1, 2);
