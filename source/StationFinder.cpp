@@ -17,7 +17,8 @@
 
 
 FindByCapability::FindByCapability(const char* name)
-	: fKeywords(true)
+	: BLocker(),
+	  fKeywords()
 {
 	fName.SetTo(name);
 }
@@ -40,6 +41,18 @@ FindByCapability::~FindByCapability()
 {
 	fKeywords.MakeEmpty();
 }
+
+void
+FindByCapability::UpdateKeywords(const BStringList* keywords)
+{
+	if (Lock()) {
+		fKeywords.MakeEmpty();
+		if (keywords != NULL)
+			fKeywords.Add(*keywords);
+		Unlock();
+	}
+}
+
 
 StationFinderService::StationFinderService()
 	: serviceName("unknown"),
@@ -104,6 +117,21 @@ StationFinderService::RegisterSearchCapability(const char* name, BStringList* ke
 		return findByCapabilities.IndexOf(newCapability);
 	else
 		return -1;
+}
+
+
+void
+StationFinderService::UpdateKeywords(uint32 searchCapability, const BStringList* keywords)
+{
+	FindByCapability* capability = findByCapabilities.ItemAt(searchCapability);
+	if (capability != NULL) {
+		capability->UpdateKeywords(keywords);
+
+		BMessage* msg = new BMessage(MSG_UPDATE_KEYWORDS);
+		msg->AddUInt32("capability", searchCapability);
+		msg->AddSpecifier("Window", B_TRANSLATE("Find stations"));
+		be_app->PostMessage(msg);
+	}
 }
 
 
@@ -230,13 +258,15 @@ StationFinderWindow::MessageReceived(BMessage* msg)
 			if (fKwSearch->Value() < 0)
 				break;
 
-			int32 firstValue = 0;
-			if (fKwSearch->GetOptionAt(0, NULL, &firstValue) && firstValue < 0)
-				fKwSearch->RemoveOptionAt(0);
+			FindByCapability* capability = fCurrentService->Capability(fDdSearchBy->Value());
+			if (capability->Lock()) {
+				int32 firstValue = 0;
+				if (fKwSearch->GetOptionAt(0, NULL, &firstValue) && firstValue < 0)
+					fKwSearch->RemoveOptionAt(0);
 
-			DoSearch(fCurrentService->Capability(fDdSearchBy->Value())
-				->Keywords()
-				->StringAt(fKwSearch->Value()));
+				DoSearch(capability->Keywords()->StringAt(fKwSearch->Value()));
+				capability->Unlock();
+			}
 
 			break;
 		}
@@ -318,6 +348,19 @@ StationFinderWindow::MessageReceived(BMessage* msg)
 			fBnSearch->MakeDefault(true);
 			break;
 
+		case MSG_UPDATE_KEYWORDS:
+		{
+			uint32 capability;
+			if (msg->FindUInt32("capability", &capability) == B_OK) {
+				UpdateCapability(capability);
+			} else if (fCurrentService != NULL) {
+				for (capability = 0; capability < fCurrentService->CountCapabilities();
+					capability++)
+					UpdateCapability(capability);
+			}
+			break;
+		}
+
 		default:
 			BWindow::MessageReceived(msg);
 	}
@@ -364,34 +407,50 @@ StationFinderWindow::SelectCapability(int index)
 	if (capability == NULL || capability == fCurrentFindByCapability)
 		return;
 
-	if (capability->HasKeywords()) {
-		while (fKwSearch->CountOptions() > 0)
-			fKwSearch->RemoveOptionAt(0);
+	fCurrentFindByCapability = capability;
+	_RebuildSearchForWidget();
+}
 
-		fKwSearch->AddOption(B_TRANSLATE("Choose term"), -1);
-		for (int32 i = 0; i < capability->Keywords()->CountStrings(); i++)
-			fKwSearch->AddOption(capability->Keywords()->StringAt(i), i);
 
-		fSearchGrid->RemoveView(fTxSearch);
-		fSearchGrid->AddView(fKwSearch, 1, 2);
+void
+StationFinderWindow::UpdateCapability(int index)
+{
+	if (fCurrentService == NULL)
+		return;
 
-		fKwSearch->SetEnabled(true);
-		fTxSearch->SetEnabled(false);
-		fBnSearch->SetEnabled(false);
+	FindByCapability* capability = fCurrentService->Capability(index);
+	if (capability == NULL || capability != fCurrentFindByCapability)
+		return;
 
-		Layout(true);
+	if (!capability->Lock())
+		return;
+
+	const char* widgetValue = "";
+	if (fKwSearch->IsEnabled()) {
+		int32 value = -1;
+		fKwSearch->SelectedOption(&widgetValue, &value);
+		if (value < 0)
+			widgetValue = "";
 	} else {
-		fSearchGrid->RemoveView(fKwSearch);
-		fSearchGrid->AddView(fTxSearch, 1, 2);
-
-		fKwSearch->SetEnabled(false);
-		fTxSearch->SetEnabled(true);
-		fBnSearch->SetEnabled(true);
-
-		Layout(true);
+		widgetValue = fTxSearch->Text();
 	}
 
-	fCurrentFindByCapability = capability;
+	char* term = strdup(widgetValue);
+	_RebuildSearchForWidget();
+	if (capability->HasKeywords()) {
+		if (term[0] != '\0') {
+			int32 newValue = capability->Keywords()->IndexOf(term);
+			if (newValue >= 0) {
+				fKwSearch->RemoveOptionAt(0);
+				fKwSearch->SetValue(newValue);
+			}
+		}
+	} else {
+		fTxSearch->SetText(term);
+	}
+	free(term);
+
+	capability->Unlock();
 }
 
 
@@ -417,4 +476,41 @@ StationFinderWindow::DoSearch(const char* text)
 	}
 
 	be_app->SetCursor(B_CURSOR_SYSTEM_DEFAULT);
+}
+
+
+void
+StationFinderWindow::_RebuildSearchForWidget()
+{
+	if (!fCurrentFindByCapability->Lock())
+		return;
+
+	if (fCurrentFindByCapability->HasKeywords()) {
+		while (fKwSearch->CountOptions() > 0)
+			fKwSearch->RemoveOptionAt(0);
+
+		fKwSearch->AddOption(B_TRANSLATE("Choose term"), -1);
+		for (int32 i = 0; i < fCurrentFindByCapability->Keywords()->CountStrings(); i++)
+			fKwSearch->AddOption(fCurrentFindByCapability->Keywords()->StringAt(i), i);
+
+		fSearchGrid->RemoveView(fTxSearch);
+		fSearchGrid->AddView(fKwSearch, 1, 2);
+
+		fKwSearch->SetEnabled(true);
+		fTxSearch->SetEnabled(false);
+		fBnSearch->SetEnabled(false);
+
+		Layout(true);
+	} else {
+		fSearchGrid->RemoveView(fKwSearch);
+		fSearchGrid->AddView(fTxSearch, 1, 2);
+
+		fKwSearch->SetEnabled(false);
+		fTxSearch->SetEnabled(true);
+		fBnSearch->SetEnabled(true);
+
+		Layout(true);
+	}
+
+	fCurrentFindByCapability->Unlock();
 }
