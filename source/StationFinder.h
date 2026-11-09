@@ -18,11 +18,13 @@
 #define _STATION_FINDER_H
 
 
+#include <cassert>
 #include <iterator>
 #include <set>
 #include <vector>
 
 #include <GridLayout.h>
+#include <Locker.h>
 #include <Messenger.h>
 #include <ObjectList.h>
 #include <OptionPopUp.h>
@@ -46,6 +48,7 @@
 #define MSG_VISIT_SERVICE 'mVSV'
 #define MSG_SELECT_STATION 'mSLS'
 #define MSG_UPDATE_STATION 'mUPS'
+#define MSG_UPDATE_KEYWORDS 'mUKW'
 
 
 typedef BObjectList<Station, true> StationList;
@@ -91,7 +94,7 @@ private:
 
 static StationFinderServices stationFinderServices;
 
-class FindByCapability {
+class FindByCapability : public BLocker {
 public:
 	FindByCapability(const char* name);
 	FindByCapability(const char* name, BStringList* keywords);
@@ -99,8 +102,13 @@ public:
 	~FindByCapability();
 
 	bool HasKeywords() { return !fKeywords.IsEmpty(); }
-	const BStringList* Keywords() { return &fKeywords; }
+	const BStringList* Keywords()
+	{
+		assert(IsLocked());
+		return &fKeywords;
+	}
 	const char* Name() { return fName.String(); }
+	void UpdateKeywords(const BStringList*);
 
 private:
 	BString fName;
@@ -141,6 +149,7 @@ protected:
 	BBitmap* RetrieveLogo(BUrl* url);
 	uint32 RegisterSearchCapability(const char* name);
 	uint32 RegisterSearchCapability(const char* name, BStringList* keywords);
+	void UpdateKeywords(uint32 searchCapability, const BStringList* keywords);
 };
 
 class StationFinderWindow : public BWindow {
@@ -153,7 +162,11 @@ public:
 
 	void SelectService(int index);
 	void SelectCapability(int index);
+	void UpdateCapability(int index);
 	void DoSearch(const char* text);
+
+private:
+	void _RebuildSearchForWidget();
 
 private:
 	StationFinderService* fCurrentService;

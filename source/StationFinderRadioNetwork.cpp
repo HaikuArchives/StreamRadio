@@ -53,7 +53,7 @@ StationFinderRadioNetwork::_GetKeywords(const char* path, int32 minStations)
 
 	BMessage* parsedData = HttpUtils::GetMsgFromREST(&keywordUrl);
 	if (parsedData != NULL) {
-		BStringList* keywords = new BStringList(true);
+		BStringList* keywords = new BStringList();
 		char* name;
 		uint32 type;
 		int32 count;
