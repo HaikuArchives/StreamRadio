@@ -94,12 +94,12 @@ static StationFinderServices stationFinderServices;
 class FindByCapability {
 public:
 	FindByCapability(const char* name);
-	FindByCapability(const char* name, BStringList* keyWords);
-	FindByCapability(const char* name, char* keyWords, char* delimiter);
+	FindByCapability(const char* name, BStringList* keywords);
+	FindByCapability(const char* name, char* keywords, char* delimiter);
 	~FindByCapability();
 
-	bool HasKeyWords() { return !fKeywords.IsEmpty(); }
-	const BStringList* KeyWords() { return &fKeywords; }
+	bool HasKeywords() { return !fKeywords.IsEmpty(); }
+	const BStringList* Keywords() { return &fKeywords; }
 	const char* Name() { return fName.String(); }
 
 private:
@@ -140,7 +140,7 @@ protected:
 	// Helper functions
 	BBitmap* RetrieveLogo(BUrl* url);
 	uint32 RegisterSearchCapability(const char* name);
-	uint32 RegisterSearchCapability(const char* name, BStringList* keyWords);
+	uint32 RegisterSearchCapability(const char* name, BStringList* keywords);
 };
 
 class StationFinderWindow : public BWindow {
