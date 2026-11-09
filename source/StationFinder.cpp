@@ -217,16 +217,26 @@ StationFinderWindow::MessageReceived(BMessage* msg)
 	switch (msg->what) {
 		case MSG_BNSEARCH:
 		{
-			if (fTxSearch->IsEnabled()) {
-				if (fTxSearch->Text()[0]) {
-					DoSearch(fTxSearch->Text());
-					fResultView->MakeFocus(true);
-				}
-			} else if (fKwSearch->Value() >= 0) {
-				DoSearch(fCurrentService->Capability(fDdSearchBy->Value())
-							 ->Keywords()
-							 ->StringAt(fKwSearch->Value()));
+			if (fTxSearch->Text()[0]) {
+				DoSearch(fTxSearch->Text());
+				fResultView->MakeFocus(true);
 			}
+
+			break;
+		}
+
+		case MSG_KWSEARCH:
+		{
+			if (fKwSearch->Value() < 0)
+				break;
+
+			int32 firstValue = 0;
+			if (fKwSearch->GetOptionAt(0, NULL, &firstValue) && firstValue < 0)
+				fKwSearch->RemoveOptionAt(0);
+
+			DoSearch(fCurrentService->Capability(fDdSearchBy->Value())
+				->Keywords()
+				->StringAt(fKwSearch->Value()));
 
 			break;
 		}
@@ -358,6 +368,7 @@ StationFinderWindow::SelectCapability(int index)
 		while (fKwSearch->CountOptions() > 0)
 			fKwSearch->RemoveOptionAt(0);
 
+		fKwSearch->AddOption(B_TRANSLATE("Choose term"), -1);
 		for (int32 i = 0; i < capability->Keywords()->CountStrings(); i++)
 			fKwSearch->AddOption(capability->Keywords()->StringAt(i), i);
 
@@ -366,6 +377,7 @@ StationFinderWindow::SelectCapability(int index)
 
 		fKwSearch->SetEnabled(true);
 		fTxSearch->SetEnabled(false);
+		fBnSearch->SetEnabled(false);
 
 		Layout(true);
 	} else {
@@ -374,6 +386,7 @@ StationFinderWindow::SelectCapability(int index)
 
 		fKwSearch->SetEnabled(false);
 		fTxSearch->SetEnabled(true);
+		fBnSearch->SetEnabled(true);
 
 		Layout(true);
 	}
@@ -385,6 +398,9 @@ StationFinderWindow::SelectCapability(int index)
 void
 StationFinderWindow::DoSearch(const char* text)
 {
+	if (text == NULL || text[0] == '\0')
+		return;
+
 	fResultView->MakeEmpty();
 	if (fCurrentService == NULL)
 		return;
