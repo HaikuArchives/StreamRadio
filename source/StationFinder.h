@@ -157,6 +157,7 @@ public:
 
 private:
 	StationFinderService* fCurrentService;
+	FindByCapability* fCurrentFindByCapability;
 
 	BMessenger* fMessenger;
 	BTextControl* fTxSearch;
