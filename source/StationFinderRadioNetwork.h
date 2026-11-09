@@ -45,9 +45,10 @@ public:
 private:
 	static const char* serviceNameInternal;
 
-	static BStringList* _GetKeywords(const char* path, int32 minStations);
+	static int32 _GetKeywords(void* data);
 	static int32 _IconLookupFunc(void* data);
 	void _WaitForIconLookupThread();
+	uint32 _RegisterUnknownKeywordsSearch(const char* name, const char* path, int32 minStations);
 
 private:
 	static BString sBaseUrl;
@@ -63,6 +64,9 @@ private:
 
 	BObjectList<IconLookup, true> fIconLookupList;
 	BLooper* fIconLookupNotify;
+
+	thread_id fKeywordsThread[4];
+	unsigned fKeywordsThreadCount;
 };
 
 
