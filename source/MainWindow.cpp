@@ -55,7 +55,7 @@ MainWindow::MainWindow(BRect frame)
 		ResizeTo(400, 200);
 		fSettings->SetWindowPosition(Frame());
 	} else
-		MoveOnScreen(B_MOVE_IF_PARTIALLY_OFFSCREEN );
+		MoveOnScreen(B_MOVE_IF_PARTIALLY_OFFSCREEN);
 
 	fAllowParallelPlayback = fSettings->GetAllowParallelPlayback();
 	fMenuParallelPlayback = new BMenuItem(
