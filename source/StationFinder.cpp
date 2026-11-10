@@ -109,7 +109,8 @@ StationFinderService::RegisterSearchCapability(const char* name, BStringList* ke
 
 StationFinderWindow::StationFinderWindow(BWindow* parent)
 	: BWindow(
-		BRect(0, 0, 300, 150), B_TRANSLATE("Find stations"), B_TITLED_WINDOW, B_CLOSE_ON_ESCAPE),
+		BRect(0, 0, 300, 150), B_TRANSLATE("Find stations"), B_TITLED_WINDOW,
+			B_CLOSE_ON_ESCAPE | B_AUTO_UPDATE_SIZE_LIMITS),
 	  fCurrentService(NULL)
 {
 	fMessenger = new BMessenger(parent);
@@ -128,14 +129,26 @@ StationFinderWindow::StationFinderWindow(BWindow* parent)
 	BSize size(height, height);
 	fBnSearch->SetExplicitSize(size);
 
-	fDdServices = new BOptionPopUp("fDdServices", NULL, new BMessage(MSG_SELECT_SERVICE));
 	int currentServiceIndex = 0;
 	const char* settingsServiceName = ((RadioApp*)be_app)->Settings.StationFinderName();
-	for (int32 i = 0; i < stationFinderServices.CountItems(); i++) {
-		BString* serviceName = stationFinderServices.Name(i);
-		if (settingsServiceName && serviceName->Compare(settingsServiceName))
-			currentServiceIndex = i;
-		fDdServices->AddOption(serviceName->String(), i);
+
+	BView* serviceChoice;
+	if (stationFinderServices.CountItems() > 1) {
+		fDdServices = new BOptionPopUp("fDdServices", NULL, new BMessage(MSG_SELECT_SERVICE));
+		for (int32 i = 0; i < stationFinderServices.CountItems(); i++) {
+			BString* serviceName = stationFinderServices.Name(i);
+			if (settingsServiceName && serviceName->Compare(settingsServiceName))
+				currentServiceIndex = i;
+			fDdServices->AddOption(serviceName->String(), i);
+		}
+		serviceChoice = fDdServices;
+	} else {
+		fDdServices = NULL;
+		BStringView* svService = new BStringView("SvService",
+			stationFinderServices.Name(0)->String());
+		svService->SetExplicitMaxSize(BSize(B_SIZE_UNLIMITED, B_SIZE_UNSET));
+		svService->SetAlignment(B_ALIGN_CENTER);
+		serviceChoice = svService;
 	}
 
 	fBnVisit = new BButton("fBnVisit", "", new BMessage(MSG_VISIT_SERVICE));
@@ -153,7 +166,7 @@ StationFinderWindow::StationFinderWindow(BWindow* parent)
 		.SetInsets(B_USE_WINDOW_INSETS)
 		.AddGrid(3, 3, 0.0)
 		.Add(new BStringView("lbServices", B_TRANSLATE("Service")), 0, 0)
-		.Add(fDdServices, 1, 0)
+		.Add(serviceChoice, 1, 0)
 		.Add(fBnVisit, 2, 0)
 
 		.Add(new BStringView("lbSearchBy", B_TRANSLATE("Search by")), 0, 1)
@@ -188,7 +201,10 @@ StationFinderWindow::StationFinderWindow(BWindow* parent)
 	fTxSearch->StartWatchingAll(this);
 
 	SelectService(currentServiceIndex);
-	fDdServices->SetValue(currentServiceIndex);
+	if (fDdServices != NULL)
+		fDdServices->SetValue(currentServiceIndex);
+	else
+		SelectService(0);
 }
 
 
@@ -283,7 +299,8 @@ StationFinderWindow::MessageReceived(BMessage* msg)
 		}
 
 		case MSG_SELECT_SERVICE:
-			SelectService(fDdServices->Value());
+			if (fDdServices != NULL)
+				SelectService(fDdServices->Value());
 			break;
 
 		case MSG_SEARCH_BY:
