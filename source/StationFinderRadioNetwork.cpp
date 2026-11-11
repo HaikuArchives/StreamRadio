@@ -44,16 +44,25 @@ IconLookup::IconLookup(Station* station, BUrl iconUrl)
 }
 
 
-BStringList*
-StationFinderRadioNetwork::_GetKeywords(const char* path, int32 minStations)
+struct GetKeywordsData {
+	const char* path;
+	int32 minStations;
+	uint32 searchCapability;
+	StationFinderService* service;
+};
+
+
+int32
+StationFinderRadioNetwork::_GetKeywords(void* _data)
 {
+	GetKeywordsData* data = (GetKeywordsData*)_data;
 	BString keywordUrlString(sBaseUrl);
-	keywordUrlString.Append(path);
+	keywordUrlString.Append(data->path);
 	BUrl keywordUrl(keywordUrlString, false);
 
 	BMessage* parsedData = HttpUtils::GetMsgFromREST(&keywordUrl);
 	if (parsedData != NULL) {
-		BStringList* keywords = new BStringList(true);
+		BStringList keywords;
 		char* name;
 		uint32 type;
 		int32 count;
@@ -63,54 +72,38 @@ StationFinderRadioNetwork::_GetKeywords(const char* path, int32 minStations)
 			if (parsedData->FindMessage(name, &keywordMessage) == B_OK) {
 				const char* keyword = keywordMessage.FindString("name");
 				double stationCount = keywordMessage.FindDouble("stationcount");
-				if (stationCount > minStations)
-					keywords->Add(keyword);
+				if (stationCount > data->minStations)
+					keywords.Add(keyword);
 			}
 		}
 		delete parsedData;
-		return keywords;
+		data->service->Capability(data->searchCapability)->UpdateKeywords(&keywords);
 	}
-	return NULL;
+
+	delete data;
+	return B_OK;
 };
 
 StationFinderRadioNetwork::StationFinderRadioNetwork()
 	: StationFinderService(),
 	  fIconLookupThread(-1),
-	  fIconLookupList(100)
+	  fIconLookupList(100),
+	  fKeywordsThreadCount(0)
 {
 	serviceName.SetTo(B_TRANSLATE(serviceNameInternal));
 	serviceHomePage.SetUrlString("https://www.radio-browser.info", false);
 
-	BStringList* keywords;
-
 	// Register different search capabilities
 	searchCapabilityName = RegisterSearchCapability("Name");
 
-	// Tag Search (dropdown)
-	keywords = _GetKeywords("json/tags?limit=1000000&hidebroken=true", 20);
-	if (keywords != NULL) {
-		searchCapabilityTag = RegisterSearchCapability("Tag", keywords);
-		delete keywords;
-	}
-
-	// Language Search (dropdown)
-	keywords = _GetKeywords("json/languages?limit=1000000&hidebroken=true", 20);
-	if (keywords != NULL) {
-		searchCapabilityLanguage = RegisterSearchCapability("Language", keywords);
-		delete keywords;
-	}
-
-	keywords = _GetKeywords("json/countries?limit=1000000&hidebroken=true", 10);
-	if (keywords != NULL) {
-		searchCapabilityCountry = RegisterSearchCapability("Country", keywords);
-		delete keywords;
-	}
-
-	keywords = _GetKeywords("json/codecs?limit=1000000&hidebroken=true", 10);
-	if (keywords != NULL && !keywords->IsEmpty()) {
-		searchCapabilityCodec = RegisterSearchCapability("Codec", keywords);
-		delete keywords;
-	}
+	searchCapabilityTag = _RegisterUnknownKeywordsSearch("Tag",
+		"json/tags?limit=1000000&hidebroken=true", 20);
+	searchCapabilityLanguage = _RegisterUnknownKeywordsSearch("Language",
+		"json/languages?limit=1000000&hidebroken=true", 20);
+	searchCapabilityCountry = _RegisterUnknownKeywordsSearch("Country",
+		"json/countries?limit=1000000&hidebroken=true", 10);
+	searchCapabilityCodec = _RegisterUnknownKeywordsSearch("Codec",
+		"json/codecs?limit=1000000&hidebroken=true", 10);
 
 	searchCapabilityUuid = RegisterSearchCapability("Unique identifier");
 }
@@ -120,6 +113,13 @@ StationFinderRadioNetwork::~StationFinderRadioNetwork()
 {
 	_WaitForIconLookupThread();
 	fIconLookupList.MakeEmpty(true);
+
+	for (unsigned i = 0; i < fKeywordsThreadCount; i++) {
+		if (fKeywordsThread[i] >= 0) {
+			status_t status;
+			wait_for_thread(fKeywordsThread[i], &status);
+		}
+	}
 }
 
 
@@ -266,6 +266,22 @@ StationFinderRadioNetwork::_IconLookupFunc(void* data)
 	_this->fIconLookupThread = -1;
 
 	return B_OK;
+}
+
+
+uint32
+StationFinderRadioNetwork::_RegisterUnknownKeywordsSearch(const char* name, const char* path,
+	int32 minStations)
+{
+	assert(fKeywordsThreadCount < B_COUNT_OF(fKeywordsThread));
+
+	uint32 searchCapability = RegisterSearchCapability(name);
+
+	fKeywordsThread[fKeywordsThreadCount] = spawn_thread(&_GetKeywords, "keywords download",
+		B_NORMAL_PRIORITY, new GetKeywordsData{path, minStations, searchCapability, this});
+	resume_thread(fKeywordsThread[fKeywordsThreadCount++]);
+
+	return searchCapability;
 }
 
 
