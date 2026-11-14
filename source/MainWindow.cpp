@@ -364,6 +364,13 @@ MainWindow::QuitRequested()
 	fSettings->SetWindowPosition(Frame());
 	fSettings->SetLastSelectedStation(fStationList->CurrentSelection());
 
+	// save station order
+	for (int32 i = 0; i < fStationList->CountItems(); i++) {
+		StationListViewItem* stationItem = fStationList->ItemAt(i);
+		Station* station = stationItem->GetStation();
+		station->SetItemListIndex(i);
+	}
+
 	fSettings->Save();
 	be_app->PostMessage(B_QUIT_REQUESTED);
 

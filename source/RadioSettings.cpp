@@ -28,6 +28,23 @@
 const char* kSettingsFileName = "StreamRadio.settings";
 
 
+static int
+compare_station_index(const Station* a, const Station* b)
+{
+	int32 aIndex = a->fListIndex;
+	int32 bIndex = b->fListIndex;
+
+	// an index of -1 gets sorted to the end of the list
+	if (aIndex < 0)
+		return 1;
+
+	if (bIndex < 0)
+		return 0;
+
+	return (aIndex > bIndex);
+}
+
+
 StationsList::StationsList()
 	: BObjectList<Station>()
 {
@@ -66,6 +83,13 @@ bool
 StationsList::RemoveItem(Station* station)
 {
 	return BObjectList<Station>::RemoveItem(station, false);
+}
+
+
+void
+StationsList::SortItems()
+{
+	BObjectList<Station>::SortItems(compare_station_index);
 }
 
 
@@ -232,6 +256,7 @@ RadioSettings::_Load()
 	status = configFile.SetTo(&configDir, kSettingsFileName, B_READ_ONLY);
 	status = Unflatten(&configFile);
 	status = Stations->Load();
+	Stations->SortItems();
 
 	return status;
 }
