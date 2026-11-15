@@ -105,6 +105,14 @@ StationPanel::AttachedToWindow()
 
 
 void
+StationPanel::Draw(BRect rect)
+{
+	BRect bounds = fLogo->Bounds();
+	be_control_look->DrawBorder(fLogo, bounds, rect, HighColor(), B_PLAIN_BORDER);
+}
+
+
+void
 StationPanel::SetStation(StationListViewItem* stationItem)
 {
 	if (stationItem == NULL) {
