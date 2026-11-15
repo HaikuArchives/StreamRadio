@@ -55,6 +55,8 @@ public:
 
 	virtual void SetVisible(bool visible);
 
+	StationListView* fStationList;
+
 private:
 	void _Invoke(StationListViewItem* stationItem);
 	void _TogglePlay(StationListViewItem* stationItem);
@@ -62,7 +64,6 @@ private:
 private:
 	RadioSettings* fSettings;
 	BMenuBar* fMainMenu;
-	StationListView* fStationList;
 	StationFinderWindow* fStationFinder;
 	StationPanel* fStationPanel;
 	BStringView* fStatusBar;
