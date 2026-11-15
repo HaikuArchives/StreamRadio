@@ -72,16 +72,21 @@ StationListViewItem::DrawItem(BView* owner, BRect frame, bool complete)
 	if (ownerList != nullptr)  // it's not a dragged item
 		index = ownerList->IndexOf(this);
 
-	owner->SetHighColor(ui_color(
-		IsSelected() ? B_MENU_SELECTION_BACKGROUND_COLOR
-					 : ((index % 2) ? B_MENU_BACKGROUND_COLOR : B_DOCUMENT_BACKGROUND_COLOR)));
-	owner->FillRect(frame);
+	rgb_color theme = ui_color(B_LIST_BACKGROUND_COLOR);
+	float tint = theme.IsDark() ? 0.91 : 1.09;
+	rgb_color background = IsSelected() ? ui_color(B_LIST_SELECTED_BACKGROUND_COLOR)
+			: ((index % 2) ? tint_color(ui_color(B_LIST_BACKGROUND_COLOR), tint)
+				: ui_color(B_LIST_BACKGROUND_COLOR));
+
+	ownerList->SetHighColor(background);
+	ownerList->FillRect(frame);
+
+	ownerList->SetHighColor(tint_color(background, tint * tint));
+	ownerList->StrokeLine(frame.LeftBottom(), frame.RightBottom());
 
 	owner->SetHighColor(
-		ui_color(IsSelected() ? B_MENU_SELECTED_ITEM_TEXT_COLOR : B_MENU_ITEM_TEXT_COLOR));
-	owner->SetLowColor(ui_color(
-		IsSelected() ? B_MENU_SELECTION_BACKGROUND_COLOR
-					 : ((index % 2) ? B_MENU_BACKGROUND_COLOR : B_DOCUMENT_BACKGROUND_COLOR)));
+		ui_color(IsSelected() ? B_LIST_SELECTED_ITEM_TEXT_COLOR : B_LIST_ITEM_TEXT_COLOR));
+	owner->SetLowColor(background);
 
 	BRect target(SLV_INSET, SLV_INSET, fItemHeight - 2 * SLV_INSET, fItemHeight - 2 * SLV_INSET);
 	target.OffsetBy(frame.LeftTop());
@@ -96,10 +101,12 @@ StationListViewItem::DrawItem(BView* owner, BRect frame, bool complete)
 	font.GetHeight(&fontHeight);
 	float baseline = SLV_INSET + fontHeight.ascent + fontHeight.leading;
 
+	owner->SetFont(be_bold_font);
 	owner->SetFontSize(font.Size());
 	owner->DrawString(fStation->Name()->String(),
 		frame.LeftTop() + BPoint(fItemHeight - SLV_INSET + SLV_PADDING, SLV_INSET + baseline));
 
+	owner->SetFont(be_plain_font);
 	owner->SetFontSize(ceilf(font.Size() * 0.8));
 	owner->GetFontHeight(&fontHeight);
 	baseline += fontHeight.ascent + fontHeight.descent + fontHeight.leading;
