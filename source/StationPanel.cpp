@@ -213,10 +213,12 @@ StationPanel::MessageReceived(BMessage* msg)
 
 			case MSG_CHG_NAME:
 				station->SetName(fName->Text());
+				fMainWindow->fStationList->Invalidate();
 				break;
 
 			case MSG_CHG_STREAMURL:
 				station->SetStreamUrl(fUrl->Text());
+				fMainWindow->fStationList->Invalidate();
 				break;
 
 			case MSG_CHG_GENRE:
