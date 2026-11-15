@@ -19,6 +19,7 @@
 #include "StationListView.h"
 
 #include <Application.h>
+#include <ControlLook.h>
 #include <IconUtils.h>
 #include <Resources.h>
 #include <TranslationUtils.h>
@@ -92,8 +93,9 @@ StationListViewItem::DrawItem(BView* owner, BRect frame, bool complete)
 	target.OffsetBy(frame.LeftTop());
 
 	if (fStation->Logo() != NULL) {
-		owner->DrawBitmap(
-			fStation->Logo(), fStation->Logo()->Bounds(), target, B_FILTER_BITMAP_BILINEAR);
+		BRect bounds = fStation->Logo()->Bounds();
+		be_control_look->DrawBorder(owner, target, bounds, owner->HighColor(), B_PLAIN_BORDER);
+		owner->DrawBitmap(fStation->Logo(), bounds, target, B_FILTER_BITMAP_BILINEAR);
 	}
 
 	BFont font(be_plain_font);

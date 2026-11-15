@@ -254,6 +254,7 @@ MainWindow::MessageReceived(BMessage* message)
 			if (index >= 0) {
 				fStationPanel->LockLooper();
 				fStationPanel->SetStation(fStationList->ItemAt(index));
+				fStationPanel->Invalidate();
 				fStationPanel->UnlockLooper();
 			}
 

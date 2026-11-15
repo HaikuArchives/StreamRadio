@@ -44,6 +44,7 @@ public:
 	virtual ~StationPanel();
 
 	virtual void AttachedToWindow();
+	void Draw(BRect rect);
 	virtual void MessageReceived(BMessage* msg);
 
 	void SetStation(StationListViewItem* stationItem);
