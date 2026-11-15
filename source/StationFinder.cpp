@@ -355,7 +355,7 @@ StationFinderWindow::MessageReceived(BMessage* msg)
 				UpdateCapability(capability);
 			} else if (fCurrentService != NULL) {
 				for (capability = 0; capability < fCurrentService->CountCapabilities();
-					capability++)
+					 capability++)
 					UpdateCapability(capability);
 			}
 			break;

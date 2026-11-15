@@ -96,14 +96,14 @@ StationFinderRadioNetwork::StationFinderRadioNetwork()
 	// Register different search capabilities
 	searchCapabilityName = RegisterSearchCapability("Name");
 
-	searchCapabilityTag = _RegisterUnknownKeywordsSearch("Tag",
-		"json/tags?limit=1000000&hidebroken=true", 20);
-	searchCapabilityLanguage = _RegisterUnknownKeywordsSearch("Language",
-		"json/languages?limit=1000000&hidebroken=true", 20);
-	searchCapabilityCountry = _RegisterUnknownKeywordsSearch("Country",
-		"json/countries?limit=1000000&hidebroken=true", 10);
-	searchCapabilityCodec = _RegisterUnknownKeywordsSearch("Codec",
-		"json/codecs?limit=1000000&hidebroken=true", 10);
+	searchCapabilityTag
+		= _RegisterUnknownKeywordsSearch("Tag", "json/tags?limit=1000000&hidebroken=true", 20);
+	searchCapabilityLanguage = _RegisterUnknownKeywordsSearch(
+		"Language", "json/languages?limit=1000000&hidebroken=true", 20);
+	searchCapabilityCountry = _RegisterUnknownKeywordsSearch(
+		"Country", "json/countries?limit=1000000&hidebroken=true", 10);
+	searchCapabilityCodec
+		= _RegisterUnknownKeywordsSearch("Codec", "json/codecs?limit=1000000&hidebroken=true", 10);
 
 	searchCapabilityUuid = RegisterSearchCapability("Unique identifier");
 }
@@ -270,8 +270,8 @@ StationFinderRadioNetwork::_IconLookupFunc(void* data)
 
 
 uint32
-StationFinderRadioNetwork::_RegisterUnknownKeywordsSearch(const char* name, const char* path,
-	int32 minStations)
+StationFinderRadioNetwork::_RegisterUnknownKeywordsSearch(
+	const char* name, const char* path, int32 minStations)
 {
 	assert(fKeywordsThreadCount < B_COUNT_OF(fKeywordsThread));
 
