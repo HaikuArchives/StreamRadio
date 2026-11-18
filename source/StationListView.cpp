@@ -216,6 +216,18 @@ StationListView::~StationListView()
 }
 
 
+void
+StationListView::Draw(BRect rect)
+{
+	BListView::Draw(rect);
+
+	if (fDropRect.IsValid()) {
+		SetHighColor(255, 0, 0, 255);
+		StrokeRect(fDropRect);
+	}
+}
+
+
 bool
 StationListView::InitiateDrag(BPoint point, int32 dragIndex, bool wasSelected)
 {
@@ -292,123 +304,37 @@ StationListView::MessageReceived(BMessage* message)
 
 
 void
-StationListView::Draw(BRect rect)
+StationListView::MouseDown(BPoint where)
 {
-	BListView::Draw(rect);
-
-	if (fDropRect.IsValid()) {
-		SetHighColor(255, 0, 0, 255);
-		StrokeRect(fDropRect);
-	}
-}
-
-
-bool
-StationListView::AddItem(StationListViewItem* item)
-{
-	item->fList = this;
-	return BListView::AddItem(item);
-}
-
-
-bool
-StationListView::AddItem(Station* station)
-{
-	return AddItem(new StationListViewItem(station));
+	fWhereDown = where;
+	BListView::MouseDown(where);
 }
 
 
 void
-StationListView::MakeEmpty()
+StationListView::MouseUp(BPoint where)
 {
-	for (int32 i = CountItems() - 1; i >= 0; i--) {
-		StationListViewItem* stationItem = (StationListViewItem*)ItemAt(i);
-		RemoveItem(i);
-		delete stationItem;
-	}
-	BListView::MakeEmpty();
-}
+	fWhereDown -= where;
+	if (fWhereDown.x * fWhereDown.x + fWhereDown.y * fWhereDown.y < 5 && fPlayMsg != NULL) {
+		int stationIndex = IndexOf(where);
+		if (stationIndex >= 0) {
+			BRect playFrame = ItemFrame(stationIndex);
+			float height = ItemAt(stationIndex)->Height();
+			playFrame.InsetBy(SLV_INSET, SLV_INSET);
+			playFrame.right = playFrame.left + height / 2;
+			playFrame.top = playFrame.bottom - height / 2;
 
-
-int32
-StationListView::StationIndex(Station* station)
-{
-	for (int32 i = 0; i < CountItems(); i++) {
-		if (((StationListViewItem*)ItemAt(i))->GetStation() == station)
-			return i;
-	}
-
-	return -1;
-}
-
-
-StationListViewItem*
-StationListView::ItemAt(int32 index)
-{
-	return (StationListViewItem*)BListView::ItemAt(index);
-}
-
-
-Station*
-StationListView::StationAt(int32 index)
-{
-	StationListViewItem* item = ItemAt(index);
-	return (item != NULL) ? item->GetStation() : NULL;
-}
-
-
-StationListViewItem*
-StationListView::Item(Station* station)
-{
-	for (int32 i = 0; i < CountItems(); i++) {
-		StationListViewItem* stationItem = (StationListViewItem*)ItemAt(i);
-		if (stationItem->GetStation() == station)
-			return stationItem;
-	}
-
-	return NULL;
-}
-
-
-void
-StationListView::SelectItem(StationListViewItem* item)
-{
-	int32 index = IndexOf(item);
-	Select(index);
-	ScrollToSelection();
-}
-
-
-void
-StationListView::Sync(StationsList* stations)
-{
-	LockLooper();
-
-	for (int32 i = CountItems() - 1; i >= 0; i--) {
-		StationListViewItem* stationItem = (StationListViewItem*)ItemAt(i);
-		if (!stations->HasItem(stationItem->GetStation())) {
-			RemoveItem(i);
-			delete stationItem;
+			if (playFrame.Contains(where)) {
+				BMessage* clone = new BMessage(fPlayMsg->what);
+				clone->AddInt32("index", stationIndex);
+				InvokeNotify(clone);
+			}
 		}
 	}
 
-	for (int32 i = 0; i < stations->CountItems(); i++) {
-		Station* station = stations->ItemAt(i);
-		if (Item(station) == NULL)
-			AddItem(station);
-	}
-	stations->SortItems();
-	Invalidate();
-
-	UnlockLooper();
-}
-
-
-void
-StationListView::SetPlayMessage(BMessage* fPlayMsg)
-{
-	delete this->fPlayMsg;
-	this->fPlayMsg = fPlayMsg;
+	fDropRect = BRect(-1, -1, -1, -1);
+	fWhereDown = BPoint(-1, -1);
+	BListView::MouseUp(where);
 }
 
 
@@ -453,35 +379,109 @@ StationListView::MouseMoved(BPoint where, uint32 transit, const BMessage* dragMe
 
 
 void
-StationListView::MouseDown(BPoint where)
+StationListView::Sync(StationsList* stations)
 {
-	fWhereDown = where;
-	BListView::MouseDown(where);
+	LockLooper();
+
+	for (int32 i = CountItems() - 1; i >= 0; i--) {
+		StationListViewItem* stationItem = (StationListViewItem*)ItemAt(i);
+		if (!stations->HasItem(stationItem->GetStation())) {
+			RemoveItem(i);
+			delete stationItem;
+		}
+	}
+
+	for (int32 i = 0; i < stations->CountItems(); i++) {
+		Station* station = stations->ItemAt(i);
+		if (Item(station) == NULL)
+			AddItem(station);
+	}
+	stations->SortItems();
+	Invalidate();
+
+	UnlockLooper();
+}
+
+
+bool
+StationListView::AddItem(StationListViewItem* item)
+{
+	item->fList = this;
+	return BListView::AddItem(item);
+}
+
+
+bool
+StationListView::AddItem(Station* station)
+{
+	return AddItem(new StationListViewItem(station));
 }
 
 
 void
-StationListView::MouseUp(BPoint where)
+StationListView::MakeEmpty()
 {
-	fWhereDown -= where;
-	if (fWhereDown.x * fWhereDown.x + fWhereDown.y * fWhereDown.y < 5 && fPlayMsg != NULL) {
-		int stationIndex = IndexOf(where);
-		if (stationIndex >= 0) {
-			BRect playFrame = ItemFrame(stationIndex);
-			float height = ItemAt(stationIndex)->Height();
-			playFrame.InsetBy(SLV_INSET, SLV_INSET);
-			playFrame.right = playFrame.left + height / 2;
-			playFrame.top = playFrame.bottom - height / 2;
+	for (int32 i = CountItems() - 1; i >= 0; i--) {
+		StationListViewItem* stationItem = (StationListViewItem*)ItemAt(i);
+		RemoveItem(i);
+		delete stationItem;
+	}
+	BListView::MakeEmpty();
+}
 
-			if (playFrame.Contains(where)) {
-				BMessage* clone = new BMessage(fPlayMsg->what);
-				clone->AddInt32("index", stationIndex);
-				InvokeNotify(clone);
-			}
-		}
+
+int32
+StationListView::StationIndex(Station* station)
+{
+	for (int32 i = 0; i < CountItems(); i++) {
+		if (((StationListViewItem*)ItemAt(i))->GetStation() == station)
+			return i;
 	}
 
-	fDropRect = BRect(-1, -1, -1, -1);
-	fWhereDown = BPoint(-1, -1);
-	BListView::MouseUp(where);
+	return -1;
+}
+
+
+StationListViewItem*
+StationListView::Item(Station* station)
+{
+	for (int32 i = 0; i < CountItems(); i++) {
+		StationListViewItem* stationItem = (StationListViewItem*)ItemAt(i);
+		if (stationItem->GetStation() == station)
+			return stationItem;
+	}
+
+	return NULL;
+}
+
+
+StationListViewItem*
+StationListView::ItemAt(int32 index)
+{
+	return (StationListViewItem*)BListView::ItemAt(index);
+}
+
+
+Station*
+StationListView::StationAt(int32 index)
+{
+	StationListViewItem* item = ItemAt(index);
+	return (item != NULL) ? item->GetStation() : NULL;
+}
+
+
+void
+StationListView::SelectItem(StationListViewItem* item)
+{
+	int32 index = IndexOf(item);
+	Select(index);
+	ScrollToSelection();
+}
+
+
+void
+StationListView::SetPlayMessage(BMessage* fPlayMsg)
+{
+	delete this->fPlayMsg;
+	this->fPlayMsg = fPlayMsg;
 }
