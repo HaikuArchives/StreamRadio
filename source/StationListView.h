@@ -21,6 +21,7 @@
 #include <Button.h>
 #include <ListItem.h>
 #include <ListView.h>
+#include <PopUpMenu.h>
 #include <Window.h>
 
 #include "RadioSettings.h"
@@ -30,6 +31,17 @@
 
 #define MSG_STATION_LIST 'STLS'
 #define MSG_STATION_ORDER 'STOR'
+#define MSG_POPUP_CLOSED 'POPU'
+
+
+class PopUpMenu : public BPopUpMenu {
+public:
+	PopUpMenu(const char* name, BMessenger target);
+	virtual ~PopUpMenu();
+
+private:
+	BMessenger fTarget;
+};
 
 
 class StationListView;
@@ -97,6 +109,9 @@ public:
 	bool CanPlay() { return fCanPlay; }
 
 private:
+	void _ShowPopUpMenu(BPoint screen);
+
+	bool fShowingPopUpMenu;
 	BRect fDropRect;
 	BPoint fWhereDown;
 

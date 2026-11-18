@@ -15,12 +15,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
+#include "MainWindow.h"
 #include "StationListView.h"
 
 #include <Application.h>
 #include <ControlLook.h>
+#include <Catalog.h>
 #include <IconUtils.h>
+#include <LayoutBuilder.h>
+#include <PopUpMenu.h>
 #include <Resources.h>
 #include <TranslationUtils.h>
 #include <cstdio>
@@ -31,6 +34,20 @@
 
 #define SLV_INSET 2
 #define SLV_PADDING 6
+
+
+PopUpMenu::PopUpMenu(const char* name, BMessenger target)
+	: BPopUpMenu(name, false, false),
+	fTarget(target)
+{
+	SetAsyncAutoDestruct(true);
+}
+
+
+PopUpMenu::~PopUpMenu()
+{
+	fTarget.SendMessage(MSG_POPUP_CLOSED);
+}
 
 
 StationListViewItem::StationListViewItem(Station* station)
@@ -79,11 +96,11 @@ StationListViewItem::DrawItem(BView* owner, BRect frame, bool complete)
 			: ((index % 2) ? tint_color(ui_color(B_LIST_BACKGROUND_COLOR), tint)
 				: ui_color(B_LIST_BACKGROUND_COLOR));
 
-	ownerList->SetHighColor(background);
-	ownerList->FillRect(frame);
+	owner->SetHighColor(background);
+	owner->FillRect(frame);
 
-	ownerList->SetHighColor(tint_color(background, tint * tint));
-	ownerList->StrokeLine(frame.LeftBottom(), frame.RightBottom());
+	owner->SetHighColor(tint_color(background, tint * tint));
+	owner->StrokeLine(frame.LeftBottom(), frame.RightBottom());
 
 	owner->SetHighColor(
 		ui_color(IsSelected() ? B_LIST_SELECTED_ITEM_TEXT_COLOR : B_LIST_ITEM_TEXT_COLOR));
@@ -199,6 +216,7 @@ StationListViewItem::SetFillRatio(float fillRatio)
 
 StationListView::StationListView(bool canPlay)
 	: BListView("Stations", B_SINGLE_SELECTION_LIST),
+	  fShowingPopUpMenu(false),
 	  fPlayMsg(NULL),
 	  fCanPlay(canPlay)
 {
@@ -296,6 +314,11 @@ StationListView::MessageReceived(BMessage* message)
 			Select(dropIndex);
 			break;
 		}
+		case MSG_POPUP_CLOSED:
+		{
+			fShowingPopUpMenu = false;
+			break;
+		}
 		default:
 			BView::MessageReceived(message);
 			break;
@@ -306,6 +329,22 @@ StationListView::MessageReceived(BMessage* message)
 void
 StationListView::MouseDown(BPoint where)
 {
+	BRect bounds(Bounds());
+	BRect itemFrame = ItemFrame(CountItems() - 1);
+	bounds.top = itemFrame.bottom;
+	if (bounds.Contains(where))
+		return;
+
+	uint32 buttons = 0;
+	if (Window() != NULL && Window()->CurrentMessage() != NULL)
+		buttons = Window()->CurrentMessage()->FindInt32("buttons");
+
+	if ((buttons & B_SECONDARY_MOUSE_BUTTON) != 0) {
+		Select(IndexOf(where));
+		_ShowPopUpMenu(where);
+		return;
+	}
+
 	fWhereDown = where;
 	BListView::MouseDown(where);
 }
@@ -484,4 +523,39 @@ StationListView::SetPlayMessage(BMessage* fPlayMsg)
 {
 	delete this->fPlayMsg;
 	this->fPlayMsg = fPlayMsg;
+}
+
+
+#undef B_TRANSLATION_CONTEXT
+#define B_TRANSLATION_CONTEXT "MainWindow"
+
+
+void
+StationListView::_ShowPopUpMenu(BPoint where)
+{
+	if (fShowingPopUpMenu || !CanPlay())
+		return;
+
+	BString itemLabel;
+	int32 index = IndexOf(where);
+	StationListViewItem* stationItem = (StationListViewItem*)ItemAt(index);
+	if (stationItem->State()
+			== StreamPlayer::Playing || stationItem->State() == StreamPlayer::Buffering)
+		itemLabel = B_TRANSLATE("Stop");
+	else
+		itemLabel = B_TRANSLATE("Play");
+
+	BMessage* message = new BMessage(MSG_INVOKE_STATION);
+	message->AddInt32("index", index);
+
+	PopUpMenu* menu = new PopUpMenu("PopUpMenu", this);
+	BLayoutBuilder::Menu<>(menu)
+		.AddItem(itemLabel, message)
+		.AddItem(B_TRANSLATE("Check station"), MSG_CHECK)
+		.AddItem(B_TRANSLATE("Remove station"), MSG_REMOVE, B_DELETE, B_NO_COMMAND_KEY)
+		.End();
+
+	menu->SetTargetForItems(Looper());
+	menu->Go(ConvertToScreen(where), true, true, true);
+	fShowingPopUpMenu = true;
 }
