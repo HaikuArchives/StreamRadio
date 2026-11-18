@@ -69,7 +69,7 @@ StationListViewItem::DrawItem(BView* owner, BRect frame, bool complete)
 {
 	StationListView* ownerList = dynamic_cast<StationListView*>(owner);
 	int32 index = 0;
-	if (ownerList != nullptr) // it's not a dragged item
+	if (ownerList != nullptr)  // it's not a dragged item
 		index = ownerList->IndexOf(this);
 
 	owner->SetHighColor(ui_color(
@@ -269,7 +269,7 @@ StationListView::MessageReceived(BMessage* message)
 			if (dropIndex > origIndex)
 				dropIndex--;
 			if (dropIndex < 0)
-				dropIndex = CountItems() - 1; // move to bottom
+				dropIndex = CountItems() - 1;  // move to bottom
 
 			MoveItem(origIndex, dropIndex);
 			Select(dropIndex);

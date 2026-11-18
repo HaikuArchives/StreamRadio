@@ -75,9 +75,9 @@ public:
 	virtual ~StationListView();
 
 	virtual bool InitiateDrag(BPoint point, int32 index, bool wasSelected);
-	virtual	void MouseMoved(BPoint where, uint32 transit, const BMessage* dragMessage);
+	virtual void MouseMoved(BPoint where, uint32 transit, const BMessage* dragMessage);
 	virtual void Draw(BRect rect);
-	virtual	void MessageReceived(BMessage* message);
+	virtual void MessageReceived(BMessage* message);
 
 	void Sync(StationsList* stations);
 
