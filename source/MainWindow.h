@@ -21,6 +21,7 @@
 #define _MAIN_WINDOW_H
 
 
+#include <FilePanel.h>
 #include <Menu.h>
 #include <MenuBar.h>
 #include <Message.h>
@@ -38,6 +39,8 @@
 #define MSG_REFS_RECEIVED 'REFS'
 #define MSG_PASTE_URL 'PURL'
 #define MSG_SEARCH 'mSRC'
+#define MSG_LOGO 'mLGO'
+#define MSG_LOGO_PANEL 'mPNL'
 #define MSG_CHECK 'mCKS'
 #define MSG_REMOVE 'mRMS'
 #define MSG_INVOKE_STATION 'mIST'
@@ -55,6 +58,7 @@ public:
 
 	virtual void SetVisible(bool visible);
 
+public:
 	StationListView* fStationList;
 
 private:
@@ -70,6 +74,8 @@ private:
 	BObjectList<StationListViewItem> fActiveStations;
 	bool fAllowParallelPlayback;
 	BMenuItem* fMenuParallelPlayback;
+	BFilePanel* fLogoFilePanel;
+	BString fItemForNewLogo;
 };
 
 

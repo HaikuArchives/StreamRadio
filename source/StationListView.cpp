@@ -79,11 +79,11 @@ StationListViewItem::DrawItem(BView* owner, BRect frame, bool complete)
 			: ((index % 2) ? tint_color(ui_color(B_LIST_BACKGROUND_COLOR), tint)
 				: ui_color(B_LIST_BACKGROUND_COLOR));
 
-	ownerList->SetHighColor(background);
-	ownerList->FillRect(frame);
+	owner->SetHighColor(background);
+	owner->FillRect(frame);
 
-	ownerList->SetHighColor(tint_color(background, tint * tint));
-	ownerList->StrokeLine(frame.LeftBottom(), frame.RightBottom());
+	owner->SetHighColor(tint_color(background, tint * tint));
+	owner->StrokeLine(frame.LeftBottom(), frame.RightBottom());
 
 	owner->SetHighColor(
 		ui_color(IsSelected() ? B_LIST_SELECTED_ITEM_TEXT_COLOR : B_LIST_ITEM_TEXT_COLOR));
