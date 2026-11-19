@@ -196,6 +196,7 @@ StationPanel::MessageReceived(BMessage* msg)
 				station->SetLogo(bm);
 				fLogo->SetViewBitmap(station->Logo(), station->Logo()->Bounds(), fLogo->Bounds(), 0,
 					B_FILTER_BITMAP_BILINEAR);
+				fMainWindow->fStationList->Invalidate();
 			}
 
 			return;
