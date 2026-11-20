@@ -186,10 +186,12 @@ StreamPlayer::_GetDecodedChunk(
 status_t
 StreamPlayer::_StartPlayThreadFunc(StreamPlayer* _this)
 {
-	if (!_this->fStream)
-		return B_ERROR;
-
 	_this->Lock();
+
+	if (!_this->fStream) {
+		_this->Unlock();
+		return B_ERROR;
+	}
 
 	_this->_SetState(StreamPlayer::Buffering);
 	_this->fStopRequested = false;
