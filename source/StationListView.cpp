@@ -15,12 +15,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
+#include "MainWindow.h"
 #include "StationListView.h"
 
 #include <Application.h>
 #include <ControlLook.h>
+#include <Catalog.h>
 #include <IconUtils.h>
+#include <LayoutBuilder.h>
+#include <PopUpMenu.h>
 #include <Resources.h>
 #include <TranslationUtils.h>
 #include <cstdio>
@@ -31,6 +34,20 @@
 
 #define SLV_INSET 2
 #define SLV_PADDING 6
+
+
+PopUpMenu::PopUpMenu(const char* name, BMessenger target)
+	: BPopUpMenu(name, false, false),
+	fTarget(target)
+{
+	SetAsyncAutoDestruct(true);
+}
+
+
+PopUpMenu::~PopUpMenu()
+{
+	fTarget.SendMessage(MSG_POPUP_CLOSED);
+}
 
 
 StationListViewItem::StationListViewItem(Station* station)
@@ -80,11 +97,11 @@ StationListViewItem::DrawItem(BView* owner, BRect frame, bool complete)
 							   : ((index % 2) ? tint_color(ui_color(B_LIST_BACKGROUND_COLOR), tint)
 											  : ui_color(B_LIST_BACKGROUND_COLOR));
 
-	ownerList->SetHighColor(background);
-	ownerList->FillRect(frame);
+	owner->SetHighColor(background);
+	owner->FillRect(frame);
 
-	ownerList->SetHighColor(tint_color(background, tint * tint));
-	ownerList->StrokeLine(frame.LeftBottom(), frame.RightBottom());
+	owner->SetHighColor(tint_color(background, tint * tint));
+	owner->StrokeLine(frame.LeftBottom(), frame.RightBottom());
 
 	owner->SetHighColor(
 		ui_color(IsSelected() ? B_LIST_SELECTED_ITEM_TEXT_COLOR : B_LIST_ITEM_TEXT_COLOR));
@@ -200,6 +217,7 @@ StationListViewItem::SetFillRatio(float fillRatio)
 
 StationListView::StationListView(bool canPlay)
 	: BListView("Stations", B_SINGLE_SELECTION_LIST),
+	  fShowingPopUpMenu(false),
 	  fPlayMsg(NULL),
 	  fCanPlay(canPlay)
 {
@@ -214,6 +232,18 @@ StationListView::~StationListView()
 {
 	delete fPlayMsg;
 	MakeEmpty();
+}
+
+
+void
+StationListView::Draw(BRect rect)
+{
+	BListView::Draw(rect);
+
+	if (fDropRect.IsValid()) {
+		SetHighColor(255, 0, 0, 255);
+		StrokeRect(fDropRect);
+	}
 }
 
 
@@ -285,6 +315,11 @@ StationListView::MessageReceived(BMessage* message)
 			Select(dropIndex);
 			break;
 		}
+		case MSG_POPUP_CLOSED:
+		{
+			fShowingPopUpMenu = false;
+			break;
+		}
 		default:
 			BView::MessageReceived(message);
 			break;
@@ -293,123 +328,53 @@ StationListView::MessageReceived(BMessage* message)
 
 
 void
-StationListView::Draw(BRect rect)
+StationListView::MouseDown(BPoint where)
 {
-	BListView::Draw(rect);
+	BRect bounds(Bounds());
+	BRect itemFrame = ItemFrame(CountItems() - 1);
+	bounds.top = itemFrame.bottom;
+	if (bounds.Contains(where))
+		return;
 
-	if (fDropRect.IsValid()) {
-		SetHighColor(255, 0, 0, 255);
-		StrokeRect(fDropRect);
+	uint32 buttons = 0;
+	if (Window() != NULL && Window()->CurrentMessage() != NULL)
+		buttons = Window()->CurrentMessage()->FindInt32("buttons");
+
+	if ((buttons & B_SECONDARY_MOUSE_BUTTON) != 0) {
+		Select(IndexOf(where));
+		_ShowPopUpMenu(where);
+		return;
 	}
-}
 
-
-bool
-StationListView::AddItem(StationListViewItem* item)
-{
-	item->fList = this;
-	return BListView::AddItem(item);
-}
-
-
-bool
-StationListView::AddItem(Station* station)
-{
-	return AddItem(new StationListViewItem(station));
+	fWhereDown = where;
+	BListView::MouseDown(where);
 }
 
 
 void
-StationListView::MakeEmpty()
+StationListView::MouseUp(BPoint where)
 {
-	for (int32 i = CountItems() - 1; i >= 0; i--) {
-		StationListViewItem* stationItem = (StationListViewItem*)ItemAt(i);
-		RemoveItem(i);
-		delete stationItem;
-	}
-	BListView::MakeEmpty();
-}
+	fWhereDown -= where;
+	if (fWhereDown.x * fWhereDown.x + fWhereDown.y * fWhereDown.y < 5 && fPlayMsg != NULL) {
+		int stationIndex = IndexOf(where);
+		if (stationIndex >= 0) {
+			BRect playFrame = ItemFrame(stationIndex);
+			float height = ItemAt(stationIndex)->Height();
+			playFrame.InsetBy(SLV_INSET, SLV_INSET);
+			playFrame.right = playFrame.left + height / 2;
+			playFrame.top = playFrame.bottom - height / 2;
 
-
-int32
-StationListView::StationIndex(Station* station)
-{
-	for (int32 i = 0; i < CountItems(); i++) {
-		if (((StationListViewItem*)ItemAt(i))->GetStation() == station)
-			return i;
-	}
-
-	return -1;
-}
-
-
-StationListViewItem*
-StationListView::ItemAt(int32 index)
-{
-	return (StationListViewItem*)BListView::ItemAt(index);
-}
-
-
-Station*
-StationListView::StationAt(int32 index)
-{
-	StationListViewItem* item = ItemAt(index);
-	return (item != NULL) ? item->GetStation() : NULL;
-}
-
-
-StationListViewItem*
-StationListView::Item(Station* station)
-{
-	for (int32 i = 0; i < CountItems(); i++) {
-		StationListViewItem* stationItem = (StationListViewItem*)ItemAt(i);
-		if (stationItem->GetStation() == station)
-			return stationItem;
-	}
-
-	return NULL;
-}
-
-
-void
-StationListView::SelectItem(StationListViewItem* item)
-{
-	int32 index = IndexOf(item);
-	Select(index);
-	ScrollToSelection();
-}
-
-
-void
-StationListView::Sync(StationsList* stations)
-{
-	LockLooper();
-
-	for (int32 i = CountItems() - 1; i >= 0; i--) {
-		StationListViewItem* stationItem = (StationListViewItem*)ItemAt(i);
-		if (!stations->HasItem(stationItem->GetStation())) {
-			RemoveItem(i);
-			delete stationItem;
+			if (playFrame.Contains(where)) {
+				BMessage* clone = new BMessage(fPlayMsg->what);
+				clone->AddInt32("index", stationIndex);
+				InvokeNotify(clone);
+			}
 		}
 	}
 
-	for (int32 i = 0; i < stations->CountItems(); i++) {
-		Station* station = stations->ItemAt(i);
-		if (Item(station) == NULL)
-			AddItem(station);
-	}
-	stations->SortItems();
-	Invalidate();
-
-	UnlockLooper();
-}
-
-
-void
-StationListView::SetPlayMessage(BMessage* fPlayMsg)
-{
-	delete this->fPlayMsg;
-	this->fPlayMsg = fPlayMsg;
+	fDropRect = BRect(-1, -1, -1, -1);
+	fWhereDown = BPoint(-1, -1);
+	BListView::MouseUp(where);
 }
 
 
@@ -454,35 +419,144 @@ StationListView::MouseMoved(BPoint where, uint32 transit, const BMessage* dragMe
 
 
 void
-StationListView::MouseDown(BPoint where)
+StationListView::Sync(StationsList* stations)
 {
-	fWhereDown = where;
-	BListView::MouseDown(where);
+	LockLooper();
+
+	for (int32 i = CountItems() - 1; i >= 0; i--) {
+		StationListViewItem* stationItem = (StationListViewItem*)ItemAt(i);
+		if (!stations->HasItem(stationItem->GetStation())) {
+			RemoveItem(i);
+			delete stationItem;
+		}
+	}
+
+	for (int32 i = 0; i < stations->CountItems(); i++) {
+		Station* station = stations->ItemAt(i);
+		if (Item(station) == NULL)
+			AddItem(station);
+	}
+	stations->SortItems();
+	Invalidate();
+
+	UnlockLooper();
+}
+
+
+bool
+StationListView::AddItem(StationListViewItem* item)
+{
+	item->fList = this;
+	return BListView::AddItem(item);
+}
+
+
+bool
+StationListView::AddItem(Station* station)
+{
+	return AddItem(new StationListViewItem(station));
 }
 
 
 void
-StationListView::MouseUp(BPoint where)
+StationListView::MakeEmpty()
 {
-	fWhereDown -= where;
-	if (fWhereDown.x * fWhereDown.x + fWhereDown.y * fWhereDown.y < 5 && fPlayMsg != NULL) {
-		int stationIndex = IndexOf(where);
-		if (stationIndex >= 0) {
-			BRect playFrame = ItemFrame(stationIndex);
-			float height = ItemAt(stationIndex)->Height();
-			playFrame.InsetBy(SLV_INSET, SLV_INSET);
-			playFrame.right = playFrame.left + height / 2;
-			playFrame.top = playFrame.bottom - height / 2;
+	for (int32 i = CountItems() - 1; i >= 0; i--) {
+		StationListViewItem* stationItem = (StationListViewItem*)ItemAt(i);
+		RemoveItem(i);
+		delete stationItem;
+	}
+	BListView::MakeEmpty();
+}
 
-			if (playFrame.Contains(where)) {
-				BMessage* clone = new BMessage(fPlayMsg->what);
-				clone->AddInt32("index", stationIndex);
-				InvokeNotify(clone);
-			}
-		}
+
+int32
+StationListView::StationIndex(Station* station)
+{
+	for (int32 i = 0; i < CountItems(); i++) {
+		if (((StationListViewItem*)ItemAt(i))->GetStation() == station)
+			return i;
 	}
 
-	fDropRect = BRect(-1, -1, -1, -1);
-	fWhereDown = BPoint(-1, -1);
-	BListView::MouseUp(where);
+	return -1;
+}
+
+
+StationListViewItem*
+StationListView::Item(Station* station)
+{
+	for (int32 i = 0; i < CountItems(); i++) {
+		StationListViewItem* stationItem = (StationListViewItem*)ItemAt(i);
+		if (stationItem->GetStation() == station)
+			return stationItem;
+	}
+
+	return NULL;
+}
+
+
+StationListViewItem*
+StationListView::ItemAt(int32 index)
+{
+	return (StationListViewItem*)BListView::ItemAt(index);
+}
+
+
+Station*
+StationListView::StationAt(int32 index)
+{
+	StationListViewItem* item = ItemAt(index);
+	return (item != NULL) ? item->GetStation() : NULL;
+}
+
+
+void
+StationListView::SelectItem(StationListViewItem* item)
+{
+	int32 index = IndexOf(item);
+	Select(index);
+	ScrollToSelection();
+}
+
+
+void
+StationListView::SetPlayMessage(BMessage* fPlayMsg)
+{
+	delete this->fPlayMsg;
+	this->fPlayMsg = fPlayMsg;
+}
+
+
+#undef B_TRANSLATION_CONTEXT
+#define B_TRANSLATION_CONTEXT "MainWindow"
+
+
+void
+StationListView::_ShowPopUpMenu(BPoint where)
+{
+	if (fShowingPopUpMenu || !CanPlay())
+		return;
+
+	BString itemLabel;
+	int32 index = IndexOf(where);
+	StationListViewItem* stationItem = (StationListViewItem*)ItemAt(index);
+	if (stationItem->State()
+			== StreamPlayer::Playing || stationItem->State() == StreamPlayer::Buffering)
+		itemLabel = B_TRANSLATE("Stop");
+	else
+		itemLabel = B_TRANSLATE("Play");
+
+	BMessage* message = new BMessage(MSG_INVOKE_STATION);
+	message->AddInt32("index", index);
+
+	PopUpMenu* menu = new PopUpMenu("PopUpMenu", this);
+	BLayoutBuilder::Menu<>(menu)
+		.AddItem(itemLabel, message)
+		.AddItem(B_TRANSLATE("Check station"), MSG_CHECK)
+		.AddItem(B_TRANSLATE("Remove station"), MSG_REMOVE, B_DELETE, B_NO_COMMAND_KEY)
+		.End();
+
+	menu->SetTargetForItems(Looper());
+	menu->Go(ConvertToScreen(where), true, true, true);
+	fShowingPopUpMenu = true;
 }
