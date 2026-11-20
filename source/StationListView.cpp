@@ -75,9 +75,10 @@ StationListViewItem::DrawItem(BView* owner, BRect frame, bool complete)
 
 	rgb_color theme = ui_color(B_LIST_BACKGROUND_COLOR);
 	float tint = theme.IsDark() ? 0.91 : 1.09;
-	rgb_color background = IsSelected() ? ui_color(B_LIST_SELECTED_BACKGROUND_COLOR)
-			: ((index % 2) ? tint_color(ui_color(B_LIST_BACKGROUND_COLOR), tint)
-				: ui_color(B_LIST_BACKGROUND_COLOR));
+	rgb_color background = IsSelected()
+							   ? ui_color(B_LIST_SELECTED_BACKGROUND_COLOR)
+							   : ((index % 2) ? tint_color(ui_color(B_LIST_BACKGROUND_COLOR), tint)
+											  : ui_color(B_LIST_BACKGROUND_COLOR));
 
 	ownerList->SetHighColor(background);
 	ownerList->FillRect(frame);
