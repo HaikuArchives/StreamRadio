@@ -284,6 +284,7 @@ MainWindow::MessageReceived(BMessage* message)
 					stationItem->StateChanged(player->State());
 
 					if (player->State() == StreamPlayer::Stopped) {
+						fActiveStations.RemoveItem(stationItem);
 						delete player;
 						stationItem->SetPlayer(NULL);
 					}
