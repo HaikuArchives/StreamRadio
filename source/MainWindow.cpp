@@ -32,15 +32,50 @@
 #include <LayoutBuilder.h>
 #include <MenuBar.h>
 #include <MenuItem.h>
+#include <NodeInfo.h>
 #include <ScrollView.h>
+#include <TranslationUtils.h>
 #include <Url.h>
 #include <View.h>
+#include <Volume.h>
 
 #include "RadioApp.h"
 
 
 #undef B_TRANSLATION_CONTEXT
 #define B_TRANSLATION_CONTEXT "MainWindow"
+
+
+
+class FileFilter : public BRefFilter {
+public:
+			FileFilter(const char* mime) { fMime = mime; };
+
+	bool	Filter(const entry_ref* entryRef, BNode* node,
+				struct stat_beos* stat, const char* fileType);
+	BString	fMime;
+};
+
+
+bool
+FileFilter::Filter(const entry_ref* ref, BNode* node, struct stat_beos* stat,
+	const char* fileType)
+{
+	BEntry entry(ref, true); // traverse links
+	if (entry.IsDirectory())
+		return true;
+
+	if (strncmp(fMime.String(), fileType, fMime.CountChars()) == 0)
+		return true;
+
+	// allow all, if volume doesn't know MIME
+	BVolume volume;
+	volume.SetTo((ref->device));
+	if (volume.KnowsMime() == false)
+		return true;
+
+	return false;
+}
 
 
 MainWindow::MainWindow(BRect frame)
@@ -73,7 +108,9 @@ MainWindow::MainWindow(BRect frame)
 		.End()
 		.AddMenu(B_TRANSLATE("Station"))
 		.AddItem(B_TRANSLATE("Paste Shoutcast URL"), MSG_PASTE_URL, 'V')
+		.AddItem(B_TRANSLATE("Choose logo" B_UTF8_ELLIPSIS), MSG_LOGO_PANEL)
 		.AddItem(B_TRANSLATE("Check station"), MSG_CHECK)
+		.AddSeparator()
 		.AddItem(B_TRANSLATE("Remove station"), MSG_REMOVE, B_DELETE, B_NO_COMMAND_KEY)
 		.End()
 		.AddMenu(B_TRANSLATE("Search"))
@@ -111,6 +148,11 @@ MainWindow::MainWindow(BRect frame)
 
 	fStatusBar->SetExplicitAlignment(BAlignment(B_ALIGN_USE_FULL_WIDTH, B_ALIGN_VERTICAL_UNSET));
 	fStatusBar->SetExplicitMinSize(BSize(10, B_SIZE_UNSET));
+
+	BMessenger messenger(this);
+	fLogoFilePanel = new BFilePanel(B_OPEN_PANEL, &messenger, NULL, B_FILE_NODE, false,
+		new BMessage(MSG_LOGO), new FileFilter("image/"));
+	fLogoFilePanel->Window()->SetTitle(B_TRANSLATE("StreamRadio: Choose logo"));
 }
 
 
@@ -122,6 +164,8 @@ MainWindow::~MainWindow()
 		if (player != NULL)
 			player->Stop();
 	}
+
+	delete fLogoFilePanel;
 }
 
 
@@ -195,6 +239,36 @@ MainWindow::MessageReceived(BMessage* message)
 				}
 			}
 
+			break;
+		}
+
+		case MSG_LOGO_PANEL:
+		{
+			StationListViewItem* stationItem
+					= fStationList->ItemAt(fStationList->CurrentSelection(0));
+			fItemForNewLogo = stationItem->GetStation()->UniqueIdentifier();
+			fLogoFilePanel->Show();
+			break;
+		}
+
+		case MSG_LOGO:
+		{
+			entry_ref ref;
+			if (message->FindRef("refs", &ref) != B_OK)
+				break;
+			BBitmap* bitmap = BTranslationUtils::GetBitmap(&ref);
+			if (bitmap != NULL && bitmap->IsValid()) {
+				for (int32 i = 0; i < fStationList->CountItems(); i++) {
+					StationListViewItem* stationItem = fStationList->ItemAt(i);
+					if (stationItem != NULL
+							&& stationItem->GetStation()->UniqueIdentifier() == fItemForNewLogo) {
+						Station* station = stationItem->GetStation();
+						station->SetLogo(bitmap);
+						fStationList->Invalidate();
+						fStationPanel->SetStation(stationItem);
+					}
+				}
+			}
 			break;
 		}
 
