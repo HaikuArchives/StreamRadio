@@ -220,15 +220,20 @@ MainWindow::MessageReceived(BMessage* message)
 			}
 			break;
 		}
+
 		case MSG_REMOVE:
 		{
-			Station* station = fStationList->StationAt(fStationList->CurrentSelection(0));
+			int32 index = fStationList->CurrentSelection(0);
+			Station* station = fStationList->StationAt(index);
 			if (station != NULL) {
 				fSettings->Stations->RemoveItem(station);
 				fStationList->Sync(fSettings->Stations);
 				fSettings->Stations->Save();
+				// after removal, select next item in list
+				// if removed item was last in list, select last item.
+				int32 count = fStationList->CountItems();
+				fStationList->Select(index >= count ? count - 1 : index);
 			}
-
 			break;
 		}
 
@@ -251,12 +256,13 @@ MainWindow::MessageReceived(BMessage* message)
 		case MSG_SELECT_STATION:
 		{
 			int index = fStationList->CurrentSelection();
-			if (index >= 0) {
-				fStationPanel->LockLooper();
+			fStationPanel->LockLooper();
+			if (index >= 0)
 				fStationPanel->SetStation(fStationList->ItemAt(index));
-				fStationPanel->Invalidate();
-				fStationPanel->UnlockLooper();
-			}
+			else
+				fStationPanel->SetStation(NULL);
+			fStationPanel->Invalidate();
+			fStationPanel->UnlockLooper();
 
 			break;
 		}
