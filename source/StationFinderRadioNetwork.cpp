@@ -94,18 +94,21 @@ StationFinderRadioNetwork::StationFinderRadioNetwork()
 	serviceHomePage.SetUrlString("https://www.radio-browser.info", false);
 
 	// Register different search capabilities
-	searchCapabilityName = RegisterSearchCapability("Name");
+	searchCapabilityName = RegisterSearchCapability(B_TRANSLATE("Name"));
 
-	searchCapabilityTag
-		= _RegisterUnknownKeywordsSearch("Tag", "json/tags?limit=1000000&hidebroken=true", 20);
+	searchCapabilityTag = _RegisterUnknownKeywordsSearch(
+		B_TRANSLATE("Tag"), "json/tags?limit=1000000&hidebroken=true", 20);
 	searchCapabilityLanguage = _RegisterUnknownKeywordsSearch(
-		"Language", "json/languages?limit=1000000&hidebroken=true", 20);
+		B_TRANSLATE("Language"), "json/languages?limit=1000000&hidebroken=true", 20);
 	searchCapabilityCountry = _RegisterUnknownKeywordsSearch(
-		"Country", "json/countries?limit=1000000&hidebroken=true", 10);
+		B_TRANSLATE("Country"), "json/countries?limit=1000000&hidebroken=true", 10);
+
+	/* Not needed for explicit searches, maybe someday as additional filter
 	searchCapabilityCodec
 		= _RegisterUnknownKeywordsSearch("Codec", "json/codecs?limit=1000000&hidebroken=true", 10);
 
 	searchCapabilityUuid = RegisterSearchCapability("Unique identifier");
+	*/
 }
 
 
@@ -164,10 +167,13 @@ StationFinderRadioNetwork::FindBy(
 		urlString.Append("bylanguage/");
 	else if (capabilityIndex == searchCapabilityCountry)  // Country search
 		urlString.Append("bycountry/");
+
+	/* Not needed for explicit searches, maybe someday as additional filter
 	else if (capabilityIndex == searchCapabilityCodec)	// Codec search
 		urlString.Append("bycodec/");
 	else if (capabilityIndex == searchCapabilityUuid)  // Unique identifier search
 		urlString.Append("byuuid/");
+	*/
 	else  // A very bad kind of search? Just do a name search...
 		urlString.Append("byname/");
 
