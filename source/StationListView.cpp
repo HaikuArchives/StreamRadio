@@ -15,12 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "MainWindow.h"
 #include "StationListView.h"
+#include "MainWindow.h"
 
 #include <Application.h>
-#include <ControlLook.h>
 #include <Catalog.h>
+#include <ControlLook.h>
 #include <IconUtils.h>
 #include <LayoutBuilder.h>
 #include <PopUpMenu.h>
@@ -38,7 +38,7 @@
 
 PopUpMenu::PopUpMenu(const char* name, BMessenger target)
 	: BPopUpMenu(name, false, false),
-	fTarget(target)
+	  fTarget(target)
 {
 	SetAsyncAutoDestruct(true);
 }
@@ -540,8 +540,8 @@ StationListView::_ShowPopUpMenu(BPoint where)
 	BString itemLabel;
 	int32 index = IndexOf(where);
 	StationListViewItem* stationItem = (StationListViewItem*)ItemAt(index);
-	if (stationItem->State()
-			== StreamPlayer::Playing || stationItem->State() == StreamPlayer::Buffering)
+	if (stationItem->State() == StreamPlayer::Playing
+		|| stationItem->State() == StreamPlayer::Buffering)
 		itemLabel = B_TRANSLATE("Stop");
 	else
 		itemLabel = B_TRANSLATE("Play");
