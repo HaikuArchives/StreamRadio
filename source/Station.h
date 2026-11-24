@@ -97,7 +97,8 @@ public:
 		delete fLogo;
 
 		if (logo->Bounds().Width() > kLogoMaxWidth) {
-			BBitmap* bitmap = new BBitmap(BRect(0, 0, kLogoMaxWidth - 1, kLogoMaxWidth - 1), B_RGB32, true);
+			BBitmap* bitmap
+				= new BBitmap(BRect(0, 0, kLogoMaxWidth - 1, kLogoMaxWidth - 1), B_RGB32, true);
 			BView* canvas = new BView(bitmap->Bounds(), "canvas", B_FOLLOW_NONE, 0);
 			bitmap->AddChild(canvas);
 			canvas->LockLooper();

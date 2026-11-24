@@ -45,27 +45,25 @@
 #define B_TRANSLATION_CONTEXT "MainWindow"
 
 
-
 class FileFilter : public BRefFilter {
 public:
-			FileFilter(const char* mime) { fMime = mime; };
+	FileFilter(const char* mime) { fMime = mime; };
 
-	bool	Filter(const entry_ref* entryRef, BNode* node,
-				struct stat_beos* stat, const char* fileType);
-	BString	fMime;
+	bool Filter(
+		const entry_ref* entryRef, BNode* node, struct stat_beos* stat, const char* fileType);
+	BString fMime;
 };
 
 
 bool
-FileFilter::Filter(const entry_ref* ref, BNode* node, struct stat_beos* stat,
-	const char* fileType)
+FileFilter::Filter(const entry_ref* ref, BNode* node, struct stat_beos* stat, const char* fileType)
 {
-	BEntry entry(ref, true); // traverse links
+	BEntry entry(ref, true);  // traverse links
 	if (entry.IsDirectory())
 		return true;
 
 	char mimeType[B_MIME_TYPE_LENGTH];
-	BNode traversedNode(&entry); // create a new node from the link-traversed BEntry
+	BNode traversedNode(&entry);  // create a new node from the link-traversed BEntry
 	status_t status = BNodeInfo(&traversedNode).GetType(mimeType);
 	if (status != B_OK)
 		return true;
@@ -244,7 +242,7 @@ MainWindow::MessageReceived(BMessage* message)
 		case MSG_LOGO_PANEL:
 		{
 			StationListViewItem* stationItem
-					= fStationList->ItemAt(fStationList->CurrentSelection(0));
+				= fStationList->ItemAt(fStationList->CurrentSelection(0));
 			fItemForNewLogo = stationItem->GetStation()->UniqueIdentifier();
 			fLogoFilePanel->Show();
 			break;
@@ -260,7 +258,7 @@ MainWindow::MessageReceived(BMessage* message)
 				for (int32 i = 0; i < fStationList->CountItems(); i++) {
 					StationListViewItem* stationItem = fStationList->ItemAt(i);
 					if (stationItem != NULL
-							&& stationItem->GetStation()->UniqueIdentifier() == fItemForNewLogo) {
+						&& stationItem->GetStation()->UniqueIdentifier() == fItemForNewLogo) {
 						Station* station = stationItem->GetStation();
 						station->SetLogo(bitmap);
 						fStationList->Invalidate();
