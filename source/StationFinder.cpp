@@ -137,13 +137,11 @@ StationFinderService::UpdateKeywords(uint32 searchCapability, const BStringList*
 
 StationFinderWindow::StationFinderWindow(BWindow* parent)
 	: BWindow(
-		BRect(0, 0, 300, 150), B_TRANSLATE("Find stations"), B_TITLED_WINDOW, B_CLOSE_ON_ESCAPE),
+		BRect(), B_TRANSLATE("Find stations"), B_TITLED_WINDOW, B_CLOSE_ON_ESCAPE),
 	  fCurrentService(NULL),
 	  fCurrentFindByCapability(NULL)
 {
 	fMessenger = new BMessenger(parent);
-
-	CenterIn(parent->Frame());
 
 	fTxSearch = new BTextControl(NULL, NULL, new BMessage(MSG_TXSEARCH));
 
@@ -210,7 +208,14 @@ StationFinderWindow::StationFinderWindow(BWindow* parent)
 
 	Layout(true);
 	ResizeToPreferred();
-	ResizeBy(100, 0);
+
+	BRect rect = parent->Bounds();
+	ResizeBy(rect.Width() * 0.1, rect.Height() * 0.2);
+	rect = parent->Frame();
+	rect.OffsetBySelf(rect.Width() * 0.3, rect.Height() * 0.1);
+	MoveTo(rect.LeftTop());
+
+	MoveOnScreen(B_MOVE_IF_PARTIALLY_OFFSCREEN);
 
 	fTxSearch->MakeFocus(true);
 	fBnSearch->MakeDefault(true);
