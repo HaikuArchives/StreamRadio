@@ -35,6 +35,9 @@
 #define SLV_INSET 2
 #define SLV_PADDING 6
 
+#undef B_TRANSLATION_CONTEXT
+#define B_TRANSLATION_CONTEXT "StationList"
+
 
 PopUpMenu::PopUpMenu(const char* name, BMessenger target)
 	: BPopUpMenu(name, false, false),
@@ -134,8 +137,14 @@ StationListViewItem::DrawItem(BView* owner, BRect frame, bool complete)
 		frame.LeftTop() + BPoint(fItemHeight - SLV_INSET + SLV_PADDING, baseline));
 	baseline += fontHeight.ascent + fontHeight.descent + fontHeight.leading;
 
-	owner->DrawString(
-		BString("") << fStation->BitRate() / 1000.0 << " kbps " << fStation->Mime()->Type(),
+	BString info;
+	info.SetToFormat(B_TRANSLATE_COMMENT("%i kbps", "kilobits per second"),
+		fStation->BitRate() / 1000);
+
+	if (fStation->Mime()->Type() != NULL)
+		info << " | " << fStation->Mime()->Type();
+
+	owner->DrawString(info,
 		frame.LeftTop() + BPoint(fItemHeight - SLV_INSET + SLV_PADDING, baseline));
 
 	if (ownerList != nullptr && ownerList->CanPlay() && fStation->Flags(STATION_URI_VALID)) {

@@ -5,6 +5,7 @@
 #include <Cursor.h>
 #include <LayoutBuilder.h>
 #include <ScrollView.h>
+#include <StringFormat.h>
 #include <StringView.h>
 #include <TranslationUtils.h>
 #include <View.h>
@@ -137,13 +138,11 @@ StationFinderService::UpdateKeywords(uint32 searchCapability, const BStringList*
 
 StationFinderWindow::StationFinderWindow(BWindow* parent)
 	: BWindow(
-		BRect(0, 0, 300, 150), B_TRANSLATE("Find stations"), B_TITLED_WINDOW, B_CLOSE_ON_ESCAPE),
+		BRect(), B_TRANSLATE("Find stations"), B_TITLED_WINDOW, B_CLOSE_ON_ESCAPE),
 	  fCurrentService(NULL),
 	  fCurrentFindByCapability(NULL)
 {
 	fMessenger = new BMessenger(parent);
-
-	CenterIn(parent->Frame());
 
 	fTxSearch = new BTextControl(NULL, NULL, new BMessage(MSG_TXSEARCH));
 
@@ -176,6 +175,7 @@ StationFinderWindow::StationFinderWindow(BWindow* parent)
 	fResultView = new StationListView();
 	fResultView->SetExplicitAlignment(BAlignment(B_ALIGN_USE_FULL_WIDTH, B_ALIGN_USE_FULL_HEIGHT));
 
+	fItemCountBar = new BStringView("itemcount", B_EMPTY_STRING);
 	fBnAdd = new BButton("fBnAdd", B_TRANSLATE("Add"), new BMessage(MSG_ADD_STATION));
 
 	BLayoutBuilder::Group<>(this, B_VERTICAL, B_USE_SMALL_SPACING)
@@ -198,6 +198,7 @@ StationFinderWindow::StationFinderWindow(BWindow* parent)
 		.Add(new BScrollView("scrollResult", fResultView, 0, false, true), 0.9)
 
 		.AddGroup(B_HORIZONTAL)
+		.Add(fItemCountBar)
 		.AddGlue()
 		.Add(fBnAdd)
 		.End()
@@ -210,7 +211,14 @@ StationFinderWindow::StationFinderWindow(BWindow* parent)
 
 	Layout(true);
 	ResizeToPreferred();
-	ResizeBy(100, 0);
+
+	BRect rect = parent->Bounds();
+	ResizeBy(rect.Width() * 0.1, rect.Height() * 0.2);
+	rect = parent->Frame();
+	rect.OffsetBySelf(rect.Width() * 0.3, rect.Height() * 0.1);
+	MoveTo(rect.LeftTop());
+
+	MoveOnScreen(B_MOVE_IF_PARTIALLY_OFFSCREEN);
 
 	fTxSearch->MakeFocus(true);
 	fBnSearch->MakeDefault(true);
@@ -457,6 +465,8 @@ StationFinderWindow::UpdateCapability(int index)
 void
 StationFinderWindow::DoSearch(const char* text)
 {
+	fItemCountBar->SetText(B_EMPTY_STRING);
+
 	if (text == NULL || text[0] == '\0')
 		return;
 
@@ -476,6 +486,16 @@ StationFinderWindow::DoSearch(const char* text)
 	}
 
 	be_app->SetCursor(B_CURSOR_SYSTEM_DEFAULT);
+
+	int32 count = fResultView->CountItems();
+	if (count > 0) {
+		BString countText(B_EMPTY_STRING);
+		static BStringFormat format(B_TRANSLATE("{0, plural,"
+			"one{# station}"
+			"other{# stations}}"));
+		format.Format(countText, fResultView->CountItems());
+		fItemCountBar->SetText(countText);
+	}
 }
 
 
