@@ -30,6 +30,7 @@
 #include <OptionPopUp.h>
 #include <StatusBar.h>
 #include <StringList.h>
+#include <StringView.h>
 #include <TextControl.h>
 #include <Window.h>
 #include <private/netservices/HttpRequest.h>
@@ -180,6 +181,7 @@ private:
 	BButton* fBnVisit;
 	BOptionPopUp* fDdSearchBy;
 	StationListView* fResultView;
+	BStringView* fItemCountBar;
 	BButton* fBnAdd;
 
 	BGridLayout* fSearchGrid;

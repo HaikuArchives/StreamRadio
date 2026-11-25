@@ -5,6 +5,7 @@
 #include <Cursor.h>
 #include <LayoutBuilder.h>
 #include <ScrollView.h>
+#include <StringFormat.h>
 #include <StringView.h>
 #include <TranslationUtils.h>
 #include <View.h>
@@ -174,6 +175,7 @@ StationFinderWindow::StationFinderWindow(BWindow* parent)
 	fResultView = new StationListView();
 	fResultView->SetExplicitAlignment(BAlignment(B_ALIGN_USE_FULL_WIDTH, B_ALIGN_USE_FULL_HEIGHT));
 
+	fItemCountBar = new BStringView("itemcount", B_EMPTY_STRING);
 	fBnAdd = new BButton("fBnAdd", B_TRANSLATE("Add"), new BMessage(MSG_ADD_STATION));
 
 	BLayoutBuilder::Group<>(this, B_VERTICAL, B_USE_SMALL_SPACING)
@@ -196,6 +198,7 @@ StationFinderWindow::StationFinderWindow(BWindow* parent)
 		.Add(new BScrollView("scrollResult", fResultView, 0, false, true), 0.9)
 
 		.AddGroup(B_HORIZONTAL)
+		.Add(fItemCountBar)
 		.AddGlue()
 		.Add(fBnAdd)
 		.End()
@@ -462,6 +465,8 @@ StationFinderWindow::UpdateCapability(int index)
 void
 StationFinderWindow::DoSearch(const char* text)
 {
+	fItemCountBar->SetText(B_EMPTY_STRING);
+
 	if (text == NULL || text[0] == '\0')
 		return;
 
@@ -481,6 +486,16 @@ StationFinderWindow::DoSearch(const char* text)
 	}
 
 	be_app->SetCursor(B_CURSOR_SYSTEM_DEFAULT);
+
+	int32 count = fResultView->CountItems();
+	if (count > 0) {
+		BString countText(B_EMPTY_STRING);
+		static BStringFormat format(B_TRANSLATE("{0, plural,"
+			"one{# station}"
+			"other{# stations}}"));
+		format.Format(countText, fResultView->CountItems());
+		fItemCountBar->SetText(countText);
+	}
 }
 
 
