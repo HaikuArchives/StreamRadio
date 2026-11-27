@@ -115,6 +115,17 @@ StationListViewItem::DrawItem(BView* owner, BRect frame, bool complete)
 		be_control_look->DrawBorder(owner, target, bounds, owner->HighColor(), B_PLAIN_BORDER);
 		owner->DrawBitmap(fStation->Logo(), bounds, target, B_FILTER_BITMAP_BILINEAR);
 	}
+	if (ownerList != nullptr && ownerList->CanPlay() && fStation->Flags(STATION_URI_VALID)) {
+		BBitmap* bnBitmap = _GetButtonBitmap(State(), target.Width());
+		if (bnBitmap != NULL) {
+			owner->PushState();
+			owner->SetDrawingMode(B_OP_OVER);
+			owner->SetBlendingMode(B_PIXEL_ALPHA, B_ALPHA_OVERLAY);
+			owner->DrawBitmap(bnBitmap,
+				BPoint(target.left, target.top + (target.Height() - target.Width()) / 2));
+			owner->PopState();
+		}
+	}
 
 	BFont font(be_plain_font);
 	font_height fontHeight;
@@ -137,17 +148,6 @@ StationListViewItem::DrawItem(BView* owner, BRect frame, bool complete)
 	owner->DrawString(
 		BString("") << fStation->BitRate() / 1000.0 << " kbps " << fStation->Mime()->Type(),
 		frame.LeftTop() + BPoint(fItemHeight - SLV_INSET + SLV_PADDING, baseline));
-
-	if (ownerList != nullptr && ownerList->CanPlay() && fStation->Flags(STATION_URI_VALID)) {
-		BBitmap* bnBitmap = _GetButtonBitmap(State());
-		if (bnBitmap != NULL) {
-			owner->PushState();
-			owner->SetDrawingMode(B_OP_OVER);
-			owner->SetBlendingMode(B_PIXEL_ALPHA, B_ALPHA_OVERLAY);
-			owner->DrawBitmap(bnBitmap, bnBitmap->Bounds(), target);
-			owner->PopState();
-		}
-	}
 }
 
 
@@ -191,13 +191,13 @@ BBitmap* StationListViewItem::sButtonBitmap[3] = {NULL, NULL, NULL};
 
 
 BBitmap*
-StationListViewItem::_GetButtonBitmap(StreamPlayer::PlayState state)
+StationListViewItem::_GetButtonBitmap(StreamPlayer::PlayState state, float width)
 {
 	if (state < 0)
 		return NULL;
 
 	if (sButtonBitmap[state] == NULL)
-		sButtonBitmap[state] = Utils::ResourceBitmap(RES_BN_STOPPED + state, fItemHeight);
+          sButtonBitmap[state] = Utils::ResourceBitmap(RES_BN_STOPPED + state, width);
 
 	return sButtonBitmap[state];
 }
