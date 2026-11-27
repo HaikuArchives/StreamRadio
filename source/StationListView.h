@@ -67,7 +67,7 @@ public:
 	void SetPlayer(StreamPlayer* player) { fPlayer = player; }
 
 private:
-	BBitmap* _GetButtonBitmap(StreamPlayer::PlayState state);
+	BBitmap* _GetButtonBitmap(StreamPlayer::PlayState state, float width);
 
 private:
 	static BBitmap* sButtonBitmap[3];
